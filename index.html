@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="user-scalable=0"/>
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<title>Goodloe Solitaire</title>
+		<script src="js/jquery.min.js"></script>
+		<script src="js/bootstrap-twipsy.js"></script>
+		<script src="js/bootstrap-modal.js"></script>
+		<script src="js/jquery.form.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/jquery.taconite.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/gs.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			$(document).ready(function() {
+
+				$('#about').click(function(){
+					$('#modal-about').modal({
+						backdrop: true,
+						keyboard: true,
+						show: true
+					});
+				});
+
+				$('#highscores').click(function(){
+					$('#modal-highscores').modal({
+						backdrop: true,
+						keyboard: true,
+						show: true
+					});
+				});
+
+
+				if($('#history').css('display') == 'none'){
+					$('#history').addClass('modal hide fade modal-history').removeClass('history-table');
+
+					$('#scores').click(function(){
+						$('#history').modal({
+							backdrop: true,
+							keyboard: true,
+							show: true
+						});
+					});
+				}
+
+				
+ 			});
+		</script>
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/style.css">
+		<link href='http://fonts.googleapis.com/css?family=Amaranth' rel='stylesheet' type='text/css'>
+		<link href='http://fonts.googleapis.com/css?family=Candal' rel='stylesheet' type='text/css'>
+		<style>
+			*.draw {filter:alpha(opacity=40); opacity:0.4}
+		</style>
+	</head>
+	<body>
+
+		<div class="topbar">
+			<div class="fill">
+		 		<div class="container">
+		 			<h3 class="brand">Goodloe Solitaire</h3>
+		 			<ul class="nav">
+		 				<li><a id="newgame">New Game</a></li>
+		 			</ul>
+		 			<ul class="nav secondary-nav">
+		 				<li id="highscores"><a>High Scores</a></li>
+		 				<li id="about"><a>About</a></li>
+		 			</ul>
+		 		</div>
+
+	 		</div>
+		</div>
+
+
+		<div class="container">
+  			<div class="content">
+  				<div class="page-header"></div>
+		    	<div class="row">
+		    		<div class="span10 main">
+		    			<div id="scores">
+		    				<span id="currentscore"><span id="score">0</span></span>
+		    				<span id="currentchange"><span id="delta"></span></span>
+			    		</div>
+		    			<div id="drawdeck">
+			    			<div><span id="numcards" class="label notice">47</span></div>
+			    			<div id="dc"><img id="drawcards" src="images/back.png"></div>
+		    			</div>
+			        <form id="gs" method="post" action="http://goodloepoker.com/solitaire/gscard.php">
+			    			<div id="hand">
+				    			<ul>
+					    			<li class="card" id="card1"><input type="checkbox" name="card[]" value="1"></li>
+					    			<li class="card" id="card2"><input type="checkbox" name="card[]" value="2"></li>
+					    			<li class="card" id="card3"><input type="checkbox" name="card[]" value="3"></li>
+					    			<li class="card" id="card4"><input type="checkbox" name="card[]" value="4"></li>
+					    			<li class="card" id="card5"><input type="checkbox" name="card[]" value="5"></li>
+				    			</ul>
+				    		</div>
+								<div class="hide">
+									<input  type="submit" name="shuffle" value="New Game" />
+				          <input  type="submit" name="viewscores" value="View Scores" />
+				          <input  type="submit" name="drawcards" value="Draw Cards" />
+				
+				          <p id='scoreentry' class="hide">
+			              Enter name for <span id="highs"
+			               class="hide">high</span><span
+			               id="lows" class="hide">low</span> score: 
+			             <input type=text name='name' /> <br />
+			             <input type='submit' name='submitname' value='Submit your name' />
+			            </p>
+						      <input type="hidden" name="gid" id="gid" value='' />
+						      <input type="hidden" name="count" id="count" value='' />
+						      <input type="hidden" name="action" value='' />
+						      <input type="submit" class='start' name="endgame" value="End Game"/>
+								</div>				
+							</form>
+		    			<div id="endgame"><a class="btn large danger">End Game</a></div>
+		    		</div>
+		    		<div id="history" class="span6 history-table">
+		    			<table>
+		    				<tbody>
+							</tbody>
+		    			</table>
+		    		</div>
+		   	 	</div>
+			</div>
+		</div>
+
+
+		<div id="modal-about" class="modal hide fade">
+		    <div class="modal-header">
+		    	<a href="#" class="close">&times;</a>
+		    	<h3>About Goodloe Solitaire</h3>
+		    </div>
+		    <div class="modal-body">
+		    	<h4>How to play</h4>
+		    	<p>Continually improve your hand as you draw one or more cards. Put a streak together to really boost your score. Twos are crazy wild!</p>
+		    	<h4>Credits</h4>
+		    	<p>Backed in by James Taylor, frightened by Thomas Park, creamed by Stephen Goodloe.</p>
+					<h4>Origins</h4>
+					<p>Mr. Goodloe had the great misfortune to find himself on a trip filled with the most honest-speaking people on Earth. He thought to himself:"This will not do!"and promptly tried to teach them poker. But, being honest, they had no money to their names.</p>
+					<p>Pondering this, he went to the top of a mountain for 30 days and 30 nights. When he came down, he had the perfect game: Goodloe Poker. Pass the hand, try to improve it, and make calls whether true or not.</p>
+					<p>Such is the commonly known history. But what is not so commonly known is that these honest folk had a hard time learning the poker hands and their relative strengths. To remedy this, Mr. Goodloe went deep into the caves for 10 days and 10 nights. When he came out, he taught these honest folk Goodloe Solitaire: just improve the hand.</p>
+					<p>And so it was that he taught these honest, happy people how to play with themselves and lie to others. All hail the Goodloe!</p>
+		    </div>
+		</div>
+
+		<div id="modal-highscores" class="modal hide fade">
+		    <div class="modal-header">
+		    	<a href="#" class="close">&times;</a>
+		    	<h3>High Scores</h3>
+		    </div>
+		    <div class="modal-body">
+		    	<table id="table-highscores" class="zebra-striped">
+						<tbody id="hs">
+						</tbody>
+				 	</table>
+		    </div>
+		</div>
+
+
+	</body>
+</html>
