@@ -392,6 +392,11 @@ table {
 		line-height: 30px !important;
 	}
 
+	#modal-about {
+		height: 50%;
+		overflow: scroll;
+	}
+
 	.modal-history {
 		height: 50%;
 		width: 70%;
@@ -455,6 +460,11 @@ table {
 	#modal-about .modal-body * {
 		font-size: 22px !important;
 		line-height: 22px !important;
+	}
+
+	#modal-about {
+		height: 90%;
+		overflow: scroll;
 	}
 
 	#modal-highscores .modal-body * {
