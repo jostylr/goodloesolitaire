@@ -13,6 +13,15 @@ body {
 	box-shadow: inset -50px 10px 100px rgba(0, 0, 0, 0.3), inset 20px 20px 100px rgba(0, 0, 0, 0.3);
 }
 
+.topbar .fill {
+	background-image: -khtml-gradient(linear, left top, left bottom, from(#351C0F), to(#1A0E07));
+	background-image: -moz-linear-gradient(top, #351C0F, #1A0E07);
+	background-image: -ms-linear-gradient(top, #351C0F, #1A0E07);
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #351C0F), color-stop(100%, #1A0E07));
+	background-image: -o-linear-gradient(top, #351C0F, #1A0E07);
+	background-image: linear-gradient(top, #351C0F, #1A0E07);
+}
+
 .brand {
 	font-family: 'Amaranth', sans-serif;
 }
