@@ -97,7 +97,7 @@ body {
 	}	
 }
 
-#scores {
+#scores, #handtext {
 	font-family: 'Candal', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	line-height: 50px;
 	text-align: center;
@@ -107,6 +107,10 @@ body {
 
 #currentscore {
 	font-size: 60px;
+}
+
+#handtext {
+	font-size: 20px;
 }
 
 .scoreplus {
@@ -383,8 +387,9 @@ table {
 		zoom: 160%;
 	}
 
-	#endgame {
-		margin-top: 100px;
+	#handtext {
+		margin-top: 50px;
+		font-size: 50px;
 	}
 
 	#modal-about .modal-body * {
@@ -453,8 +458,8 @@ table {
 		top: 215px;
 	}
 
-	#endgame {
-		margin-top: 5%;
+	#handtext {
+		font-size: 25px;
 	}
 
 	#modal-about .modal-body * {
