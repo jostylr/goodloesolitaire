@@ -471,7 +471,7 @@ EOT;
 <replace select="#history table">
 <table><tbody><tr title="$curmult"><td>1.</td><td>$score</td><td><span class='label success'>&#x25B2;$delta</span></td><td class="left">$histcall</td></tr></tbody></table>
 </replace>
-<replaceContent select='#htype'>
+<replaceContent select='#handtext'>
  $handcall 
 </replaceContent>
 <replaceContent select='#score'>
@@ -572,7 +572,7 @@ EOT;
       }
 
       $output.= <<<EOT
-<replaceContent select='#htype'>
+<replaceContent select='#handtext'>
  $handcall 
 </replaceContent>
 <prepend select="#history table tbody">

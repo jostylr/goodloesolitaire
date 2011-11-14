@@ -2,7 +2,6 @@
 
 1. Animation for new deck, discard card, draw card
 2. Make Start Game / End Game buttons toggleable
-4. History: concise card description (Ac Td 2h) or just high-level hand description (Two pairs)
 5. Animate color/size of score on draw
 6. Make About window scrollable for iPhone - test?
 8. Scoring: transparent, fun algorithm
