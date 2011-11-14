@@ -190,7 +190,7 @@ $.each(['shuffle', 'drawcards', 'endgame', 'viewscores', 'submitname'],
 
 $("#newgame").live('click', function() {$('input[name=shuffle]').click(); });
 $("#highscores").click(function() {$('input[name=viewscores]').click(); });
-$("#dc").click(function() {$('input[name=drawcards]').click(); });
+$("#drawcards").click(function() {$('input[name=drawcards]').click(); });
 $("#endgame").live('click', function() {$('input[name=endgame]').click(); });
 
 akeys = function (evnt) {
