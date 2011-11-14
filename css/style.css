@@ -47,52 +47,44 @@ body {
 
 @-webkit-keyframes scoreplus {
 
-	40% {
-		font-size: 150%;
-		color: #46A546;
+	0% {
+		color: rgba(256, 256, 256, 1);
 	}
 
 	100% {
-		font-size: 100%;
 		color: inherit;
 	}
 }
 
 @-webkit-keyframes scoreminus {
 
-	40% {
-		font-size: 150%;
+	0% {
 		color: #C43C35;
 	}
 
 	100% {
-		font-size: 100%;
 		color: inherit;
 	}	
 }
 
 @-moz-keyframes scoreplus {
 
-	40% {
-		font-size: 150%;
-		color: #46A546;
+	0% {
+		color: rgba(256, 256, 256, 1);
 	}
 
 	100% {
-		font-size: 100%;
 		color: inherit;
 	}
 }
 
 @-moz-keyframes scoreminus {
 
-	40% {
-		font-size: 150%;
+	0% {
 		color: #C43C35;
 	}
 
 	100% {
-		font-size: 100%;
 		color: inherit;
 	}	
 }
