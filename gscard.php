@@ -567,8 +567,8 @@ EOT;
 				 $maindelta = "&#x25BC;$posdelta";
          $deltacall = "class='label important'>&#x25BC;$posdelta";
       } else {
-				 $maindelta = "▬0";
-         $deltacall = "class='label'>▬0";
+				 $maindelta = "▬";
+         $deltacall = "class='label'>▬";
       }
 
       $output.= <<<EOT
