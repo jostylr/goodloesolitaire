@@ -219,6 +219,23 @@ function shortcall($hand) {
     }
 };
 
+#returns a brief card description of hand As 2c ...
+function handcall($hand) {
+	$ret = '';
+	foreach ($hand as $card) {
+		$rank =''; 
+	  switch ($card[0]) {
+	  case "0": $rank = "T"; break;
+	  case "n": $rank = "2"; break;
+
+	  default : $rank = $card[0]; 
+	  };
+	  $suit = $card[1];	
+		$ret = $ret." ".$rank.$suit;
+	}
+	return $ret;
+}
+
 #compares two hands
 function compare ($new, $old) {
   GLOBAL $hand_ord_tv, $curmult, $scoinc, $curdec, $base;        
@@ -448,7 +465,8 @@ EOT;
    $numcards = 47; 
    $gid = storeGame($deck, $drawcards); 
    $handcall = makecall($htype); 
-   $histcall = shortcall($htype); 
+   #$histcall = shortcall($htype); 
+	 $histcall = handcall($hand);
    $output.= <<<EOT
 <replace select="#history table">
 <table><tbody><tr title="$curmult"><td>1.</td><td>$score</td><td><span class='label success'>&#x25B2;$delta</span></td><td class="left">$histcall</td></tr></tbody></table>
@@ -538,7 +556,8 @@ EOT;
       if ($numcards <0) {$numcards = 0;}
       store_hand($_POST['gid'], $num_hand); 
       $handcall = makecall($htype); 
-      $histcall = shortcall($htype); 
+      #$histcall = shortcall($htype); 
+	 		$histcall = handcall($hand);
       $count = $_POST['count']+1;
       if ($delta > 0) {
 				 $maindelta = "&#x25B2;$delta";
