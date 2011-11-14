@@ -477,6 +477,9 @@ EOT;
 <replaceContent select='#score'>
  $score
 </replaceContent>
+<removeClass select='#score' arg1="scoreminus" />
+<removeClass select='#score' arg1="scoreplus" />
+<addClass select='#score' arg1="scoreplus" />
 <replaceContent select='#delta'>
  &#x25B2;$delta
 </replaceContent>
@@ -562,13 +565,16 @@ EOT;
       if ($delta > 0) {
 				 $maindelta = "&#x25B2;$delta";
          $deltacall = "class='label success'>&#x25B2;$delta";
+				 $scoreclass = "'scoreplus'";
       } else if ($delta < 0) {
          $posdelta = -1*$delta;
 				 $maindelta = "&#x25BC;$posdelta";
          $deltacall = "class='label important'>&#x25BC;$posdelta";
+				 $scoreclass = "'scoreminus'";
       } else {
 				 $maindelta = "▬";
          $deltacall = "class='label'>▬";
+				 $scoreclass = "''";
       }
 
       $output.= <<<EOT
@@ -581,6 +587,9 @@ EOT;
 <replaceContent select='#score'>
  $score 
 </replaceContent>
+<removeClass select='#score' arg1="scoreminus" />
+<removeClass select='#score' arg1="scoreplus" />
+<addClass select='#score' arg1=$scoreclass />
 <replaceContent select='#delta'>
  $maindelta
 </replaceContent>
