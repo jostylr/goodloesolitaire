@@ -6,3 +6,4 @@
 9. Add recent high score in backend/frontend
 10. Apply .scoreplus and .scoreminus to #delta too
 11. History table: can use html codes for suits instead of lowercase: &spades; &clubs; &diams; &hearts;
+12. Make mousedown for draw work only on the card back image (#drawcards), not the whole div (#dc). 

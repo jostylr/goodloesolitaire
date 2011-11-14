@@ -22,7 +22,7 @@ body {
 	background-image: linear-gradient(top, #351C0F, #1A0E07);
 }
 
-.topbar a {
+.topbar a, .card, #drawcards {
 	cursor: pointer;
 }
 
