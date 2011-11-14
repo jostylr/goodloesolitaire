@@ -157,7 +157,7 @@ ajsub = function (subtype) {
                   $('.tomove').removeClass('tomove'); 
     break; 
     case 'endgame': 
-           if (($('#nonscore').filter('.fade').size() > 0) ||($('input[name=gid]').val()=='')) {console.log("boo"); block=false; return false;}
+           if (($('#nonscore').filter('.fade').size() > 0) ||($('input[name=gid]').val()=='')) {block=false; return false;}
            dosub('endgame'); 
     break; 
     case 'viewscores':
@@ -188,10 +188,10 @@ $.each(['shuffle', 'drawcards', 'endgame', 'viewscores', 'submitname'],
           }
       ); 
 
-$("#newgame").click(function() {$('input[name=shuffle]').click(); });
+$("#newgame").live('click', function() {$('input[name=shuffle]').click(); });
 $("#highscores").click(function() {$('input[name=viewscores]').click(); });
 $("#dc").click(function() {$('input[name=drawcards]').click(); });
-$("#endgame").click(function() {$('input[name=endgame]').click(); });
+$("#endgame").live('click', function() {$('input[name=endgame]').click(); });
 
 akeys = function (evnt) {
         var key = evnt.keyCode; 

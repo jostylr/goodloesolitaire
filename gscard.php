@@ -468,6 +468,7 @@ EOT;
    #$histcall = shortcall($htype); 
 	 $histcall = handcall($hand);
    $output.= <<<EOT
+<replaceContent select="#togglegame"><a id="endgame">End Game</a></replaceContent>
 <replace select="#history table">
 <table><tbody><tr title="$curmult"><td>1.</td><td>$score</td><td><span class='label success'>&#x25B2;$delta</span></td><td class="left">$histcall</td></tr></tbody></table>
 </replace>
@@ -495,6 +496,9 @@ EOT;
     if ($_POST['gid']) {
         load_scores($_POST['gid']);
     }
+   $output.= <<<EOT
+<replaceContent select="#togglegame"><a id="newgame">New Game</a></replaceContent>
+EOT;
   break;
 
   #submitting new name for high/low score  
