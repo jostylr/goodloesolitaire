@@ -93,12 +93,20 @@ body {
 	font-family: 'Candal', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	line-height: 50px;
 	text-align: center;
-	height: 16%;
+	height: 12%;
 	color: rgba(225, 225, 225, 0.7);
 }
 
 #currentscore {
 	font-size: 60px;
+}
+
+#inarow-container {
+	text-align: center;
+	padding-bottom: 5%;
+	font-family: 'Candal', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	font-size: 20px;
+	color: rgba(225, 225, 225, 0.7);
 }
 
 #handtext {
