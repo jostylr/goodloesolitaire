@@ -58,6 +58,12 @@ inarow = function (num) {
 }; 
 
 
+scorepulse = function (scoreclass) {
+	$('#score, #delta').removeClass("scoreminus scoreplus");
+	setTimeout(function () {$('#score, #delta').addClass(scoreclass)}, 5);
+}
+
+
 loadscorescleargame = function () {
    // $('#scoreentry').remove(); 
     $('.s').removeClass('hide');

@@ -483,9 +483,7 @@ EOT;
 <replaceContent select='#score'>
  $score
 </replaceContent>
-<removeClass select='#score' arg1="scoreminus" />
-<removeClass select='#score' arg1="scoreplus" />
-<addClass select='#score' arg1="scoreplus" />
+<eval>scorepulse("scoreplus")</eval>
 <replaceContent select='#delta'>
  &#x25B2;$delta
 </replaceContent>
@@ -596,9 +594,7 @@ EOT;
 <replaceContent select='#score'>
  $score 
 </replaceContent>
-<removeClass select='#score' arg1="scoreminus" />
-<removeClass select='#score' arg1="scoreplus" />
-<addClass select='#score' arg1=$scoreclass />
+<eval>scorepulse($scoreclass)</eval>
 <replaceContent select='#delta'>
  $maindelta
 </replaceContent>

@@ -3,7 +3,6 @@
 1. Animation for new deck, discard card, draw card
 2. Make Start Game / End Game buttons toggleable
 9. Add recent high score in backend/frontend
-10. Apply .scoreplus and .scoreminus to #delta too
 8. Scoring: transparent, fun algorithm  
     S = streak count  
     LC = level jump of current hand  
