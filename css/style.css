@@ -278,6 +278,7 @@ table {
 	border-right: 0px;
 	border-left: 0px;
 	color: rgba(225, 225, 225, 0.7);
+	font-size: 110%;
 }
 
 .history-table td:first-child, #history td:nth-child(2) {
@@ -387,6 +388,10 @@ table {
 		font-size: 50px;
 	}
 
+	#inarow {
+		font-size: 50px;
+	}
+
 	#modal-about .modal-body * {
 		font-size: 30px !important;
 		line-height: 30px !important;
@@ -425,9 +430,14 @@ table {
 		padding-top: 2%;
 	}
 
+	#gs {	
+		margin: 0;
+		padding: 0;
+	}
+
 	#scores {
 		margin-top: 0;
-		margin-bottom: 5%;
+		margin-bottom: 4%;
 	}
 
 	#currentscore {
@@ -453,7 +463,7 @@ table {
 		top: 215px;
 	}
 
-	#handtext {
+	#handtext, #inarow {
 		font-size: 25px;
 	}
 
