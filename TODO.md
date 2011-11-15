@@ -4,7 +4,6 @@
 2. Make Start Game / End Game buttons toggleable
 9. Add recent high score in backend/frontend
 10. Apply .scoreplus and .scoreminus to #delta too
-13. History: Change title labels to data attributes so they don't show when hovered. See <http://ejohn.org/blog/html-5-data-attributes/>
 8. Scoring: transparent, fun algorithm  
     S = streak count  
     LC = level jump of current hand  

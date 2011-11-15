@@ -475,7 +475,7 @@ EOT;
    $output.= <<<EOT
 <replaceContent select="#togglegame"><a id="endgame">End Game</a></replaceContent>
 <replace select="#history table">
-<table><tbody><tr title="$curmult"><td>1.</td><td>$score</td><td><span class='label success'>&#x25B2;$delta</span></td><td class="left">$histcall</td></tr></tbody></table>
+<table><tbody><tr data-multiplier="$curmult"><td>1.</td><td>$score</td><td><span class='label success'>&#x25B2;$delta</span></td><td class="left">$histcall</td></tr></tbody></table>
 </replace>
 <replaceContent select='#handtext'>
  $handcall 
@@ -591,7 +591,7 @@ EOT;
  $handcall 
 </replaceContent>
 <prepend select="#history table tbody">
-<tr title="$curmult"><td>$count.</td><td>$score</td><td><span $deltacall</span></td><td class="left">$histcall</td></tr>
+<tr data-multiplier="$curmult"><td>$count.</td><td>$score</td><td><span $deltacall</span></td><td class="left">$histcall</td></tr>
 </prepend>
 <replaceContent select='#score'>
  $score 
