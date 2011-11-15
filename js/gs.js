@@ -55,8 +55,29 @@ inarow = function (streak, level) {
       $('#inarow').text("Point Drain: "+streak+" Level Change: "+level);
   };
  // setTimeout(function(){$('#inarow').empty()}, 1000);
+ scoredata.push([streak, level]);
 }; 
 
+//pass in a function f that has its second and third arguments the streak and level. 
+scorefun = function (f) {
+	var i;
+	var n = scoredata.length; 
+	var deltas = [];
+	var score =0;
+	var store = {}; 
+	var prelevel; 
+	for (i = 0; i<n; i += 1) {
+		//streak, level
+		if (i== 0) {
+			prelevel = 0;
+		} else {
+			prelevel = scoredata[i-1][1];
+		}
+		deltas.push(f(scoredata[i][0], scoredata[i][1], prelevel, i, n, store));
+		score += f(scoredata[i][0], scoredata[i][1], prelevel, i, n, store);
+	}
+	return [score, deltas];
+}
 
 scorepulse = function (scoreclass) {
 	$('#score, #delta').removeClass("scoreminus scoreplus");
@@ -139,6 +160,8 @@ ajsub = function (subtype) {
            dosub('shuffle');
            $("#hand li").children('input').clearFields().end().removeClass('draw');
            $('.tomove').removeClass('tomove'); 
+					//clear old score info or initialize. see inarow and scorefun
+					scoredata =[];
     break; 
     case 'drawcards':
                  //if viewing scores do not draw cards
