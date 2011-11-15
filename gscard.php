@@ -600,7 +600,7 @@ EOT;
 </replaceContent>
 <replaceContent select="#numcards"> $numcards </replaceContent>
 <attr select="#count" arg1="value" arg2="$count" />
-<eval> inarow($cudec); </eval> 
+<eval> inarow($curdec); </eval> 
 EOT;
 
     };#arrays formed

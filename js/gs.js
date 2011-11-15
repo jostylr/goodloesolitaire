@@ -54,7 +54,8 @@ inarow = function (num) {
       for (var i=-1; i>num; i-- ) {txt += 'D\'oh!';}
       $('#inarow').text(txt);
   };
-  setTimeout(function(){$('#inarow').empty()}, 1000);
+ // setTimeout(function(){$('#inarow').empty()}, 1000);
+	console.log(num);
 }; 
 
 
