@@ -247,7 +247,14 @@ function compare ($new, $old) {
     $newlvl = $hand_ord_tv[$new[0]];
     $oldlvl = $hand_ord_tv[$old[0]];
     $dif = $newlvl - $oldlvl;
-    $boost = round(pow($base, abs($dif)))*50;
+		#add in curmult (delayed streak additive)
+		$curdec = $curdec + $curmult; 
+		#using curmult to hold amount to add to next time as it is now available and storable
+		if ($dif != 0) {
+			$curmult = $dif;
+		} else {
+			$curmult = 0; 
+		}
     if ($dif == 0) {
       $parts = count($new[1]);
       for ($level =0; $level < $parts; $level++) {
@@ -256,44 +263,23 @@ function compare ($new, $old) {
       };
     };
     if ($dif > 0) {  #use new level to boost positive
-        if ($curmult >0) 
-             {$curmult++;}
-        else {$curmult +=2;}
-        if (in_array($newlvl, array(9, 6, 5))) {$curmult += 2;}
-        if ($newlvl == 7) {$curmult += 1;}
         if ($curdec >0) {
            $curdec++;
         } else {
           $curdec = 1;
         }
-        if ($curmult >0) {
-          return $newlvl*$scoinc*$curmult +$boost;
-        } else {
-          return $newlvl*$scoinc +$boost;
-        }
-
-        return $newlvl*$scoinc*$curmult +$boost;
     } else if ($dif<0) {
-        if ($curmult <0) 
-             {$curmult--;}
-        else if ($curmult >8)
-          {$curmult -=3;}
-        else  
-          {$curmult -=2;}
         if ($curdec <0) {
            $curdec--;
         } else {
           $curdec = -1;
         }
-        if ($curmult <0) {
-          return $oldlvl*$scoinc*$curmult-$boost;
-        } else {
-          return (-1)*$oldlvl*$scoinc-$boost;
-        }
-    } else {
-      $curmult--;
+    } else { #same exact ranked hand
+      $curmult = 1; #add 1 for next streak
       return 0; 
     };
+		#sign of curdec *50 * 2^magnitude of curdec
+		return $curdec/abs($curdec)*50*round(pow(2, abs($curdec)));
 }
 
 #order by value
@@ -456,7 +442,7 @@ if (isset($_POST['action'])) {
    $lowesthand = array("1", array(6, 4, 3, 2, 1));  
 
    #compare and finish
-   $delta = compare($htype, $oldtype);
+   $delta = compare($htype, $lowesthand);
    $score = $score+$delta;   
 
    $output = ''; $i = 1;
@@ -475,7 +461,7 @@ EOT;
    $output.= <<<EOT
 <replaceContent select="#togglegame"><a id="endgame">End Game</a></replaceContent>
 <replace select="#history table">
-<table><tbody><tr data-multiplier="$curmult"><td>1.</td><td>$score</td><td><span class='label success'>&#x25B2;$delta</span></td><td class="left">$histcall</td></tr></tbody></table>
+<table><tbody><tr data-multiplier="$curdec(+$curmult)"><td>1.</td><td>$score</td><td><span class='label success'>&#x25B2;$delta</span></td><td class="left">$histcall</td></tr></tbody></table>
 </replace>
 <replaceContent select='#handtext'>
  $handcall 
@@ -589,7 +575,7 @@ EOT;
  $handcall 
 </replaceContent>
 <prepend select="#history table tbody">
-<tr data-multiplier="$curmult"><td>$count.</td><td>$score</td><td><span $deltacall</span></td><td class="left">$histcall</td></tr>
+<tr data-multiplier="$curdec(+$curmult)"><td>$count.</td><td>$score</td><td><span $deltacall</span></td><td class="left">$histcall</td></tr>
 </prepend>
 <replaceContent select='#score'>
  $score 

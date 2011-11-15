@@ -48,14 +48,13 @@ namescore = function (type) {
 
 
 inarow = function (num) {
-  if (num >1) { $('#inarow').text(num+'-in-a-row!');}
-  if (num < -1) { 
-      var txt = 'D\'oh!';
-      for (var i=-1; i>num; i-- ) {txt += 'D\'oh!';}
-      $('#inarow').text(txt);
+  if (num >= 1) { $('#inarow').text("Streaking Power: "+ num);}
+  if (num <= -1) { 
+//      var txt = 'D\'oh!';
+//      for (var i=-1; i>num; i-- ) {txt += 'D\'oh!';}
+      $('#inarow').text("Point Drain: "+num);
   };
  // setTimeout(function(){$('#inarow').empty()}, 1000);
-	console.log(num);
 }; 
 
 
