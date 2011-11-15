@@ -461,7 +461,7 @@ EOT;
    $output.= <<<EOT
 <replaceContent select="#togglegame"><a id="endgame">End Game</a></replaceContent>
 <replace select="#history table">
-<table><tbody><tr data-multiplier="$curdec(+$curmult)"><td>1.</td><td>$score</td><td><span class='label success'>&#x25B2;$delta</span></td><td class="left">$histcall</td></tr></tbody></table>
+<table><tbody><tr><td>1.</td><td>$score</td><td><span class='label success'>&#x25B2;$delta</span></td><td class="left">$histcall</td></tr></tbody></table>
 </replace>
 <replaceContent select='#handtext'>
  $handcall 
@@ -469,6 +469,7 @@ EOT;
 <replaceContent select='#score'>
  $score
 </replaceContent>
+<eval>inarow($curdec, $curmult)</eval>
 <eval>scorepulse("scoreplus")</eval>
 <replaceContent select='#delta'>
  &#x25B2;$delta
@@ -575,18 +576,18 @@ EOT;
  $handcall 
 </replaceContent>
 <prepend select="#history table tbody">
-<tr data-multiplier="$curdec(+$curmult)"><td>$count.</td><td>$score</td><td><span $deltacall</span></td><td class="left">$histcall</td></tr>
+<tr><td>$count.</td><td>$score</td><td><span $deltacall</span></td><td class="left">$histcall</td></tr>
 </prepend>
 <replaceContent select='#score'>
  $score 
 </replaceContent>
+<eval> inarow($curdec, $curmult); </eval> 
 <eval>scorepulse($scoreclass)</eval>
 <replaceContent select='#delta'>
  $maindelta
 </replaceContent>
 <replaceContent select="#numcards"> $numcards </replaceContent>
 <attr select="#count" arg1="value" arg2="$count" />
-<eval> inarow($curdec); </eval> 
 EOT;
 
     };#arrays formed

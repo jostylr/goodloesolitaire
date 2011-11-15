@@ -47,12 +47,12 @@ namescore = function (type) {
  };
 
 
-inarow = function (num) {
-  if (num >= 1) { $('#inarow').text("Streaking Power: "+ num);}
-  if (num <= -1) { 
+inarow = function (streak, level) {
+  if (streak >= 1) { $('#inarow').text("Streaking Power: "+ streak+" Level Change: "+level);}
+  if (streak <= -1) { 
 //      var txt = 'D\'oh!';
 //      for (var i=-1; i>num; i-- ) {txt += 'D\'oh!';}
-      $('#inarow').text("Point Drain: "+num);
+      $('#inarow').text("Point Drain: "+streak+" Level Change: "+level);
   };
  // setTimeout(function(){$('#inarow').empty()}, 1000);
 }; 
