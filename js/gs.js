@@ -76,7 +76,7 @@ scorefun = function (f) {
 		deltas.push(f(scoredata[i][0], scoredata[i][1], prelevel, i, n, store));
 		score += f(scoredata[i][0], scoredata[i][1], prelevel, i, n, store);
 	}
-	return [score, deltas];
+	return JSON.stringify([score, deltas]);
 }
 
 scorepulse = function (scoreclass) {
