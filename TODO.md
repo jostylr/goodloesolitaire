@@ -6,6 +6,7 @@
 4. BUG: when #inarow is updated, extra markup is injected
 ?Not sure what markup.
 5. REQUEST: Break "streak power" into streak and bonus counts for debugging purposes
+15. REQUEST: History - <strong>bold</strong> new cards in the hand
 Is it sufficient?
 6. Implement way to play around with scoring algorithm
 9. Add recent high scores in backend/frontend
