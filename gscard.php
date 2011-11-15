@@ -279,7 +279,7 @@ function compare ($new, $old) {
       return 0; 
     };
 		#sign of curdec *50 * 2^magnitude of curdec
-		return $curdec/abs($curdec)*50*round(pow(2, abs($curdec)));
+		return $curdec/abs($curdec)*50*$curdec*$curdec;  ##round(pow(2, abs($curdec)));
 }
 
 #order by value
