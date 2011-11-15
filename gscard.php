@@ -230,7 +230,12 @@ function handcall($hand) {
 
 	  default : $rank = $card[0]; 
 	  };
-	  $suit = $card[1];	
+		switch ($card[1]) {
+			case "c": $suit = "&#x2663;"; break;
+			case "d": $suit = "&#x2666;"; break;
+			case "h": $suit = "&#x2665;"; break;
+			case "s": $suit = "&#x2660;"; break;
+		}
 		$ret = $ret." ".$rank.$suit;
 	}
 	return $ret;
