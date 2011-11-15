@@ -2,7 +2,9 @@
 
 1. Animation for new deck, discard card, draw card
 2. Make Start Game / End Game buttons toggleable
-9. Add recent high score in backend/frontend
+3. On End Game, screen state should save or reset. Currently it does a mix of both.
+4. BUG: when #inarow is updated, extra markup is injected
+9. Add recent high scores in backend/frontend
 8. Scoring: transparent, fun algorithm  
     S = streak count  
     LC = level jump of current hand  
@@ -14,9 +16,10 @@
     4. 100 * (2^S + LP)
     5. 100 * (2^S * LP)
     6. 100 * (2^(S+LP))
+    7. 50 * (S + LP)^2
 
 13. 2.0 Feature: custom link to individual game replays/history
-14. 2.0 Feature: Multiple games:
+14. 2.0 Feature: Multiple game modes:
 
 	1. Streaking
 		This is what we are doing now.
