@@ -46,6 +46,7 @@ namescore = function (type) {
    $('input[name=name]').focus(); 
  };
 
+inarowprelevel = 0;
 
 inarow = function (streak, level) {
   if (streak >= 1) { $('#inarow').html("Streaking Power: "+ streak+" Level Change: "+level);}
@@ -55,7 +56,12 @@ inarow = function (streak, level) {
       $('#inarow').html("Point Drain: "+streak+" Level Change: "+level);
   };
  // setTimeout(function(){$('#inarow').empty()}, 1000);
- scoredata.push([streak, level]);
+ if ( (streak === 1) || (streak === -1)) {
+	 scoredata.push([streak, streak, level]);
+ } else {
+	 scoredata.push([streak, streak-inarowprelevel, level]);	
+ }
+ inarowprelevel = level;
 }; 
 
 //pass in a function f that has its second and third arguments the streak and level. 
@@ -71,13 +77,45 @@ scorefun = function (f) {
 		if (i== 0) {
 			prelevel = 0;
 		} else {
-			prelevel = scoredata[i-1][1];
+			prelevel = scoredata[i-1][2];
 		}
 		deltas.push(f(scoredata[i][0], scoredata[i][1], prelevel, i, n, store));
-		score += f(scoredata[i][0], scoredata[i][1], prelevel, i, n, store);
+		score += f(scoredata[i][0], scoredata[i][1], scoredata[i][2], prelevel, i, n, store);
 	}
 	return JSON.stringify([score, deltas]);
 }
+
+//s already incorporates the previous level. So use slp to 
+runscorefun = function () {
+	var funs = [
+	function (s, slp, lc, lp) {
+		return 100*s;
+ 	},
+	function (s, lc, lp) {
+		return 100*Math.pow(2, s);
+ 	},
+	function (s, lc, lp) {
+		return 100*(s+lp);
+ 	},
+	function (s, lc, lp) {
+		return 100*(Math.pow(2, s)+lp);
+ 	},
+	function (s, lc, lp) {
+		return 100*(Math.pow(2, s)*lp);
+ 	},
+	function (s, lc, lp) {
+		return 100*(Math.pow(2, s+lp));
+ 	},	
+		function (s, lc, lp) {
+			return s/Math.abs(s)*50*(s+lp)*(s+lp);
+	 	}
+	];
+	var i;
+	var n = funs.length;
+	for (i=0; i<n; i += 1) {
+		console.log(i, scorefun(funs[i]));
+	}
+};
 
 scorepulse = function (scoreclass) {
 	$('#score, #delta').removeClass("scoreminus scoreplus");
