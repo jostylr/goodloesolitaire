@@ -285,6 +285,10 @@ table {
 	text-align: right;
 }
 
+.history-table strong {
+	color: white;
+}
+
 #modal-highscores {
 	width: 360px;
 	margin-left: -150px;
