@@ -2,7 +2,7 @@
 
 1. Animation for new deck, discard card, draw card
 3. On End Game, screen state should save or reset. Currently it does a mix of both.
-15. REQUEST: History - <strong>bold</strong> new cards in the hand
+15. Make strong work with CSS styling.
 9. Add recent high scores in backend/frontend
 8. Scoring: transparent, fun algorithm  
     S = streak count  

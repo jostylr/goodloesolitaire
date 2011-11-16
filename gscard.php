@@ -220,7 +220,7 @@ function shortcall($hand) {
 };
 
 #returns a brief card description of hand As 2c ...
-function handcall($hand) {
+function handcall($hand, $drawcards) {
 	$ret = '';
 	foreach ($hand as $card) {
 		$rank =''; 
@@ -236,7 +236,11 @@ function handcall($hand) {
 			case "h": $suit = "&#x2665;"; break;
 			case "s": $suit = "&#x2660;"; break;
 		}
-		$ret = $ret." ".$rank.$suit;
+		if (in_array($card, $drawcards)) {
+			$ret = $ret." <strong>".$rank.$suit."</strong>";
+		} else {
+			$ret = $ret." ".$rank.$suit;
+		}
 	}
 	return $ret;
 }
@@ -457,7 +461,7 @@ EOT;
    $gid = storeGame($deck, $drawcards); 
    $handcall = makecall($htype); 
    #$histcall = shortcall($htype); 
-	 $histcall = handcall($hand);
+	 $histcall = handcall($hand, $hand);
    $output.= <<<EOT
 <replaceContent select="#togglegame"><a id="endgame">End Game</a></replaceContent>
 <replace select="#history table">
@@ -522,6 +526,9 @@ EOT;
       usort($oldsort,  "cmpval");
       $oldtype = identify($oldsort);   
   
+			#initialize array for new cards as cards
+			$newcards = array();
+
       #load new hand
       #  $deck['current']=max($hand);
       $cur = max($num_hand);
@@ -534,6 +541,7 @@ EOT;
         $place = $cardslot-1;
         $num_hand[$place] = $cur;  #the location in deck
         $hand[$place] =$deck[$cur]; #the card itself
+				$newcards[$place] = $deck[$cur];
       };
       $sorth = $hand; 
       usort($sorth,  "cmpval");
@@ -554,7 +562,7 @@ EOT;
       store_hand($_POST['gid'], $num_hand); 
       $handcall = makecall($htype); 
       #$histcall = shortcall($htype); 
-	 		$histcall = handcall($hand);
+	 		$histcall = handcall($hand, $newcards);
       $count = $_POST['count']+1;
       if ($delta > 0) {
 				 $maindelta = "&#x25B2;$delta";
