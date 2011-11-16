@@ -247,7 +247,7 @@ function handcall($hand, $drawcards) {
 
 #compares two hands
 function compare ($new, $old) {
-  GLOBAL $hand_ord_tv, $curmult, $scoinc, $curdec, $base;        
+  GLOBAL $hand_ord_tv, $curmult, $scoinc, $curdec, $base, $typechange;        
     $newlvl = $hand_ord_tv[$new[0]];
     $oldlvl = $hand_ord_tv[$old[0]];
     $dif = $newlvl - $oldlvl;
@@ -269,17 +269,22 @@ function compare ($new, $old) {
     if ($dif > 0) {  #use new level to boost positive
         if ($curdec >0) {
            $curdec++;
+					$typechange = "up";
         } else {
           $curdec = 1;
+					$typechange = "newup";
         }
     } else if ($dif<0) {
         if ($curdec <0) {
            $curdec--;
+					$typechange = "down";
         } else {
           $curdec = -1;
+					$typechange = "newdown";
         }
     } else { #same exact ranked hand
       $curmult = 1; #add 1 for next streak
+			$typechange = "null";
       return 0; 
     };
 		#sign of curdec *50 * 2^magnitude of curdec
@@ -473,7 +478,7 @@ EOT;
 <replaceContent select='#score'>
  $score
 </replaceContent>
-<eval>inarow($curdec, $curmult)</eval>
+<eval>inarow($curdec, $curmult, "newup")</eval>
 <eval>scorepulse("scoreplus")</eval>
 <replaceContent select='#delta'>
  &#x25B2;$delta
@@ -589,7 +594,7 @@ EOT;
 <replaceContent select='#score'>
  $score 
 </replaceContent>
-<eval> inarow($curdec, $curmult); </eval> 
+<eval> inarow($curdec, $curmult, '$typechange'); </eval> 
 <eval>scorepulse($scoreclass)</eval>
 <replaceContent select='#delta'>
  $maindelta

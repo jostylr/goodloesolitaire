@@ -48,7 +48,7 @@ namescore = function (type) {
 
 inarowprelevel = 0;
 
-inarow = function (streak, level) {
+inarow = function (streak, level, typechange) {
   if (streak >= 1) { $('#inarow').html("Streaking Power: "+ streak+" Level Change: "+level);}
   if (streak <= -1) { 
 //      var txt = 'D\'oh!';
@@ -62,6 +62,7 @@ inarow = function (streak, level) {
 	 scoredata.push([streak, streak-inarowprelevel, level]);	
  }
  inarowprelevel = level;
+	console.log(typechange);
 }; 
 
 //pass in a function f that has its second and third arguments the streak and level. 
