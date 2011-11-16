@@ -48,11 +48,11 @@ namescore = function (type) {
 
 
 inarow = function (streak, level) {
-  if (streak >= 1) { $('#inarow-container').html("<span id='inarow'>Streaking Power: "+ streak+" Level Change: "+level+"</span");}
+  if (streak >= 1) { $('#inarow').html("Streaking Power: "+ streak+" Level Change: "+level);}
   if (streak <= -1) { 
 //      var txt = 'D\'oh!';
 //      for (var i=-1; i>num; i-- ) {txt += 'D\'oh!';}
-      $('#inarow-container').html("<span id='inarow'>Point Drain: "+streak+" Level Change: "+level+"</span>");
+      $('#inarow').html("Point Drain: "+streak+" Level Change: "+level);
   };
  // setTimeout(function(){$('#inarow').empty()}, 1000);
  scoredata.push([streak, level]);
