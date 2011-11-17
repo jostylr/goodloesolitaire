@@ -362,17 +362,17 @@ function load_game ($gid, &$deck, &$hand) {
 function sendscores($func) {
       $db = new PDO("sqlite:gsg.sqlite"); 
       $hs = $db->query("SELECT * FROM scores ORDER BY score DESC LIMIT 10");
-      $ls = $db->query("SELECT * FROM scores ORDER BY score ASC LIMIT 10");
-      if (($hs) && ($ls)) {
-          $hstab =''; $lstab='';
+      #$ls = $db->query("SELECT * FROM scores ORDER BY score ASC LIMIT 10");
+      if ($hs) { #(($hs) && ($ls)) {
+          $hstab =''; #$lstab='';
         foreach ($hs as $row) {
             $hstab .= "<tr><td>".htmlentities($row['nam'])."</td><td>".$row['score']."</td></tr>";
         };
-        foreach ($ls as $row) {
-            $lstab .= "<tr><td>".htmlentities($row['nam'])."</td><td>".$row['score']."</td></tr>";
-        };
+       # foreach ($ls as $row) {
+       #     $lstab .= "<tr><td>".htmlentities($row['nam'])."</td><td>".$row['score']."</td></tr>";
+       # };
         print ("<replaceContent select='#hs'>".$hstab."</replaceContent>");
-        print ("<replaceContent select='#ls'>".$lstab."</replaceContent>");
+        #print ("<replaceContent select='#ls'>".$lstab."</replaceContent>");
         print ("<eval> ${func}(); </eval>");
       } 
 };
@@ -402,15 +402,15 @@ function load_scores ($gid) {
       $row = $rows->fetch(); 
       $score = $row['score'];
       $hs = $db->query("SELECT min(score) FROM (SELECT score FROM scores ORDER BY score DESC LIMIT 10)"); 
-      $ls = $db->query("SELECT max(score) FROM (SELECT score FROM scores ORDER BY score ASC LIMIT 10)"); 
+      #$ls = $db->query("SELECT max(score) FROM (SELECT score FROM scores ORDER BY score ASC LIMIT 10)"); 
 
-      if ($hs && $ls){
+      if ($hs) { # && $ls){
           $hs= $hs->fetch();
-          $ls = $ls->fetch();
+          #$ls = $ls->fetch();
           if($score > $hs[0]) {
              print ("<eval> namescore('high'); </eval>");
-          } else if ($score < $ls[0]) {
-             print ("<eval> namescore('low'); </eval>");
+         # } else if ($score < $ls[0]) {
+         #    print ("<eval> namescore('low'); </eval>");
           } else {
              sendscores('loadscorescleargame');
           };
