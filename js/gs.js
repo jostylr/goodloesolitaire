@@ -46,8 +46,6 @@ namescore = function (type) {
    $('input[name=name]').focus(); 
  };
 
-inarowprelevel = 0;
-
 inarow = function (streak, level, typechange) {
   if (streak >= 1) { $('#inarow').html("Streaking Power: "+ streak+" Level Change: "+level);}
   if (streak <= -1) { 
@@ -56,13 +54,24 @@ inarow = function (streak, level, typechange) {
       $('#inarow').html("Point Drain: "+streak+" Level Change: "+level);
   };
  // setTimeout(function(){$('#inarow').empty()}, 1000);
- if ( (streak === 1) || (streak === -1)) {
-	 scoredata.push([streak, streak, level]);
- } else {
-	 scoredata.push([streak, streak-inarowprelevel, level]);	
+ switch (typechange) {
+	case 'newup':
+		scoredata.push([1, streak, level, typechange]);
+	break;
+	case 'up' :
+		scoredata.push([scoredata[scoredata.length-1][0]+1, streak, level, typechange]);
+	break;
+	case 'newdown':
+		scoredata.push([-1, streak, level, typechange]);
+	break;
+	case 'down':
+		scoredata.push([scoredata[scoredata.length-1][0]-1, streak, level,typechange]);
+	break;
+	case 'null' :
+		scoredata.push([scoredata[scoredata.length-1][0], streak, level,typechange]);
+	break;
  }
- inarowprelevel = level;
-	console.log(typechange);
+	console.log(JSON.stringify(scoredata));
 }; 
 
 //pass in a function f that has its second and third arguments the streak and level. 
