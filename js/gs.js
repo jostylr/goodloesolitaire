@@ -71,7 +71,6 @@ inarow = function (streak, level, typechange) {
 		scoredata.push([scoredata[scoredata.length-1][0], streak, level,typechange]);
 	break;
  }
-	console.log(JSON.stringify(scoredata));
 }; 
 
 //pass in a function f that has its second and third arguments the streak and level. 
@@ -83,47 +82,65 @@ scorefun = function (f) {
 	var store = {}; 
 	var prelevel; 
 	for (i = 0; i<n; i += 1) {
-		//streak, level
-		if (i== 0) {
-			prelevel = 0;
-		} else {
-			prelevel = scoredata[i-1][2];
-		}
-		deltas.push(f(scoredata[i][0], scoredata[i][1], prelevel, i, n, store));
-		score += f(scoredata[i][0], scoredata[i][1], scoredata[i][2], prelevel, i, n, store);
+		deltas.push(f(scoredata[i], i, n, store));
+		score += f(scoredata[i], i, n, store);
 	}
 	return JSON.stringify([score, deltas]);
 }
 
-//s already incorporates the previous level. So use slp to 
-runscorefun = function () {
-	var funs = [
-	function (s, slp, lc, lp) {
-		return 100*s;
+
+//data consists of [runlength, "streak", level, typechange]
+runscorefun = function (mult) {
+	mult = mult || 100;
+	var funs = {
+	"100 * S" : function (data) {
+		if (data[3] === "null") {return 0;}
+		return mult*data[0];
  	},
-	function (s, lc, lp) {
-		return 100*Math.pow(2, s);
+	"100 * S^2" : function (data) {
+		if (data[3] === "null") {return 0;}
+		var s = data[0];
+		return mult*s*s*s/Math.abs(s);
  	},
-	function (s, lc, lp) {
-		return 100*(s+lp);
+	"100 * (2^S)": function (data) {
+		if (data[3] === "null") {return 0;}
+		return mult*Math.pow(2, data[0]);
  	},
-	function (s, lc, lp) {
-		return 100*(Math.pow(2, s)+lp);
+	"100 * (S+LP)": function (data) {
+		if (data[3] === "null") {return 0;}
+		return mult*data[1];
  	},
-	function (s, lc, lp) {
-		return 100*(Math.pow(2, s)*lp);
+
+	"100 * (2^S + LP)": function (data) {
+		if (data[3] === "null") {return 0;}
+		if ((data[3] === "newup") || (data[3] === "newdown")) {
+			return mult*Math.pow(data[0], 2); 
+		}
+		return mult*Math.pow(data[0], 2)+data[1];
  	},
-	function (s, lc, lp) {
-		return 100*(Math.pow(2, s+lp));
- 	},	
-		function (s, lc, lp) {
-			return s/Math.abs(s)*50*(s+lp)*(s+lp);
-	 	}
-	];
-	var i;
-	var n = funs.length;
-	for (i=0; i<n; i += 1) {
-		console.log(i, scorefun(funs[i]));
+
+	"100 * (2^S * LP)": function (data) {
+		if (data[3] === "null") {return 0;}
+		return 100*data[0];
+ 	},
+ "100 * (2^(S+LP))"	: function (data) {
+		if (data[3] === "null") {return 0;}
+		return 100*data[0];
+ 	},
+
+	"100 * (S + LP)^2": function (data) {
+		if (data[3] === "null") {return 0;}
+		return 100*data[0];
+ 	},
+
+	"100 * (S + LP)^2"	: function (data) {
+		if (data[3] === "null") {return 0;}
+		return 100*data[0];
+	}
+};
+	var lab;
+	for (lab in funs) {
+		console.log(lab, scorefun(funs[lab]));
 	}
 };
 

@@ -15,7 +15,7 @@
     5. 100 * (2^S * LP)
     6. 100 * (2^(S+LP))
     7. 50 * (S + LP)^2
-
+10. Add in a column for the hand type
 13. 2.0 Feature: custom link to individual game replays/history
 14. 2.0 Feature: Multiple game modes:
 
