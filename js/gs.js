@@ -111,32 +111,30 @@ runscorefun = function (mult) {
 		return mult*data[1];
  	},
 
-	"100 * (2^S + LP)": function (data) {
+	"100 * (2^S + LC)": function (data) {
 		if (data[3] === "null") {return 0;}
 		if ((data[3] === "newup") || (data[3] === "newdown")) {
 			return mult*Math.pow(data[0], 2); 
 		}
-		return mult*Math.pow(data[0], 2)+data[1];
+		return mult*Math.pow(data[0], 2)+data[2];
  	},
 
-	"100 * (2^S * LP)": function (data) {
+	"100 * (2^S * LC)": function (data) {
 		if (data[3] === "null") {return 0;}
-		return 100*data[0];
+		if ((data[3] === "newup") || (data[3] === "newdown")) {
+			return mult*Math.pow(data[0], 2); 
+		}
+		return mult*Math.pow(data[0], 2)*data[1];
  	},
  "100 * (2^(S+LP))"	: function (data) {
 		if (data[3] === "null") {return 0;}
-		return 100*data[0];
+		return mult*Math.pow(2, data[1]);
  	},
 
 	"100 * (S + LP)^2": function (data) {
 		if (data[3] === "null") {return 0;}
-		return 100*data[0];
- 	},
-
-	"100 * (S + LP)^2"	: function (data) {
-		if (data[3] === "null") {return 0;}
-		return 100*data[0];
-	}
+		return mult*data[0]/Math.abs(data[0])*data[1]*data[1];
+ 	}
 };
 	var lab;
 	for (lab in funs) {
