@@ -36,10 +36,7 @@ scoreentrysubmit = function  (evnt) {
 
  //end game  
 namescore = function (type) {
-   $('#scoreentry').removeClass('hide'); 
-   if (type =='low') 
-        {$('#lows').removeClass('hide');}
-   else {$('#high').removeClass('hide');}
+	 $('#scoreentry').removeClass('hide');
    $('html').unbind('keyup', akeys); 
    $('html').bind('keyup', scoreentrysubmit); 
    keyun = true; 
@@ -149,22 +146,21 @@ scorepulse = function (scoreclass) {
 
 
 loadscorescleargame = function () {
-   // $('#scoreentry').remove(); 
-    $('.s').removeClass('hide');
+		$(".main").fadeTo(600, 0.2, function () {$('#modal-highscores').modal({
+			backdrop: true,
+			keyboard: true,
+			show: true
+		});}); 
     $('input[name=gid]').val('');
-   $('#hand li').addClass('hide');
-   // $('.start').addClass('hide');
     $('#nocards').addClass('hide');
-		
-    $('#nonscore').addClass('fade'); 
-    $('body').one('click',function (){ 
-            $('#nonscore').removeClass('fade'); 
-            $('.s').addClass('hide'); 
-            });
-   // $('#numcards').remove(); 
     if (keyun) {$('html').bind('keyup', akeys); keyun=false;};
  };
 
+loadscores = function () {
+	//$("#highscores").click(); 
+}
+
+/*
 loadscores = function () {
     $('.s').removeClass('hide');
     $('#nonscore').addClass('fade'); 
@@ -173,6 +169,8 @@ loadscores = function () {
             $('.s').addClass('hide'); 
             });
  };
+*/
+
 
 //switching their order
 switchcards = function (card) {
@@ -218,6 +216,7 @@ ajsub = function (subtype) {
            //clear old game id
            $('input[name=gid]').val('');
            $('#history table').empty();
+					 $(".main").fadeTo(200, 1);
            $('.s').addClass('hide');
            $('#nocards').addClass('hide');
            dosub('shuffle');
@@ -249,7 +248,7 @@ ajsub = function (subtype) {
                   $('.tomove').removeClass('tomove'); 
     break; 
     case 'endgame': 
-           if (($('#nonscore').filter('.fade').size() > 0) ||($('input[name=gid]').val()=='')) {block=false; return false;}
+           //if (($('#nonscore').filter('.fade').size() > 0) ||($('input[name=gid]').val()=='')) {block=false; return false;}
            dosub('endgame'); 
     break; 
     case 'viewscores':

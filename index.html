@@ -73,11 +73,17 @@
 	 		</div>
 		</div>
 
-
+    <form id="gs" method="post" action="http://goodloepoker.com/solitaire/gscard.php">
 		<div class="container">
   			<div class="content">
   				<div class="page-header"></div>
 		    	<div class="row">
+						<p id='scoreentry' class="hide">
+			        Enter name for high score: 
+             <input type=text name='name' /> <br />
+             <input type='submit' name='submitname' value='Submit your name' />
+						</p>
+			
 		    		<div class="span10 main">
 		    			<div id="scores">
 		    				<span id="currentscore"><span id="score" class="scoreminus">0</span></span>
@@ -88,7 +94,6 @@
 			    			<div><span id="numcards" class="label notice">52</span></div>
 			    			<div id="dc"><img id="drawcards" src="images/back.png"></div>
 		    			</div>
-			        <form id="gs" method="post" action="http://goodloepoker.com/solitaire/gscard.php">
 			    			<div id="hand">
 				    			<ul>
 					    			<li class="card" id="card1"><input type="checkbox" name="card[]" value="1"></li>
@@ -102,20 +107,12 @@
 									<input  type="submit" name="shuffle" value="New Game" />
 				          <input  type="submit" name="viewscores" value="View Scores" />
 				          <input  type="submit" name="drawcards" value="Draw Cards" />
-				
-				          <p id='scoreentry' class="hide">
-			              Enter name for <span id="highs"
-			               class="hide">high</span><span
-			               id="lows" class="hide">low</span> score: 
-			             <input type=text name='name' /> <br />
-			             <input type='submit' name='submitname' value='Submit your name' />
-			            </p>
+			
 						      <input type="hidden" name="gid" id="gid" value='' />
 						      <input type="hidden" name="count" id="count" value='' />
 						      <input type="hidden" name="action" value='' />
 						      <input type="submit" class='start' name="endgame" value="End Game"/>
 								</div>				
-							</form>
 		    			<div id="handtext"></div>
 		    		</div>
 		    		<div id="history" class="span6 history-table">
@@ -127,6 +124,7 @@
 		   	 	</div>
 			</div>
 		</div>
+	  </form>
 
 
 		<div id="modal-about" class="modal hide fade">
