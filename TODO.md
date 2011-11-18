@@ -2,8 +2,7 @@
 
 ## 1.5
 
-3. On End Game, screen state should save or reset. Currently it does a mix of both.
-4. High score name stuff
+4. Name at endgame needs styling. Would want it to be modal like high scores if possible. 
 8. Scoring: transparent, fun algorithm . get algorithms on client working.
     S = streak count  
     LC = level jump of current hand  
