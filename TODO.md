@@ -1,5 +1,7 @@
 # To do
 
+## 1.5
+
 3. On End Game, screen state should save or reset. Currently it does a mix of both.
 4. High score name stuff
 8. Scoring: transparent, fun algorithm . get algorithms on client working.
@@ -14,12 +16,14 @@
     5. 100 * (2^S * LP)
     6. 100 * (2^(S+LP))
     7. 50 * (S + LP)^2
-		
-1. 2.0 Animation for new deck, discard card, draw card
-9. 2.0 Add recent high scores in backend/frontend
-10. 2.0 Add in a column for the hand type
-13. 2.0 Feature: custom link to individual game replays/history
-14. 2.0 Feature: Multiple game modes:
+
+## 2.0
+
+1. Animation for new deck, discard card, draw card
+9. Add recent high scores in backend/frontend
+10. Add in a column for the hand type
+13. Feature: custom link to individual game replays/history
+14. Feature: Multiple game modes:
 
 	1. Streaking
 		This is what we are doing now.
