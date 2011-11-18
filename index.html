@@ -60,6 +60,7 @@
 		<link href='http://fonts.googleapis.com/css?family=Candal' rel='stylesheet' type='text/css'>
 	</head>
 	<body>
+    <form id="gs" method="post" action="http://goodloepoker.com/solitaire/gscard.php">
 
 		<div class="topbar">
 			<div class="fill">
@@ -77,7 +78,6 @@
 	 		</div>
 		</div>
 
-    <form id="gs" method="post" action="http://goodloepoker.com/solitaire/gscard.php">
 		<div class="container">
   			<div class="content">
   				<div class="page-header"></div>
@@ -88,8 +88,8 @@
 						    	<h3>Enter Your Name</h3>
 						    </div>
 						    <div class="modal-body">
-						    	<p>50,000 is a new high score!</p>
-				             	<input type="text" maxlength="20" name="name" /> 
+						    	<p id="newhighscoretext"> new high score!</p>
+				             	<input type="text" maxlength="20" name="namemodal" /> 
 				             	<input type="submit" name="submitname" value="Submit" />
 			            	</div>
 						</div>
@@ -117,7 +117,8 @@
 									<input  type="submit" name="shuffle" value="New Game" />
 				          <input  type="submit" name="viewscores" value="View Scores" />
 				          <input  type="submit" name="drawcards" value="Draw Cards" />
-			
+
+									<input type="hidden" name="name" value='' />								
 						      <input type="hidden" name="gid" id="gid" value='' />
 						      <input type="hidden" name="count" id="count" value='' />
 						      <input type="hidden" name="action" value='' />
@@ -134,7 +135,6 @@
 		   	 	</div>
 			</div>
 		</div>
-	  </form>
 
 
 		<div id="modal-about" class="modal hide fade">
@@ -167,7 +167,8 @@
 				 	</table>
 		    </div>
 		</div>
-
+		</form>
+	  
 
 	</body>
 </html>

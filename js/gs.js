@@ -27,16 +27,17 @@ $('#hail >span').addClass('hide');
 
 
 scoreentrysubmit = function  (evnt) {
- if (evnt.keycode == 13) {
-     console.log(evnt.keycode);
-     ajsub('submitname');
+ if (evnt.keyCode == 13) {
+     //ajsub('submitname');
+		 $("#submintname").click(); 
      return false;
  }; 
 }
 
  //end game  
 namescore = function (type) {
-	 $('#scoreentry').removeClass('hide');
+		submitScore(); 
+	 //$('#scoreentry').removeClass('hide');
    $('html').unbind('keyup', akeys); 
    $('html').bind('keyup', scoreentrysubmit); 
    keyun = true; 
@@ -207,6 +208,7 @@ block=false;
 
 //handles submission 
 ajsub = function (subtype) {
+	console.log(subtype, block);
  if (!block) {
   block=true;    
   switch (subtype) {
@@ -255,14 +257,15 @@ ajsub = function (subtype) {
           dosub('viewscores'); 
     break;                 
     case 'submitname':
-          if (($('#scoreentry').filter('.hide').size() > 0) ||($('input[name=gid]').val()=='')) {block=false; return false;}
+          if ($('input[name=gid]').val()=='') {block=false; return false;}
+					$('input[name=name]').val($('input[name=namemodal]').val());
           dosub('submitname'); 
+					$('#scoreentry .close').click();
           if (keyun) {
             $('html').bind('keyup', akeys); 
             $('html').unbind('keyup', scoreentrysubmit); 
             keyun = false; 
           };
-          $('#scoreentry').addClass('hide'); 
     break;                   
 
   };
