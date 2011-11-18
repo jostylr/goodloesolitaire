@@ -2,8 +2,17 @@
 
 ## 1.5
 
-4. Name at endgame needs styling. Would want it to be modal like high scores if possible. 
+4. BUG: keystrokes on submitting name are intercepted as moves in game
+5. inarow text should be changed to something more friendly and intuitive. Like:
+
+    2 in a row!  
+    3 in a row + 1 bonus!
+
+    Negative plays could perhaps be left blank here. Or:  
+    Yikes! 2 in a row!
+
 8. Scoring: transparent, fun algorithm . get algorithms on client working.
+
     S = streak count  
     LC = level jump of current hand  
     LP = level jump of previous hand
