@@ -15,6 +15,14 @@
 		<script type="text/javascript">
 			$(document).ready(function() {
 
+				submitScore = function(){
+					$('#scoreentry').modal({
+						backdrop: true,
+						keyboard: true,
+						show: true
+					});
+				};
+
 				$('#about').click(function(){
 					$('#modal-about').modal({
 						backdrop: true,
@@ -30,7 +38,6 @@
 						show: true
 					});
 				});
-
 
 				if($('#history').css('display') == 'none'){
 					$('#history').addClass('modal hide fade modal-history').removeClass('history-table');
@@ -75,11 +82,17 @@
   			<div class="content">
   				<div class="page-header"></div>
 		    	<div class="row">
-						<p id='scoreentry' class="hide">
-			        Enter name for high score: 
-             <input type=text name='name' /> <br />
-             <input type='submit' name='submitname' value='Submit your name' />
-						</p>
+						<div id="scoreentry" class="modal hide fade">
+							<div class="modal-header">
+						    	<a href="#" class="close">&times;</a>
+						    	<h3>Enter Your Name</h3>
+						    </div>
+						    <div class="modal-body">
+						    	<p>50,000 is a new high score!</p>
+				             	<input type="text" maxlength="20" name="name" /> 
+				             	<input type="submit" name="submitname" value="Submit" />
+			            	</div>
+						</div>
 			
 		    		<div class="span10 main">
 		    			<div id="scores">

@@ -294,6 +294,14 @@ table {
 	color: white;
 }
 
+#scoreentry {
+	width: 360px;
+}
+
+#scoreentry input[type="text"] {
+	width: 200px;
+}
+
 #modal-highscores {
 	width: 360px;
 	margin-left: -150px;
