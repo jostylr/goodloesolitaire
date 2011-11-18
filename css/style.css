@@ -211,6 +211,11 @@ body {
 	-webkit-appearance: checkbox;
 }
 
+.draw {
+	filter:alpha(opacity=40);
+	opacity:0.4;
+}
+
 .container {
 	height: 80%;
 }
