@@ -263,8 +263,6 @@ ajsub = function (subtype) {
             keyun = false; 
           };
           $('#scoreentry').addClass('hide'); 
-          $('#lows').addClass('hide');
-          $('#high').addClass('hide');
     break;                   
 
   };
