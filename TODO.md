@@ -3,6 +3,7 @@
 ## 1.5
 
 4. BUG: keystrokes on submitting name are intercepted as moves in game
+5. BUG: inarow streak text is not correct.
 5. inarow text should be changed to something more friendly and intuitive. Like:
 
     2 in a row!  
