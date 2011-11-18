@@ -2,7 +2,6 @@
 
 ## 1.5
 
-4. BUG: keystrokes on submitting name are intercepted as moves in game
 5. BUG: inarow streak text is not correct.
 5. inarow text should be changed to something more friendly and intuitive. Like:
 
@@ -12,6 +11,9 @@
     Negative plays could perhaps be left blank here. Or:  
     Yikes! 2 in a row!
 
+6. BUG: On the second game started, the "Start Game" text changes to "New Game". Keep it "Start Game".
+7. REQ: Submit name, allow submit by typing "Enter"
+8. BUG: After you submit a new name, the hand saves state in a transparent form. But you never see this anywhere else. Perhaps this should always be the view when a game is ended or not active (such as on first load).
 8. Scoring: transparent, fun algorithm . get algorithms on client working.
 
     S = streak count  
