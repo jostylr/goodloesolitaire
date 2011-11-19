@@ -15,7 +15,9 @@ REQ: Make toppage index look nice.
 10. Add date for high scores?
 11. Detect twitter name or add link (riskier) for high score: give people a way to link back to their identity.
 10. Add in a column for the hand type
-13. Feature: custom link to individual game replays/history
+13. Feature: custom link to individual game history
+14. Feature: custom link to individual game review (watch)
+15. Feature: custom link to individual game replay (play)
 14. Feature: Multiple game modes:
 
 	1. Streaking
