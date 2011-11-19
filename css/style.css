@@ -89,7 +89,7 @@ body {
 	}	
 }
 
-#scores, #handtext {
+#scores, #handtext, #hail {
 	font-family: 'Candal', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	line-height: 50px;
 	text-align: center;
@@ -109,7 +109,7 @@ body {
 	color: rgba(225, 225, 225, 0.7);
 }
 
-#handtext {
+#handtext, #hail {
 	font-size: 20px;
 }
 
@@ -407,7 +407,7 @@ table {
 		zoom: 160%;
 	}
 
-	#handtext {
+	#handtext, #hail {
 		margin-top: 50px;
 		font-size: 50px;
 	}
@@ -487,7 +487,7 @@ table {
 		top: 215px;
 	}
 
-	#handtext, #inarow {
+	#handtext, #inarow, #hail {
 		font-size: 25px;
 	}
 

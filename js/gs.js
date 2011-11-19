@@ -24,10 +24,10 @@ $(function() {
 
 //hailsetup  
 makecall= function (domid){  
-     $(domid).removeClass('hide');
-     setTimeout(function(){$(domid).addClass('hide')}, 1000);
-     }; 
-$('#hail >span').addClass('hide'); 
+     $(domid).fadeIn(600).fadeOut(600); 
+};
+ 
+$('#hail >span').hide(); 
 
 
 scoreentrysubmit = function  (evnt) {
@@ -184,6 +184,7 @@ $('#gs').ajaxForm({});
 completesub = function() {
   block = false; 
   $('input[name=action]').val('none');
+  $('.backing').removeClass('backing');	
 };
 
 dosub = function (subtype) {
@@ -209,7 +210,7 @@ ajsub = function (subtype) {
            $('.s').addClass('hide');
            $('#nocards').addClass('hide');
            dosub('shuffle');
-           $("#hand li").children('input').clearFields().end().removeClass('draw');
+           $("#hand li").children('input').clearFields().end().removeClass('draw').removeClass('backing');
            $('.tomove').removeClass('tomove'); 
 					//clear old score info or initialize. see inarow and scorefun
 					scoredata =[];
@@ -217,7 +218,20 @@ ajsub = function (subtype) {
     case 'drawcards':
                  //if viewing scores do not draw cards
 //                 if ($('#nonscore').filter('.fade').size() > 0)  {block=false; return false;} 
-                 if ($('#numcards').text() ==0) {$('#nocards').removeClass('hide'); block=false; return false;}
+                // if ($('#numcards').text() ==0) {$('#nocards').removeClass('hide'); block=false; return false;}
+							 //do hail mia stuff; committed to submitting
+							  switch ( ($("li > input").fieldValue()).length) {
+							    case 4: 
+							     if ($("#count").val() >1) 
+							         {makecall('#dr4');}
+							    else {makecall('#m4');}
+							   break;
+							   case 5: 
+							     if ($("#count").val() >1) 
+							         {makecall('#dr5');}
+							    else {makecall('#m5');}
+							   break;
+							  };
                  //submit form using trash for action designation
                  dosub('drawcards'); 
 								$(".draw").addClass('backing');	
@@ -226,6 +240,7 @@ ajsub = function (subtype) {
     case 'endgame': 
            //if (($('#nonscore').filter('.fade').size() > 0) ||($('input[name=gid]').val()=='')) {block=false; return false;}
            dosub('endgame'); 
+           $("#hand li").removeClass('draw').removeClass('backing');
     break; 
     case 'viewscores':
           dosub('viewscores'); 
@@ -246,6 +261,10 @@ ajsub = function (subtype) {
  }   
 
 };
+
+runoutofcards = function () {
+	setTimeout(function () {$('input[name=endgame]').click()}, 800);
+}
 
 //assign click functionality to all of these buttons
 $.each(['shuffle', 'drawcards', 'endgame', 'viewscores', 'submitname'], 

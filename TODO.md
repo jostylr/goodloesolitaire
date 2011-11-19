@@ -2,6 +2,9 @@
 
 ## 1.5
 
+REQ: Bring back Hail Mia, etc., call. Envisioning the Text pulsing out over the deck and fading out. Or sliding in/out. One of the simple jQuery effects. Text is in div #hail, the function makeCall (line25 ish) handles the behavior.
+
+CHECK: When all cards drawn, is behavior of ending appropriate or does there need to be another stage/warning? 
 
 ## 2.0
 

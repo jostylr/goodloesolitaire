@@ -613,6 +613,11 @@ EOT;
 <attr select="#count" arg1="value" arg2="$count" />
 EOT;
 
+if ($numcards == 0) {
+	$output .= <<<EOT
+<eval>runoutofcards()</eval>
+EOT;
+}
     };#arrays formed
   }; #end of switch
     
