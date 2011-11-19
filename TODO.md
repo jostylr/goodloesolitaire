@@ -2,16 +2,9 @@
 
 ## 1.5
 
-5. inarow text should be changed to something more friendly and intuitive. Like:
-
-    2 in a row!  
-    3 in a row + 1 bonus!
-
-    Negative plays could perhaps be left blank here. Or:  
-    Yikes! 2 in a row!
 
 7. REQ: Submit name, allow submit by typing "Enter"
-8. BUG: After you submit a new name, the hand saves state in a transparent form. But you never see this anywhere else. Perhaps this should always be the view when a game is ended or not active (such as on first load).
+
 
 
 ## 2.0

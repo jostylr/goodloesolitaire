@@ -45,30 +45,30 @@ namescore = function (type) {
  };
 
 inarow = function (streak, level, typechange) {
-  if (streak >= 1) { $('#inarow').html("Streaking Power: "+ streak+" Level Change: "+level);}
-  if (streak <= -1) { 
-//      var txt = 'D\'oh!';
-//      for (var i=-1; i>num; i-- ) {txt += 'D\'oh!';}
-      $('#inarow').html("Point Drain: "+streak+" Level Change: "+level);
-  };
- // setTimeout(function(){$('#inarow').empty()}, 1000);
+	var streaktext;
  switch (typechange) {
 	case 'newup':
 		scoredata.push([1, streak, level, typechange]);
+		streaktext = "&nbsp;";
 	break;
 	case 'up' :
 		scoredata.push([scoredata[scoredata.length-1][0]+1, streak, level, typechange]);
+		streaktext = streak+" in a row"+ (level ? " with a "+level+" bonus!" : "!");
 	break;
 	case 'newdown':
 		scoredata.push([-1, streak, level, typechange]);
+		streaktext = "&nbsp;";
 	break;
 	case 'down':
 		scoredata.push([scoredata[scoredata.length-1][0]-1, streak, level,typechange]);
+		streaktext = "&nbsp;";
 	break;
 	case 'null' :
 		scoredata.push([scoredata[scoredata.length-1][0], streak, level,typechange]);
+		streaktext = "&nbsp;";
 	break;
  }
+ $('#inarow').html(streaktext);
 }; 
 
 //pass in a function f that has its second and third arguments the streak and level. 
