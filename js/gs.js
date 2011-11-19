@@ -32,8 +32,7 @@ $('#hail >span').addClass('hide');
 
 scoreentrysubmit = function  (evnt) {
  if (evnt.keyCode == 13) {
-     //ajsub('submitname');
-		 $("#submintname").click(); 
+		 $("input[name=submitname]").click(); 
      return false;
  }; 
 }
@@ -220,7 +219,8 @@ ajsub = function (subtype) {
                  if ($('#numcards').text() ==0) {$('#nocards').removeClass('hide'); block=false; return false;}
                  //submit form using trash for action designation
                  dosub('drawcards'); 
-                  $("#hand li").children('input').attr('checked', false).end().removeClass('draw');
+								$(".draw").addClass('backing');	
+                  $("#hand li").children('input').attr('checked', false); //.end().removeClass('draw');
     break; 
     case 'endgame': 
            //if (($('#nonscore').filter('.fade').size() > 0) ||($('input[name=gid]').val()=='')) {block=false; return false;}

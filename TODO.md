@@ -2,10 +2,6 @@
 
 ## 1.5
 
-7. REQ: Submit name, allow submit by typing "Enter"
-
-
-
 ## 2.0
 
 1. Animation for new deck, discard card, draw card

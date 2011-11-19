@@ -456,6 +456,11 @@ if (isset($_POST['action'])) {
    $score = $delta;   
 
    $output = ''; $i = 1;
+	 $output .= <<<EOT
+<removeClass select=".draw" arg1="backing" />
+<removeClass select=".draw" arg1="draw" />
+EOT;
+
    foreach ($hand as $card) {
      $imgn = cardImage($card); 
      $output .= <<<EOT
@@ -557,6 +562,10 @@ EOT;
       $delta = compare($htype, $oldtype);
       $score = $score+$delta;   
       $output = ''; 
+		  $output .= <<<EOT
+<removeClass select=".draw" arg1="backing" />
+<removeClass select=".draw" arg1="draw" />
+EOT;
       foreach ($drawcards as $card) {
         $imgn = cardImage($hand[$card-1]); 
         $output .= <<<EOT

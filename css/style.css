@@ -188,6 +188,7 @@ body {
 	min-height: 125px;
 }
 
+
 .card {
 	float: left;
 	width: 86px;
@@ -200,6 +201,11 @@ body {
 	-moz-box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
 	box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
 }
+
+.backing {
+	background-image: url('../images/back.png');
+}
+
 
 .card:last-child {
 	margin-right: 0;
