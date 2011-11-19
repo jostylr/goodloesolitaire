@@ -177,22 +177,6 @@ loadscores = function () {
 */
 
 
-//switching their order
-switchcards = function (card) {
-    var a = ($('.tomove'))[0]
-    if (!(a)) {      
-       $('#hand li:nth-child('+card+')').addClass('tomove'); 
-    } else {
-      current = $('#hand li').index(a) +1;
-      cardcur = card; 
-      if (card < current) {
-        $(a).removeClass('tomove').insertBefore('#hand li:nth-child('+card+')');
-      } else {
-        $(a).removeClass('tomove').insertAfter('#hand li:nth-child('+card+')');
-      }
-    };
-  };
-
 
 $('#gs').ajaxForm({});  
 
