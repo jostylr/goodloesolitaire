@@ -10,6 +10,7 @@ BUG: When you cancel out of the submitName modal instead of inputting a name, th
 
 1. Animation for new deck, discard card, draw card
 9. Add recent high scores in backend/frontend
+10. Add date for high scores?
 10. Add in a column for the hand type
 13. Feature: custom link to individual game replays/history
 14. Feature: Multiple game modes:
