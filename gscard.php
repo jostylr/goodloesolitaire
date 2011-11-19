@@ -284,7 +284,7 @@ function compare ($new, $old) {
 					$typechange = "newdown";
         }
     } else { #same exact ranked hand
-      $curmult = 1; #add 1 for next streak
+      $curdec = $curdec + $curdec/abs($curdec); #add 1 for next streak
 			$typechange = "null";
       return 0; 
     };
