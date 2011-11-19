@@ -497,7 +497,7 @@ EOT;
         load_scores($_POST['gid']);
     }
    $output.= <<<EOT
-<replaceContent select="#togglegame"><a id="newgame">New Game</a></replaceContent>
+<replaceContent select="#togglegame"><a id="newgame">Start Game</a></replaceContent>
 EOT;
   break;
 

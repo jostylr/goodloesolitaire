@@ -2,7 +2,6 @@
 
 ## 1.5
 
-5. BUG: inarow streak text is not correct.
 5. inarow text should be changed to something more friendly and intuitive. Like:
 
     2 in a row!  
@@ -11,22 +10,9 @@
     Negative plays could perhaps be left blank here. Or:  
     Yikes! 2 in a row!
 
-6. BUG: On the second game started, the "Start Game" text changes to "New Game". Keep it "Start Game".
 7. REQ: Submit name, allow submit by typing "Enter"
 8. BUG: After you submit a new name, the hand saves state in a transparent form. But you never see this anywhere else. Perhaps this should always be the view when a game is ended or not active (such as on first load).
-8. Scoring: transparent, fun algorithm . get algorithms on client working.
 
-    S = streak count  
-    LC = level jump of current hand  
-    LP = level jump of previous hand
-
-    1. 100 * S
-    2. 100 * (2^S)
-    3. 100 * (S+LP)
-    4. 100 * (2^S + LP)
-    5. 100 * (2^S * LP)
-    6. 100 * (2^(S+LP))
-    7. 50 * (S + LP)^2
 
 ## 2.0
 
@@ -48,3 +34,4 @@
 		Maintain or improve current hand type, but ranking in it is of no consequence. Points for different hand types are not by ordering, but on perceived difficulty. One downturn is the end game.
 	6. Paying the Rent	
 		Pot of money. Each card draw costs money. Levels cost money for rent. Level gains give a pot of money. Rent increases as level stays the same. Interest accrues on pot of money each turn with streaks increasing interest. Level loss loses money.
+	10. Maybe different scoring rules too. Such as Current Major Level as base and the streak at that level as power. 
