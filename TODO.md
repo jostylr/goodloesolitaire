@@ -16,6 +16,7 @@ REQ: When deck is used up, game automatically ends, and high score modal pops up
 
 1. Animation for new deck, discard card, draw card
 9. Add recent high scores in backend/frontend
+10. Add numbering for high scores.
 10. Add date for high scores?
 11. Detect twitter name or add link (riskier) for high score: give people a way to link back to their identity.
 10. Add in a column for the hand type
