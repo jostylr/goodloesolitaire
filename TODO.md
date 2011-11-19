@@ -4,6 +4,8 @@
 
 REQUEST: inarow text wording for bonus: change from "a x bonus" to "a bonus of x". Sounds better as "a bonus of 1" instead of "a 1 bonus".
 
+BUG: When you cancel out of the submitName modal instead of inputting a name, the dead hand doesn't display as semi-transparent.
+
 ## 2.0
 
 1. Animation for new deck, discard card, draw card
