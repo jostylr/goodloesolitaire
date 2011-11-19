@@ -1,5 +1,9 @@
 $(function() {  
         //setup 
+	fadelevel = 0.4;
+
+	$(".main").fadeTo(100, fadelevel);	
+
    $("#history").children('h1').click(function() {$(this).siblings('table').toggleClass('hide')});     
 
    $('#hand li ').live('click', function (event) {
@@ -147,7 +151,7 @@ scorepulse = function (scoreclass) {
 
 
 loadscorescleargame = function () {
-		$(".main").fadeTo(600, 0.2, function () {$('#modal-highscores').modal({
+		$(".main").fadeTo(600, fadelevel, function () {$('#modal-highscores').modal({
 			backdrop: true,
 			keyboard: true,
 			show: true
@@ -208,7 +212,6 @@ block=false;
 
 //handles submission 
 ajsub = function (subtype) {
-	console.log(subtype, block);
  if (!block) {
   block=true;    
   switch (subtype) {
@@ -229,25 +232,11 @@ ajsub = function (subtype) {
     break; 
     case 'drawcards':
                  //if viewing scores do not draw cards
-                 if ($('#nonscore').filter('.fade').size() > 0)  {block=false; return false;} 
+//                 if ($('#nonscore').filter('.fade').size() > 0)  {block=false; return false;} 
                  if ($('#numcards').text() ==0) {$('#nocards').removeClass('hide'); block=false; return false;}
-                 //do hail mia stuff; committed to submitting
-                 switch ( ($("li > input").fieldValue()).length) {
-                   case 4: 
-                    if ($("#count").val() >1) 
-                        {makecall('#dr4');}
-                   else {makecall('#m4');}
-                  break;
-                  case 5: 
-                    if ($("#count").val() >1) 
-                        {makecall('#dr5');}
-                   else {makecall('#m5');}
-                  break;
-                 };
                  //submit form using trash for action designation
                  dosub('drawcards'); 
                   $("#hand li").children('input').attr('checked', false).end().removeClass('draw');
-                  $('.tomove').removeClass('tomove'); 
     break; 
     case 'endgame': 
            //if (($('#nonscore').filter('.fade').size() > 0) ||($('input[name=gid]').val()=='')) {block=false; return false;}
@@ -276,7 +265,7 @@ ajsub = function (subtype) {
 //assign click functionality to all of these buttons
 $.each(['shuffle', 'drawcards', 'endgame', 'viewscores', 'submitname'], 
         function (key,value) {
-          $('input[name='+value+']').click(function () {console.log(value); ajsub(value); return false;});
+          $('input[name='+value+']').click(function () {ajsub(value); return false;});
           }
       ); 
 
@@ -293,18 +282,7 @@ akeys = function (evnt) {
         case 51: $('#hand li:nth-child(3)').click(); break;
         case 52: $('#hand li:nth-child(4)').click(); break;
         case 53: $('#hand li:nth-child(5)').click(); break;
-        case 54: switchcards(1); break;//visible 1 card to be moved                 
-        case 55: switchcards(2); break;//visible 2 card to be moved                 
-        case 56: switchcards(3); break;//visible 3 card to be moved                                  
-        case 57: switchcards(4); break;//visible 4 card to be moved                                  
-        case 48: switchcards(5); break;//visible 5 card to be moved                                                   
-        case 27: $('body').click(); break; //esc clicks on the body                 
-        case 72: $('#history >h1').click(); break;//h history         
-        case 83: ajsub('shuffle'); break;//s shuffle
-        case 32: ajsub('drawcards'); return false; break; //space drawcards
-        case 77: ajsub('drawcards'); break; //m drawcards
-        case 69: ajsub('endgame'); break; //e end game
-        case 86: ajsub('viewscores'); break; //v view scores                 
+        case 13: $('#drawcards').click(); return false; break; //space drawcards
        };
 
 };

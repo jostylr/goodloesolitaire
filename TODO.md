@@ -2,7 +2,6 @@
 
 ## 1.5
 
-
 7. REQ: Submit name, allow submit by typing "Enter"
 
 
