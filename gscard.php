@@ -1,7 +1,7 @@
 <?php header('Content-type: text/xml'); 
  header("Access-Control-Allow-Origin: *");
 
-$curdec = 1; #coopted to be in a row
+$curdec = 0; #coopted to be in a row
 $curmult = 0;
 $score = 0;
 $scoinc =50;
@@ -252,14 +252,15 @@ function compare ($new, $old) {
     $oldlvl = $hand_ord_tv[$old[0]];
     $dif = $newlvl - $oldlvl;
 		#add in curmult (delayed streak additive)
-		$curdec = $curdec + $curmult; 
+		#$curdec = $curdec + $curmult; 
 		#using curmult to hold amount to add to next time as it is now available and storable
-		if ($dif != 0) {
-			$curmult = $dif;
-		} else {
-			$curmult = 0; 
-		}
-    if ($dif == 0) {
+		$curmult = $dif;
+#		if ($dif != 0) {
+#			$curmult = $dif;
+#		} else {
+#			$curmult = 0; 
+#		}
+   if ($dif == 0) {
       $parts = count($new[1]);
       for ($level =0; $level < $parts; $level++) {
           $dif = $new[1][$level] - $old[1][$level];
@@ -288,7 +289,7 @@ function compare ($new, $old) {
       return 0; 
     };
 		#sign of curdec *50 * 2^magnitude of curdec
-		return $curdec/abs($curdec)*50*$curdec*$curdec;  ##round(pow(2, abs($curdec)));
+		return $curdec/abs($curdec)*100*round(pow(2, abs($curdec)))*(abs($curmult)+1);  ##round(pow(2, abs($curdec)));
 }
 
 #order by value
@@ -452,7 +453,7 @@ if (isset($_POST['action'])) {
 
    #compare and finish
    $delta = compare($htype, $lowesthand);
-   $score = $score+$delta;   
+   $score = $delta;   
 
    $output = ''; $i = 1;
    foreach ($hand as $card) {
