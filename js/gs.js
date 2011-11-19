@@ -40,6 +40,7 @@ scoreentrysubmit = function  (evnt) {
  //end game  
 namescore = function (type) {
 		submitScore(); 
+		$(".main").fadeTo(200, fadelevel);
 	 //$('#scoreentry').removeClass('hide');
    $('html').unbind('keyup', akeys); 
    $('html').bind('keyup', scoreentrysubmit); 
@@ -56,7 +57,7 @@ inarow = function (streak, level, typechange) {
 	break;
 	case 'up' :
 		scoredata.push([scoredata[scoredata.length-1][0]+1, streak, level, typechange]);
-		streaktext = streak+" in a row"+ (level ? " with a "+level+" bonus!" : "!");
+		streaktext = streak+" in a row"+ (level ? " with a bonus of "+level+"!" : "!");
 	break;
 	case 'newdown':
 		scoredata.push([-1, streak, level, typechange]);
