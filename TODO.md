@@ -6,6 +6,8 @@ REQ: Bring back Hail Mia, etc., call. Envisioning the Text pulsing out over the 
 
 CHECK: When all cards drawn, is behavior of ending appropriate or does there need to be another stage/warning? 
 
+REQ: Make toppage index look nice. 
+
 ## 2.0
 
 1. Animation for new deck, discard card, draw card
