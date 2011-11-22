@@ -1,0 +1,29 @@
+Following http://caolanmcmahon.com/posts/deploying_node_js_with_upstart
+
+sudo adduser --system --shell /bin/bash -gecos 'user for running node.js' --group --disabled-password --home /home/node node
+
+git pull in order to load gs.conf 
+
+sudo cp gs.conf /etc/init/gs.conf
+
+load app: 
+sudo mkdir -p /var/local/sites/gs
+sudo chown node /var/local/sites/gs
+cd /var/local/sites/gs
+sudo -u node git clone git://github.com/jostylr/goodloesolitaire.git .
+sudo -u node git checkout node
+
+permissions: 
+sudo touch /var/log/gs.log
+sudo chown node /var/log/gs.log
+
+Testing:
+$ sudo start gs
+
+$ sudo status gs
+
+$ curl localhost:8000
+
+$ sudo stop gs
+
+Then reboot and check. 
