@@ -27,3 +27,6 @@ $ curl localhost:8000
 $ sudo stop gs
 
 Then reboot and check. 
+
+to get port 80 without root running the app
+sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 3000
