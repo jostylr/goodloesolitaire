@@ -1,4 +1,17 @@
 $(function() {  
+	
+	
+	var put = function (id, data, callback) {
+		$.ajax('http://127.0.0.1:8181/' + id + '/', {
+			type: 'POST',
+			data: JSON.stringify(data),
+			contentType: 'text/json',
+			success: function() { if ( callback ) callback(true); },
+			error  : function() { if ( callback ) callback(false); }
+		});
+	}
+	
+	
         //setup 
 	fadelevel = 0.4;
 
