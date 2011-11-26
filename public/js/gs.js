@@ -1,19 +1,87 @@
+/*global $, console */
+
 $(function() {  
 	
+	var server = 'http://127.0.0.1:3000/';
 	
-	var put = function (id, data, callback) {
-		$.ajax('http://127.0.0.1:8181/' + id + '/', {
+	var uid = '0';
+	var gid = '0';
+	
+	var put = function (command, data, callback) {
+		$.ajax(server + command, {
 			type: 'POST',
 			data: JSON.stringify(data),
-			contentType: 'text/json',
-			success: function() { if ( callback ) callback(true); },
-			error  : function() { if ( callback ) callback(false); }
+			contentType: 'application/json',
+			dataType: "json",
+			success: callback || function (data, status) {console.log(command, data, status);},
+			error  : function() { console.log("error response"); }
 		});
-	}
+	};
 	
+	var get = function (command, callback) {
+		$.ajax(server + command, {
+			type: 'GET',
+			contentType: 'application/json',
+			dataType: "json",
+			success: callback || function (data, status) {console.log(command, data, status);},
+			error  : function() { console.log("error response"); }
+		});
+	};
+
+	//testing
+	var dc = ["01000",
+	      "01100",
+	      "11111",
+	      "00000"];
+	
+	
+	
+	var commands = {
+		'shuffle' : function () {
+			//presend
+			put('shuffle/'+uid, {}, function (data) {
+				//postsend
+				console.log(JSON.stringify(data));
+				gid = data.gid;
+				if (dc.length) {commands.drawcards(dc.pop());}
+			});
+		},
+		'drawcards' : function (draws) {
+			put('drawcards/'+uid+'/'+gid, draws, function (data){				
+				if (dc.length) {
+					commands.drawcards(dc.pop());
+				} else {
+					commands.retrievegame(gid);
+				}
+				console.log(JSON.stringify(data));
+			});	
+		}, 
+		'endgame' : function () {
+			put('endgame/'+uid+"/"+gid, {}, function (data){
+				console.log(JSON.stringify(data));
+				commands.viewscores(); 
+			});
+		},
+		'retrievegame' : function (gid) {
+			get('retrievegame/'+gid,  function (data){				
+				console.log(JSON.stringify(data));
+				commands.endgame();
+			});			
+		},
+		'viewscores' : function () {
+			get('viewscores', function (data) {
+				console.log(JSON.stringify(data));				
+			})
+		}
+		
+	};
+
+	
+	commands.shuffle(); 
+	commands.viewscores(); 
 	
         //setup 
-	fadelevel = 0.4;
+	var fadelevel = 0.4;
 
 	$(".main").fadeTo(100, fadelevel);	
 

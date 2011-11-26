@@ -1,29 +1,59 @@
-var http = require('http');
+/*jslint node:true */
 
-var commands = require('./commands');
+var express = require('express');
+var app = express.createServer();
 
-var server = http.createServer(function(request, response) {
-	try { 
-		if ( request.method === 'POST' ) {
-			// the body of the POST is JSON payload.  It is raw, not multipart encoded.
-			//format [idData, command, data, command, data,...]
-			var data = '';
-			var jsdata
-			request.addListener('data', function(chunk) { data += chunk; });
-			request.addListener('end', function() {
-				jsdata = JSON.parse(data);
-				response.writeHead(200, {'content-type': 'text/json' });
-				commands(response, jsdata));  // other require as arguments? 
-			});
-		} else {
-			response.writeHead(404);
-			response.end('bad method');
-		}
-	} catch ( e ) {
-		response.writeHead(500, {'content-type': 'text/plain' });
-		response.write('ERROR:' + e);
-		response.end('\n');
-	}
+//app-specific modules
+var scores = require('./scores');
+var games = require('./games');
+var users = require('./users');
+
+
+var setHeaders = function (req,res,next) {
+// if ajax set access control	
+
+//if (req.xhr) {	 
+	res.header("Access-Control-Allow-Origin",req.header('origin'));	
+	res.header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept");	 
+	res.header("X-Powered-By","nodeejs");	
+//}	
+
+next();
+};
+
+app.configure( function () {
+	app.use(setHeaders);
+	app.use(express.bodyParser());	
 });
 
-server.listen(4000);
+
+app.get('/retrievegame/:gid', function (req, res) {
+	games.retrievegame(res, req.params.gid);
+});
+
+app.get('/viewscores', function (req, res) {
+	scores.viewscores(res); 
+});
+
+
+app.post('/drawcards/:id/:gid', function (req, res) {
+	games.drawcards(res, req.body, req.params.id, req.params.gid);
+});
+
+app.post('/endgame/:id/:gid', function (req, res) {
+	games.endgame(res, req.params.id, req.params.gid, scores, users);
+});
+
+app.post('/login', function (req, res){
+	//implement oauth
+	
+}); 
+
+app.post('/shuffle/:id', function (req, res) {
+	games.shuffle(res, req.params.id);		
+});
+	
+//	  console.log("posting", req.params.com, req.params.id);
+//    res.json([req.params.com, req.params.id, req.body]);
+
+app.listen(3000);
