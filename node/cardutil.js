@@ -114,7 +114,8 @@ var analyzehand = function (hand, wilds) {
 		calls.push(["sf", straight[1]]);
 	}
 	calls.sort(function(a,b) {return major[b[0]] - major[a[0]];});
-	return JSON.stringify( [calls[0], hand]); 
+	return calls[0];
+	//return JSON.stringify( [calls[0], hand]); 
 };
 
 //testing
