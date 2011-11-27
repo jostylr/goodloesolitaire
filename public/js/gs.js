@@ -15,8 +15,6 @@ $(function() {
 	//initial screen faded
 	$(".main").fadeTo(100, fadelevel);
 	
-	//no hand view
-	
 	
 	//remove fade
 	var removeFade =  function  () {
@@ -68,6 +66,18 @@ $(function() {
 		;
 	};
 		
+	var showHand = function () {
+		$("#hand").show(); 
+	};
+		
+	var hideHand = function () {
+		$("#hand").hide(); 
+	};
+	
+	//----  no hand view on startup
+	hideHand(); 
+	
+	
 	//cards get hand
 	var loadHand = function (hand) {
 		$('#hand li').each(function () {
@@ -164,6 +174,7 @@ $(function() {
 				console.log(JSON.stringify(data));
 				gid = data.gid;
 				loadHand(data.hand);
+				showHand(); 
 				loadScore(data);
 	      
 			});
