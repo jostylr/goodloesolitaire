@@ -37,9 +37,9 @@ $(function() {
 	
 	
 	var commands = {
-		'shuffle' : function () {
+		'shuffle' : function (type) {
 			//presend
-			put('shuffle/'+uid, {}, function (data) {
+			get('shuffle/'+uid+'/'+type, function (data) {
 				//postsend
 				console.log(JSON.stringify(data));
 				gid = data.gid;
@@ -47,7 +47,7 @@ $(function() {
 			});
 		},
 		'drawcards' : function (draws) {
-			put('drawcards/'+uid+'/'+gid, draws, function (data){				
+			get('drawcards/'+uid+'/'+gid+'/'+draws, function (data){				
 				if (dc.length) {
 					commands.drawcards(dc.pop());
 				} else {
@@ -57,7 +57,7 @@ $(function() {
 			});	
 		}, 
 		'endgame' : function () {
-			put('endgame/'+uid+"/"+gid, {}, function (data){
+			get('endgame/'+uid+"/"+gid, {}, function (data){
 				console.log(JSON.stringify(data));
 				commands.viewscores(); 
 			});
@@ -77,7 +77,7 @@ $(function() {
 	};
 
 	
-	commands.shuffle(); 
+	commands.shuffle('basic'); 
 	commands.viewscores(); 
 	
         //setup 

@@ -16,6 +16,7 @@ var setHeaders = function (req,res,next) {
 	res.header("Access-Control-Allow-Origin",req.header('origin'));	
 	res.header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept");	 
 	res.header("X-Powered-By","nodeejs");	
+	res.header("Cache-Control", "no-store");
 //}	
 
 next();
@@ -36,11 +37,11 @@ app.get('/viewscores', function (req, res) {
 });
 
 
-app.post('/drawcards/:id/:gid', function (req, res) {
-	games.drawcards(res, req.body, req.params.id, req.params.gid);
+app.get('/drawcards/:id/:gid/:cards', function (req, res) {
+	games.drawcards(res, req.params.cards, req.params.id, req.params.gid);
 });
 
-app.post('/endgame/:id/:gid', function (req, res) {
+app.get('/endgame/:id/:gid', function (req, res) {
 	games.endgame(res, req.params.id, req.params.gid, scores, users);
 });
 
@@ -49,8 +50,8 @@ app.post('/login', function (req, res){
 	
 }); 
 
-app.post('/shuffle/:id', function (req, res) {
-	games.shuffle(res, req.params.id);		
+app.get('/shuffle/:id/:type', function (req, res) {
+	games.shuffle(res, req.params.id, req.params.type, scores);		
 });
 	
 //	  console.log("posting", req.params.com, req.params.id);
