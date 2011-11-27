@@ -5,13 +5,19 @@
 var major = {"5" :9, "sf":8, "4":7, "fh":6, "f":5, "s":4, "3":3, "2p":2, "2":1, "1":0};
 var rankings = {'2' :0, '3':1,'4':2, '5':3, '6':4,'7':5, '8': 6, '9':7, 'T':8, 'J':9, 'Q':10, 'K':11, 'A':12};
 
-var wilds = function (card) {
-	if (card[0] === '2') {
-		return true;
-	} else {
-		return false;
+var wilds = {
+	'yes' : function (card) {
+		if (card[0] === '2') {
+			return true;
+		} else {
+			return false;
+		}
+	},
+	'no' : function (card) {
+		return false; 
 	}
 };
+	
 
 //higher ranks come first in sort list
 var sortbyranks = function (a,b) {return rankings[b[0]] - rankings[a[0]];};
@@ -61,7 +67,7 @@ var analyzehand = function (hand, wilds) {
 		case 3: // 3k (3, 1, 1) or 2p (2, 2, 1)
 			if ( (rankcount[0][1] + wildcount) === 3) { //3k
 				subrc = rankcount.slice(1).sort(sortbyranks);
-				grouping = ["3", rankcount[0][0], subrc[1][0], subrc[2][0]];						
+				grouping = ["3", rankcount[0][0], subrc[0][0], subrc[1][0]];						
 			} else { //2p
 				subrc = rankcount.slice(0,2).sort(sortbyranks);
 				grouping = ["2p", subrc[0][0], subrc[1][0], rankcount[2][0]];		
@@ -80,14 +86,14 @@ var analyzehand = function (hand, wilds) {
 	//check for straight 
 	if ( (rankcount.length + wildcount === 5) ) {
 		rankcount.sort(sortbyranks);
-		if ((rankings[rankcount[0][0]] - rankings[rankcount[rankcount.length-1][0]] ) <= 5 ) {
+		if ((rankings[rankcount[0][0]] - rankings[rankcount[rankcount.length-1][0]] ) < 5 ) {
 			straight = ["s", rankcount[0][0]];
 			calls.push(straight);
 		}  else {
 			//Aces can be low!
 			rankings['A']  = -1;
 			rankcount.sort(sortbyranks);
-			if ((rankings[rankcount[0][0]] - rankings[rankcount[rankcount.length-1][0]] ) <= 5 ) {
+			if ((rankings[rankcount[0][0]] - rankings[rankcount[rankcount.length-1][0]] ) < 5 ) {
 				straight = ["s", rankcount[0][0]];
 				calls.push(straight);
 			} else {
@@ -118,6 +124,26 @@ var analyzehand = function (hand, wilds) {
 	//return JSON.stringify( [calls[0], hand]); 
 };
 
+var comparehands = function (newh, oldh) {
+	var diff, i, n;
+	//compare major first
+	diff = major[newh[0]] - major[oldh[0]];
+	if (diff !== 0 ) {
+		return [(diff>0 ? 1 : -1), diff]; 
+	} else {
+		//same level, look for minor differences
+		n = newh.length;
+		for (i = 1; i<n; i += 1) {
+			diff = rankings[newh[i]] - rankings[oldh[i]];
+			if (diff !== 0) {
+				return [ ((diff >0) ? i : -i), diff];
+			}
+		}
+		//no differences found
+		return [0];
+	}
+};
+
 //testing
 /*
 console.log(analyzehand(["As", "Ad", "Ac", "Ah", "2s"], wilds)); 
@@ -129,7 +155,9 @@ console.log(analyzehand(["As", "3d", "4c", "5h", "2s"], wilds));
 console.log(analyzehand(["As", "Ad", "Kc", "Kh", "4s"], wilds)); 
 */
 
-
-exports.call = function (hand) {
-	return ['TBD', Math.floor(Math.random()*(300))];
+exports.call = function (newhand, oldhand, scoring, game) {
+	var newcall = analyzehand(newhand, wilds[game.wilds]);
+	var oldcall = analyzehand(oldhand, wilds[game.wilds]);
+	var diff = comparehands(newcall, oldcall );
+	return [newcall, scoring(diff, game)];
 };

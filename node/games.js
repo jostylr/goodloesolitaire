@@ -17,11 +17,24 @@ for (i = 0; i<26; i += 1) {
 }
 
 
+var gametypes =  {
+	'basic' : function (game) {
+		game.type = 'basic';
+		game.data = {streak:0, score:0};
+		game.wilds = 'yes';
+	}
+};
+
 		//implement a cleanup routine 
 
 //new game and shuffles deck
-exports.shuffle = function (res, id) {
-	var deck, i, j, temp, gid, hand, calldelta;
+exports.shuffle = function (res, id, type, scores) {
+	var deck, i, j, temp, gid, hand, calldelta, game;
+	//work out type
+	type = type || 'basic';
+	if (!(gametypes.hasOwnProperty(type))) { 
+		type = "basic";
+	}
 	//create and shuffle deck
 	deck = ["2c",  "2d",  "2h",  "2s",  "3c",  "3d",  "3h",  "3s",  "4c",  "4d",  "4h",  "4s",  "5c",  "5d",  "5h",  "5s",  
 					"6c",  "6d",  "6h",  "6s",  "7c",  "7d",  "7h",  "7s",  "8c",  "8d",  "8h",  "8s",  "9c",  "9d",  "9h",  "9s", 
@@ -36,22 +49,28 @@ exports.shuffle = function (res, id) {
 	}
 	//hand
 	hand = deck.slice(0,5);	
-	calldelta = cardutil.call(hand);
 	//create game id
 	gid = '';
 	for (i = 0; i<8; i+=1) {
 		gid += letters[Math.floor(Math.random()*(63))];
 	}
-	games[gid] = {deck:deck, userid:id, hand: hand, draws: ["11111"], current:5, score:calldelta[1], typeGame : 'basic', status: Date.now()};
-	memory.newgame(gid, games[gid]);
-	res.json({gid:gid, hand: hand, call: calldelta[0], cardsleft: 47, score: calldelta[1]});
+	//initial game creation
+	game = {deck:deck, userid:id, hand: hand, draws: ["11111"], current:5, status: Date.now()};
+	games[gid] = game; 
+	//put in stuff for game type
+	gametypes[type](game);
+	//make initial call using lowest possible hand for oldhand
+	calldelta = cardutil.call(hand, ["3c", "4d", "5h", "6s", "8c"], scores.scoring[type], game);
+	memory.newgame(gid, game);
+	res.json({gid:gid, hand: hand, call: calldelta[0], cardsleft: 47, gamedata: game.data, delta : calldelta[1]});
 };
 
-exports.drawcards = function (res, draws, id, gid) {
-	var game, hand, i, score, cur, deck, calldelta; 
+exports.drawcards = function (res, draws, id, gid, scores) {
+	var game, hand, oldhand, i, score, cur, deck, calldelta; 
 	//is gid available--check!, call memory in async fashion if needed passing this function and others for callback.
 	game = games[gid]; 
 	deck = game.deck;
+	oldhand = game.hand.slice(); 
 	//check id matches gid's userid
 	
 	//main logic
@@ -68,10 +87,9 @@ exports.drawcards = function (res, draws, id, gid) {
 			console.log(e);
 		}
 	}
-	calldelta = cardutil.call(hand);
-	score = game.score+calldelta[1];
-	memory.update(gid, game, {hand:hand, draws:draws, current: cur, score:score, status:Date.now()});
-	res.json({hand:hand, call:calldelta[0], score:score, delta:calldelta[1], cardsleft: 52-cur});
+	calldelta = cardutil.call(hand, oldhand, scores.scoring[game.type], game);	
+	memory.update(gid, game, {hand:hand, draws:draws, data:game.data, current: cur, score:score, status:Date.now()});
+	res.json({hand:hand, call:calldelta[0], gamedata:game.data, delta:calldelta[1], cardsleft: 52-cur});
 };
 
 exports.endgame = function (res, id, gid, scores, users) {
