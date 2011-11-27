@@ -22,13 +22,57 @@ $(function() {
 	};
 	
 	
+	
+	//!!!! hand calling
+	
+	var shorthandcall = function (hand){
+		return "S&nbsp;";
+	};
+	
+	var oldhand = false;
+	
+	var suitHtml = {
+		c: "&#x2663;",
+		d: "&#x2666;", 
+		h: "&#x2665;",
+		s: "&#x2660;"
+	};
+	
+	var shorthand = function (hand) {
+		var i; 
+		if (!oldhand) {
+			oldhand = hand;
+		}
+		var ret = '';
+		for (i = 0; i < 5; i+=1) {
+			if (hand[i] === oldhand[i]) {
+			  ret += " "+hand[i][0] +suitHtml[hand[i][1]]+" ";	
+			} else {
+			  ret += " <strong>"+hand[i][0] +suitHtml[hand[i][1]]+"</strong> ";					
+			}
+		}
+		return ret;
+	};
+	
+	var handcall = function (hand) {
+		
+	};
+	
 	//!!!! history
+	var historyCount = 0;
+	
 	var clearHistory = function () {
-		$('#history table').empty();
+		$('#history table tbody').empty();
+		historyCount = 0;
 	};
   
+
 	var addHistory = function (data, deltalabel) {
-		
+		historyCount += 1;
+		$('#history table tbody').prepend("<tr><td>"+historyCount+".</td><td>"+
+		   data.gamedata.score+"</td><td><span "+deltalabel+"</span></td><td class='left'>"+
+		   shorthand(data.hand)+"</td><td>"+shorthandcall(data.call)+"</td></tr>"
+		);		
 	};
 	
 	//!!!! numcards
