@@ -13,6 +13,11 @@ cd /var/local/sites/gs
 sudo -u node git clone git://github.com/jostylr/goodloesolitaire.git .
 sudo -u node git checkout node
 
+
+later:
+cd /var/local/sites/gs
+sudo -u node git pull
+
 permissions: 
 sudo touch /var/log/gs.log
 sudo chown node /var/log/gs.log

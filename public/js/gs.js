@@ -3,7 +3,7 @@
 $(function() {
 	
 	//!!!! initial values
-	var server = 'http://127.0.0.1:3000/';	
+	var server = '';//'http://127.0.0.1:3000/';	
 	var uid = '0'; //set by server
 	var gid = '0'; //set by server
 	var type = 'basic'; //toggle options

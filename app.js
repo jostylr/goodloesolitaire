@@ -13,9 +13,9 @@ var setHeaders = function (req,res,next) {
 // if ajax set access control	
 
 //if (req.xhr) {	 
-	res.header("Access-Control-Allow-Origin",req.header('origin'));	
-	res.header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept");	 
-	res.header("X-Powered-By","nodeejs");	
+	//res.header("Access-Control-Allow-Origin",req.header('origin'));	
+	//res.header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept");	 
+	//res.header("X-Powered-By","nodeejs");	
 	res.header("Cache-Control", "no-store");
 //}	
 
