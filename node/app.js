@@ -38,6 +38,7 @@ app.get('/viewscores', function (req, res) {
 
 
 app.get('/drawcards/:id/:gid/:cards', function (req, res) {
+	
 	games.drawcards(res, req.params.cards, req.params.id, req.params.gid, scores);
 });
 

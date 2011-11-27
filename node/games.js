@@ -71,6 +71,7 @@ exports.drawcards = function (res, draws, id, gid, scores) {
 	game = games[gid]; 
 	deck = game.deck;
 	oldhand = game.hand.slice(); 
+	var nocards = true;
 	//check id matches gid's userid
 	
 	//main logic
@@ -80,6 +81,7 @@ exports.drawcards = function (res, draws, id, gid, scores) {
 		try {
 			if (draws[i] === "1") {
 				if (cur >= 52) {break;}
+				nocards = false;
 				hand[i] = deck[cur];
 				cur += 1;
 			}
@@ -87,6 +89,7 @@ exports.drawcards = function (res, draws, id, gid, scores) {
 			console.log(e);
 		}
 	}
+	if (nocards) {res.json({error:"no cards drawn."}); return false;}
 	calldelta = cardutil.call(hand, oldhand, scores.scoring[game.type], game);	
 	memory.update(gid, game, {hand:hand, draws:draws, data:game.data, current: cur, score:score, status:Date.now()});
 	res.json({hand:hand, call:calldelta[0], gamedata:game.data, delta:calldelta[1], cardsleft: 52-cur});

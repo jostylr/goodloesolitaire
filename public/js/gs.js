@@ -61,6 +61,13 @@ $(function() {
 		return [0, 0];
 	};
 		
+	var clearCards = function () {
+		$('#hand li').
+			removeClass('draw').
+			removeClass('backing')
+		;
+	};
+		
 	//cards get hand
 	var loadHand = function (hand) {
 		$('#hand li').each(function () {
@@ -163,9 +170,31 @@ $(function() {
 		},
 		'drawcards' : function () {
 			//get draws
-			var draws = '11111';
-			get('drawcards/'+uid+'/'+gid+'/'+draws, function (data){				
+			var draws = '';
+			var nocards = true;
+			$("#hand li").each(function (){
+				if ($(this).hasClass('draw')) {
+					draws += '1';
+					nocards = false;
+				} else {
+					draws += '0';
+				}
+			});
+			if (nocards) {
+				console.log("no cards selected."); 
+				clearCards(); 
+				return false;
+			}
+			get('drawcards/'+uid+'/'+gid+'/'+draws, function (data){
+				if (data.error) {
+					console.log(data.error); 
+					clearCards(); 
+					return false;
+				}
 				console.log(JSON.stringify(data));
+				loadHand(data.hand);
+				loadScore(data);
+				
 			});	
 		}, 
 		'endgame' : function () {
@@ -327,7 +356,7 @@ $.each(['shuffle', 'drawcards', 'endgame', 'viewscores', 'submitname'],
 
 $("#newgame").click(commands.shuffle);
 $("#highscores").click(function() {$('input[name=viewscores]').click(); });
-$("#drawcards").click(function() {$('input[name=drawcards]').click(); });
+$("#drawcards").click(commands.drawcards);
 $("#endgame").live('click', function() {$('input[name=endgame]').click(); });
 
 akeys = function (evnt) {
