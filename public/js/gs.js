@@ -25,8 +25,19 @@ $(function() {
 	
 	//!!!! hand calling
 	
-	var shorthandcall = function (hand){
-		return "S&nbsp;";
+	var shorthandcall = function (call){
+		switch (call[0]) {
+			case "5":  return "5K";
+			case "sf": return "SF";
+			case "4":  return "4K";
+			case "fh": return "FH";
+			case "f":  return "Fl";
+			case "s":  return "St";
+			case "3":  return "3K";
+			case "2p": return "2P";
+			case "2":  return "1P";
+			case "1":  return "▬" ;
+		}
 	};
 	
 	var oldhand = false;
@@ -54,8 +65,40 @@ $(function() {
 		return ret;
 	};
 	
-	var handcall = function (hand) {
-		
+	var ranks = {
+		"A": ["Aces", "Ace"], 
+		"K": ["Kings","King"],
+		"Q": ["Queens","Queen"] ,
+		"J": ["Jacks","Jack"],
+		"T": ["Tens","Ten"],
+		"9": ["Nines","Nine"],
+		"8": ["Eights","Eight"],
+		"7": ["Sevens","Seven"],
+		"6": ["Sixes","Six"],
+		"5": ["Fives","Five"],
+		"4": ["Fours","Four"],
+		"3": ["Threes","Three"],
+		"2": ["Twos", "Two"]
+		};
+         
+	
+	var handcall = function (call) {
+		switch (call[0]) {
+			case "5":  return "Five "+ranks[call[1]][0]; 
+			case "sf": return ranks[call[1]][1]+" High Straight Flush"; 
+			case "4":  return "Four "+ranks[call[1]][0]+" and a "+ranks[call[2]][1]+" kicker"; 
+			case "fh": return "Full House: "+ranks[call[1]][0]+" over "+ranks[call[2]][0]; 
+			case "f":  return ranks[call[1]][1]+" Low Flush"; 
+			case "s":  return ranks[call[1]][1]+" High Straight"; 
+			case "3":  return "Three "+ranks[call[1]][0]+" and  "+ranks[call[2]][1]+", "+ranks[call[3]][1]+" kickers"; 
+			case "2p": return "Two pair: "+ranks[call[1]][0]+", "+ranks[call[2]][0]+" and a "+ranks[call[3]][1]+" kicker"; 
+			case "2":  return "Pair of "+ranks[call[1]][0]+" with "+ranks[call[2]][1]+", "+ranks[call[3]][1]+", "+ranks[call[4]][1]+" kickers"; 
+			case "1":  return  ranks[call[1]][1]+" high  and "+ranks[call[2]][1]+", "+ranks[call[3]][1]+", "+ranks[call[4]][1]+", "+ranks[call[5]][1]+" kickers"; 
+		}
+	};
+	
+	var makeCall = function (call) {
+		$("#handtext").html(handcall(call));
 	};
 	
 	//!!!! history
@@ -224,6 +267,7 @@ $(function() {
 				gid = data.gid;
 				loadHand(data.hand);
 				showHand(); 
+				makeCall(data.call);
 				loadScore(data);
 				numcards(data.cardsleft);
 	      
@@ -254,6 +298,7 @@ $(function() {
 				}
 				console.log(JSON.stringify(data));
 				loadHand(data.hand);
+				makeCall(data.call);
 				loadScore(data);
 				numcards(data.cardsleft);
 			});	
@@ -287,7 +332,7 @@ $(function() {
 	//effects: 
 	
 	//hail call
-	makecall= function (domid){  
+	hailcall= function (domid){  
      $(domid).fadeIn(600).fadeOut(600); 
 	};
 
@@ -296,10 +341,10 @@ $(function() {
 
 	//not needed in future
 	scoreentrysubmit = function  (evnt) {
- 		if (evnt.keyCode == 13) {
-		 	$("input[name=submitname]").click(); 
-     	return false;
- 		} 
+		if (evnt.keyCode == 13) {
+			$("input[name=submitname]").click(); 
+			return false;
+		} 
 	};
 
  //end game  
