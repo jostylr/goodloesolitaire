@@ -136,7 +136,7 @@ var comparehands = function (newh, oldh) {
 		for (i = 1; i<n; i += 1) {
 			diff = rankings[newh[i]] - rankings[oldh[i]];
 			if (diff !== 0) {
-				return [ ((diff >0) ? i : -i), diff];
+				return [ ((diff >0) ? i+1 : -(i+1)), diff];
 			}
 		}
 		//no differences found

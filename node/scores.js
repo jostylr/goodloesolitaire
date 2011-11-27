@@ -26,6 +26,7 @@ exports.scoring = {
 	"basic" : function (diff, game) {
 		var streak = game.data.streak;
 		var delta = 0;
+		var lvl = 0;
 		//no change, streak grows, not score
 		if (diff[0] === 0) {
 			if (streak > 0 ) {
@@ -42,9 +43,10 @@ exports.scoring = {
 			} else {
 				streak = 1;
 			}
-			delta = 100*streak*streak
+			delta = 100*streak*streak;
 			if (diff[0] === 1) { //major change
 				delta *= diff[1];
+				lvl = diff[1];
 			}
 		} else {
 			if (streak < 0) {
@@ -56,10 +58,12 @@ exports.scoring = {
 			delta = -100*streak*streak;
 			if (diff[0] === 1) { //major change
 				delta *= diff[1];
+				lvl = diff[1];
 			}
 		}
 		game.data.streak = streak;
 		game.data.score += delta;
+		game.data.level += lvl;
 		return delta; 
 	}
-}
+};
