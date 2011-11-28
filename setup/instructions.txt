@@ -14,6 +14,8 @@ sudo -u node git clone git://github.com/jostylr/goodloesolitaire.git .
 sudo -u node git checkout node
 
 
+MAKE SURE TO INSTALL NODE MODULES!
+
 later:
 cd /var/local/sites/gs
 sudo -u node git pull
@@ -27,7 +29,7 @@ $ sudo start gs
 
 $ sudo status gs
 
-$ curl localhost:8000
+$ curl localhost:80
 
 $ sudo stop gs
 

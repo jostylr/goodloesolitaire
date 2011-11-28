@@ -121,8 +121,14 @@ $(function() {
 	//!!!! numcards
 	var numcards = function (cardsleft) {
 		$("#numcards").html(cardsleft);
+		if (cardsleft === 0) {
+			$('#drawdeck').fadeTo(400, 0.01); 
+		}
 	};
 
+	var showDeck = function () {
+		$('#drawdeck').fadeTo(400, 1); 		
+	}
   
 	
 	//!!!! card management
@@ -270,6 +276,7 @@ $(function() {
 				makeCall(data.call);
 				loadScore(data);
 				numcards(data.cardsleft);
+				showDeck(); 
 	      
 			});
 		},
