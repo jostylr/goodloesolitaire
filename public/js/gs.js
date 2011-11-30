@@ -9,6 +9,8 @@ $(function() {
 	var type = 'basic'; //toggle options
 	var scoredata = [];
 	
+	var commands;
+	
 	var keyun = false; 
 	var akeys; 
 	
@@ -135,6 +137,13 @@ $(function() {
 	var showDeck = function () {
 		$('#drawdeck').fadeTo(400, 1);
 	};
+	
+	
+	var runoutofcards = function () {
+		commands.endgame(); 
+		//setTimeout(function () {$('input[name=endgame]').click()}, 800);
+	};
+
   
 	
 	//!!!! card management
@@ -267,6 +276,19 @@ $(function() {
 			$("#hand li").removeClass('draw').removeClass('backing');
 	};
 	
+	
+	//hail call
+ var hailCall= function (count, type){  
+	  var domid = '';
+		if (count === 4) {
+			domid =  (type === 'newhand') ? "#m4" : "#dr4";
+		} else if (count === 5) {
+			domid =  (type === 'newhand') ? "#m5" : "#dr5";
+		}
+    $(domid).fadeIn(600).fadeOut(600); 
+	};
+	
+	
 	//!!!! server
 		
 	var put = function (command, data, callback) {
@@ -291,10 +313,13 @@ $(function() {
 	};
 
 	
-	var commands = {
+	var state; //for hail call
+	
+	commands = {
 		'shuffle' : function () {
 			 clearHistory(); 
 			 removeFade();
+			 state = 'newhand';
 			//presend
 			get('shuffle/'+uid+'/'+type, function (data) {
 				//postsend
@@ -313,10 +338,12 @@ $(function() {
 			//get draws
 			var draws = '';
 			var nocards = true;
+			var drawcount = 0; 
 			$("#hand li").each(function (){
 				if ($(this).hasClass('draw')) {
 					draws += '1';
 					nocards = false;
+					drawcount += 1; 
 				} else {
 					draws += '0';
 				}
@@ -326,6 +353,10 @@ $(function() {
 				clearCards(); 
 				return false;
 			}
+			hailCall(drawcount, state);
+			state = 'oldhand';
+			$(".draw").addClass('backing');	
+			
 			get('drawcards/'+uid+'/'+gid+'/'+draws, function (data){
 				if (data.error) {
 					console.log(data.error); 
@@ -336,7 +367,7 @@ $(function() {
 				loadHand(data.hand);
 				makeCall(data.call);
 				loadScore(data);
-				numcards(data.cardsleft);
+				numcards(data.cardsleft);	  
 			});	
 		}, 
 		'endgame' : function () {
@@ -356,6 +387,19 @@ $(function() {
 			get('viewscores', function (data) {
 				console.log(JSON.stringify(data));				
 			});
+		},
+		'submitname' :function () {
+			/*
+			if ($('input[name=gid]').val()=='') {block=false; return false;}
+			$('input[name=name]').val($('input[name=namemodal]').val());
+      dosub('submitname'); 
+			$('#scoreentry .close').click();
+      if (keyun) {
+        $('html').bind('keyup', akeys); 
+        $('html').unbind('keyup', scoreentrysubmit); 
+        keyun = false; 
+      };
+      */
 		}
 		
 	};
@@ -370,10 +414,6 @@ $(function() {
 
 	//effects: 
 	
-	//hail call
-	hailcall= function (domid){  
-     $(domid).fadeIn(600).fadeOut(600); 
-	};
 
 	$('#hail >span').hide(); 
 
@@ -398,89 +438,6 @@ namescore = function (type) {
  };
 
 
-//removes block on completion of previous submission
-completesub = function() {
-  block = false; 
-  $('input[name=action]').val('none');
-  $('.backing').removeClass('backing');	
-};
-
-dosub = function (subtype) {
-           $('input[name=action]').val(subtype);
-           $('#gs').ajaxSubmit({complete: completesub}) 
-
-};
-
-block=false; 
-
-//handles submission 
-ajsub = function (subtype) {
- if (!block) {
-  block=true;    
-  switch (subtype) {
-    case 'shuffle': 
-           //if viewing scores do not load new game
-           if ($('#nonscore').filter('.fade').size() > 0) {block=false; return false;}
-           //clear old game id
- 
-    break; 
-    case 'drawcards':
-                 //if viewing scores do not draw cards
-//                 if ($('#nonscore').filter('.fade').size() > 0)  {block=false; return false;} 
-                // if ($('#numcards').text() ==0) {$('#nocards').removeClass('hide'); block=false; return false;}
-							 //do hail mia stuff; committed to submitting
-							  switch ( ($("li > input").fieldValue()).length) {
-							    case 4: 
-							     if ($("#count").val() >1) 
-							         {makecall('#dr4');}
-							    else {makecall('#m4');}
-							   break;
-							   case 5: 
-							     if ($("#count").val() >1) 
-							         {makecall('#dr5');}
-							    else {makecall('#m5');}
-							   break;
-							  };
-                 //submit form using trash for action designation
-                 dosub('drawcards'); 
-								$(".draw").addClass('backing');	
-                  $("#hand li").children('input').attr('checked', false); //.end().removeClass('draw');
-    break; 
-    case 'endgame': 
-           //if (($('#nonscore').filter('.fade').size() > 0) ||($('input[name=gid]').val()=='')) {block=false; return false;}
-           dosub('endgame'); 
-
-    break; 
-    case 'viewscores':
-          dosub('viewscores'); 
-    break;                 
-    case 'submitname':
-          if ($('input[name=gid]').val()=='') {block=false; return false;}
-					$('input[name=name]').val($('input[name=namemodal]').val());
-          dosub('submitname'); 
-					$('#scoreentry .close').click();
-          if (keyun) {
-            $('html').bind('keyup', akeys); 
-            $('html').unbind('keyup', scoreentrysubmit); 
-            keyun = false; 
-          };
-    break;                   
-
-  };
- }   
-
-};
-
-runoutofcards = function () {
-	setTimeout(function () {$('input[name=endgame]').click()}, 800);
-}
-
-//assign click functionality to all of these buttons
-$.each(['shuffle', 'drawcards', 'endgame', 'viewscores', 'submitname'], 
-        function (key,value) {
-          $('input[name='+value+']').click(function () {ajsub(value); return false;});
-          }
-      ); 
 
 $("#newgame").live('click', commands.shuffle);
 $("#highscores").click(function() {$('input[name=viewscores]').click(); });
