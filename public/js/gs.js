@@ -70,6 +70,7 @@ $(function() {
 			  ret += " <strong>"+hand[i][0] +suitHtml[hand[i][1]]+"</strong> ";					
 			}
 		}
+		oldhand = hand; 
 		return ret;
 	};
 	
