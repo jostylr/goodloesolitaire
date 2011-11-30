@@ -171,6 +171,10 @@ $(function() {
 		console.log("card not found", card);
 		return [0, 0];
 	};
+	
+	var flipCards = function () {
+		$(".draw").addClass('backing');	
+	};
 		
 	var clearCards = function () {
 		$('#hand li').
@@ -280,12 +284,16 @@ $(function() {
 	//hail call
  var hailCall= function (count, type){  
 	  var domid = '';
+		console.log(count, type)
 		if (count === 4) {
 			domid =  (type === 'newhand') ? "#m4" : "#dr4";
 		} else if (count === 5) {
-			domid =  (type === 'newhand') ? "#m5" : "#dr5";
+			domid =  (type === 'oldhand') ? "#m5" : "#dr5";
+		} else {
+			return false;
 		}
-    $(domid).fadeIn(600).fadeOut(600); 
+		console.log(domid);
+    $(domid).fadeIn(600).fadeOut(600);
 	};
 	
 	
@@ -355,8 +363,7 @@ $(function() {
 			}
 			hailCall(drawcount, state);
 			state = 'oldhand';
-			$(".draw").addClass('backing');	
-			
+			flipCards(); 
 			get('drawcards/'+uid+'/'+gid+'/'+draws, function (data){
 				if (data.error) {
 					console.log(data.error); 
