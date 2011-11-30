@@ -9,6 +9,12 @@ $(function() {
 	var type = 'basic'; //toggle options
 	var scoredata = [];
 	
+	var keyun = false; 
+	var akeys; 
+	
+	//initial hiding
+	$("#endgame").hide(); 
+	
 	//!!!! fading
 	var fadelevel = 0.4;
 
@@ -127,8 +133,8 @@ $(function() {
 	};
 
 	var showDeck = function () {
-		$('#drawdeck').fadeTo(400, 1); 		
-	}
+		$('#drawdeck').fadeTo(400, 1);
+	};
   
 	
 	//!!!! card management
@@ -237,8 +243,31 @@ $(function() {
 		}
 	};
 
+	//toggling
 	
+	var toggleGameControl = function (type) {
+		if (type === "shuffling") {
+			$("#togglegame").html('<a id="endgame">End Game</a>');
+//			$("#newgame").hide();
+//			$("#endgame").show();
+		} else if (type === "ending") {
+			$("#togglegame").html('<a id="newgame">Start Game</a>');
+//			$("#endgame").hide();
+//			$("#newgame").show();			
+		}
+	};
 	
+	var endGameDisplay = function () {
+			if (keyun) {$('html').bind('keyup', akeys); keyun=false;}
+			$(".main").fadeTo(600, fadelevel, function () {$('#modal-highscores').modal({
+				backdrop: true,
+				keyboard: true,
+				show: true
+			});});
+			$("#hand li").removeClass('draw').removeClass('backing');
+	};
+	
+	//!!!! server
 		
 	var put = function (command, data, callback) {
 		$.ajax(server + command, {
@@ -277,7 +306,7 @@ $(function() {
 				loadScore(data);
 				numcards(data.cardsleft);
 				showDeck(); 
-	      
+				toggleGameControl('shuffling');
 			});
 		},
 		'drawcards' : function () {
@@ -311,8 +340,11 @@ $(function() {
 			});	
 		}, 
 		'endgame' : function () {
-			get('endgame/'+uid+"/"+gid, {}, function (data){
+			console.log('endgame');
+			get('endgame/'+uid+"/"+gid, function (data){
 				console.log(JSON.stringify(data));
+				endGameDisplay();
+				toggleGameControl("ending");
 			});
 		},
 		'retrievegame' : function (gid) {
@@ -366,23 +398,6 @@ namescore = function (type) {
  };
 
 
-
-loadscorescleargame = function () {
-		$(".main").fadeTo(600, fadelevel, function () {$('#modal-highscores').modal({
-			backdrop: true,
-			keyboard: true,
-			show: true
-		});}); 
-    $('input[name=gid]').val('');
-    $('#nocards').addClass('hide');
-    if (keyun) {$('html').bind('keyup', akeys); keyun=false;};
- };
-
-
-
-
-$('#gs').ajaxForm({});  
-
 //removes block on completion of previous submission
 completesub = function() {
   block = false; 
@@ -434,7 +449,7 @@ ajsub = function (subtype) {
     case 'endgame': 
            //if (($('#nonscore').filter('.fade').size() > 0) ||($('input[name=gid]').val()=='')) {block=false; return false;}
            dosub('endgame'); 
-           $("#hand li").removeClass('draw').removeClass('backing');
+
     break; 
     case 'viewscores':
           dosub('viewscores'); 
@@ -467,10 +482,10 @@ $.each(['shuffle', 'drawcards', 'endgame', 'viewscores', 'submitname'],
           }
       ); 
 
-$("#newgame").click(commands.shuffle);
+$("#newgame").live('click', commands.shuffle);
 $("#highscores").click(function() {$('input[name=viewscores]').click(); });
 $("#drawcards").click(commands.drawcards);
-$("#endgame").live('click', function() {$('input[name=endgame]').click(); });
+$("#endgame").live('click', commands.endgame );
 
 akeys = function (evnt) {
         var key = evnt.keyCode; 
