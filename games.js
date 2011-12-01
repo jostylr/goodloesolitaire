@@ -16,7 +16,6 @@ for (i = 0; i<26; i += 1) {
 	letters.push(String.fromCharCode(i+65), String.fromCharCode(i+97));
 }
 
-
 var gametypes =  {
 	'basic' : function (game) {
 		game.type = 'basic';
@@ -52,7 +51,7 @@ exports.shuffle = function (res, id, type, scores) {
 	//create game id
 	gid = '';
 	for (i = 0; i<8; i+=1) {
-		gid += letters[Math.floor(Math.random()*(63))];
+		gid += letters[Math.floor(Math.random()*(62))];
 	}
 	//initial game creation
 	game = {deck:deck, userid:id, hand: hand, draws: ["11111"], current:5, status: Date.now()};
