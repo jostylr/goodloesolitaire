@@ -10,7 +10,7 @@ $(function() {
 	var scoredata = [];
 	var name = false;
 	
-	var commands;
+  var commands;
 	
 	var akeys; 
 	
@@ -411,6 +411,11 @@ $(function() {
 			} else {
 				get('endgame/'+uid+"/"+gid+"/"+name, function (data){
 					console.log(JSON.stringify(data));
+					if (data.error) {
+						console.log(data.error); 
+						clearCards(); 
+						return false;
+					}
 					loadHighScores(data[2]);
 					endGameDisplay();
 					toggleGameControl("ending");

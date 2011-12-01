@@ -68,9 +68,14 @@ exports.drawcards = function (res, draws, id, gid, scores) {
 	var game, hand, oldhand, i, score, cur, deck, calldelta; 
 	//is gid available--check!, call memory in async fashion if needed passing this function and others for callback.
 	game = games[gid]; 
+	if (game.status === 'end') {
+		res.json({'error': "Game already ended"});
+		return false; 
+	}
 	deck = game.deck;
 	oldhand = game.hand.slice(); 
 	var nocards = true;
+	
 	//check id matches gid's userid
 	
 	//main logic
@@ -97,6 +102,10 @@ exports.drawcards = function (res, draws, id, gid, scores) {
 exports.endgame = function (res, id, gid, scores, name) {
 	var game;
 	game = games[gid];
+  if (game.status === 'end') {
+		res.json({'error': "Game already ended"});
+		return false; 
+	}
 	memory.endgame(gid);
 	game.status = 'end';
 	if (game.data.score >= scores.highscores[0].score) {
