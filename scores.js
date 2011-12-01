@@ -3,9 +3,9 @@
 
 //load high scores
 var highscores =  [
-{gid:"0", score:"400", name:"James", date:"11/25/11"},
-{gid:"1", score:"800", name:"A", date:"11/25/11"},
-{gid:"2", score:"1000", name:"B", date:"11/25/11"}
+{gid:"0", score:"400", name:"James", date:Date.UTC(2011, 11, 25)},
+{gid:"1", score:"800", name:"A", date:Date.UTC(2011, 10, 25)},
+{gid:"2", score:"1000", name:"B", date:Date.UTC(2011, 11, 23)}
 ];
 
 exports.highscores = highscores;

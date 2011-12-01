@@ -262,13 +262,15 @@ $(function() {
 	};
 
 	var loadHighScores = function (serverscores) {
-		var i, n, row; 
+		var i, n, row, date; 
 		highscores = serverscores; 
 		n = serverscores.length;
 		var htmltablebody = '';
 		for (i = 0; i<n; i += 1) {
 			row = serverscores[i];
-			htmltablebody += '<tr id="'+gid+'"><td>'+row.name+'</td><td>'+row.score+'</td><td>'+row.date+'</td></tr>';
+			date = new Date (row.date);
+			date = date.getMonth()+'/'+date.getDay()+'/'+date.getFullYear();
+			htmltablebody += '<tr id="'+gid+'"><td>'+row.name+'</td><td>'+row.score+'</td><td>'+date+'</td></tr>';
 		}		
 		$("#hs").html(htmltablebody);
 	};
