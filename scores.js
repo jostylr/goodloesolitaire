@@ -18,6 +18,7 @@ exports.update = function (score, gid, name) {
 	if (highscores.length > 9) {highscores.shift();} 
 	highscores.unshift({gid:gid, score:score, name:name, date:Date.now()});
 	highscores.sort(function (a,b) {return a.score - b.score;});
+	console.log(highscores);
 };
 
 //scoring functions take in a diff and a game. mainly diff

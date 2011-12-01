@@ -95,18 +95,18 @@ exports.drawcards = function (res, draws, id, gid, scores) {
 	res.json({hand:hand, call:calldelta[0], gamedata:game.data, delta:calldelta[1], cardsleft: 52-cur});
 };
 
-exports.endgame = function (res, id, gid, scores, users) {
+exports.endgame = function (res, id, gid, scores, name) {
 	var game;
 	game = games[gid];
 	memory.endgame(gid);
 	game.status = 'end';
-	if (game.score >= scores.highscores[0].score) {
+	if (game.data.score >= scores.highscores[0].score) {
 		//new highscore logic
-		scores.update(game.score, gid, users.id(id).name);
-		res.json(["highscore", game]);
+		scores.update(game.data.score, gid, name.replace(/\W/g, ''));
+		res.json(["highscore", game, scores.highscores]);
 	} else {
 		//no new highscore logic
-		res.json(["not a new highscore", game]);
+		res.json(["not a new highscore", game, scores.highscores]);
 	}
 };
 

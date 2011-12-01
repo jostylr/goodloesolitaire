@@ -1,4 +1,4 @@
-/*global $, console */
+/*global $, console, submitScore */
 
 $(function() {
 	
@@ -8,10 +8,10 @@ $(function() {
 	var gid = '0'; //set by server
 	var type = 'basic'; //toggle options
 	var scoredata = [];
+	var name = false;
 	
 	var commands;
 	
-	var keyun = false; 
 	var akeys; 
 	
 	//initial hiding
@@ -210,6 +210,9 @@ $(function() {
 	};
 	
 	//!!!! scoreManagement	
+	var score;
+	var highscores = [];
+	
 	var inarow = function (streak, level, typechange) {
 		var streaktext;
 		if (typechange === 1) {
@@ -237,6 +240,7 @@ $(function() {
 	};
 
 	var loadScore = function (data) {
+		score = data.gamedata.score;
 		$("#score").html(data.gamedata.score);
 		var delta = data.delta;
     if (delta > 0) {
@@ -257,6 +261,18 @@ $(function() {
 		}
 	};
 
+	var loadHighScores = function (serverscores) {
+		var i, n, row; 
+		highscores = serverscores; 
+		n = serverscores.length;
+		var htmltablebody = '';
+		for (i = 0; i<n; i += 1) {
+			row = serverscores[i];
+			htmltablebody += '<tr id="'+gid+'"><td>'+row.name+'</td><td>'+row.score+'</td><td>'+row.date+'</td></tr>';
+		}		
+		$("#hs").html(htmltablebody);
+	};
+
 	//toggling
 	
 	var toggleGameControl = function (type) {
@@ -272,7 +288,6 @@ $(function() {
 	};
 	
 	var endGameDisplay = function () {
-			if (keyun) {$('html').bind('keyup', akeys); keyun=false;}
 			$(".main").fadeTo(600, fadelevel, function () {$('#modal-highscores').modal({
 				backdrop: true,
 				keyboard: true,
@@ -285,7 +300,6 @@ $(function() {
 	//hail call
  var hailCall= function (count, type){  
 	  var domid = '';
-		console.log(count, type)
 		if (count === 4) {
 			domid =  (type === 'newhand') ? "#m4" : "#dr4";
 		} else if (count === 5) {
@@ -293,9 +307,11 @@ $(function() {
 		} else {
 			return false;
 		}
-		console.log(domid);
     $(domid).fadeIn(600).fadeOut(600);
 	};
+	
+	$('#hail >span').hide(); 
+	
 	
 	
 	//!!!! server
@@ -380,11 +396,24 @@ $(function() {
 		}, 
 		'endgame' : function () {
 			console.log('endgame');
-			get('endgame/'+uid+"/"+gid, function (data){
-				console.log(JSON.stringify(data));
-				endGameDisplay();
-				toggleGameControl("ending");
-			});
+			if (!name && score > highscores[0].score) {
+				submitScore();  //shows modal
+				$('#scoreentry').bind('hide', function self () {
+					name = $('#namemodal').val().replace(/\W/g, '');
+					if (!name) {
+						name = "Anon";
+					}
+					commands.endgame();
+					$('#scoreentry').unbind('hide', self); //self cleanup
+				});
+			} else {
+				get('endgame/'+uid+"/"+gid+"/"+name, function (data){
+					console.log(JSON.stringify(data));
+					loadHighScores(data[2]);
+					endGameDisplay();
+					toggleGameControl("ending");
+				});
+			}
 		},
 		'retrievegame' : function (gid) {
 			get('retrievegame/'+gid,  function (data){				
@@ -394,56 +423,33 @@ $(function() {
 		'viewscores' : function () {
 			get('viewscores', function (data) {
 				console.log(JSON.stringify(data));				
+				loadHighScores(data);
 			});
-		},
-		'submitname' :function () {
-			/*
-			if ($('input[name=gid]').val()=='') {block=false; return false;}
-			$('input[name=name]').val($('input[name=namemodal]').val());
-      dosub('submitname'); 
-			$('#scoreentry .close').click();
-      if (keyun) {
-        $('html').bind('keyup', akeys); 
-        $('html').unbind('keyup', scoreentrysubmit); 
-        keyun = false; 
-      };
-      */
 		}
 		
 	};
-	
-	
-	
-	
-	//clicking events:
 
+	commands.viewscores(); 
 
-
-
-	//effects: 
-	
-
-	$('#hail >span').hide(); 
-
-
-	//not needed in future
-	scoreentrysubmit = function  (evnt) {
-		if (evnt.keyCode == 13) {
+	//name entry
+	var	scoreentrysubmit = function  (evnt) {
+		if (evnt.keyCode === 13) {
 			$("input[name=submitname]").click(); 
 			return false;
 		} 
 	};
 
- //end game  
-namescore = function (type) {
-		submitScore(); 
-		$(".main").fadeTo(200, fadelevel);
-	 //$('#scoreentry').removeClass('hide');
-   $('html').unbind('keyup', akeys); 
-   $('html').bind('keyup', scoreentrysubmit); 
-   keyun = true; 
-   $('input[name=name]').focus(); 
- };
+
+	//remapping keys upon modal name change toggle
+	$('#scoreentry').
+		bind('show', function () {
+			$('html').unbind('keyup', akeys);
+			$('html').bind('keyup', scoreentrysubmit);
+		}).
+		bind('hide', function () {
+			$('html').unbind('keyup', scoreentrysubmit);
+			$('html').bind('keyup', akeys);
+		});
 
 
 
@@ -460,12 +466,11 @@ akeys = function (evnt) {
         case 51: $('#hand li:nth-child(3)').click(); break;
         case 52: $('#hand li:nth-child(4)').click(); break;
         case 53: $('#hand li:nth-child(5)').click(); break;
-        case 13: $('#drawcards').click(); return false; break; //space drawcards
-       };
+        case 13: $('#drawcards').click(); return false; //space drawcards
+       }
 
 };
 
-var keyun = false; 
 $('html').bind('keyup', akeys);
 
 

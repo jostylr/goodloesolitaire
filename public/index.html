@@ -9,19 +9,36 @@
 		<script src="js/jquery.min.js"></script>
 		<script src="js/bootstrap-twipsy.js"></script>
 		<script src="js/bootstrap-modal.js"></script>
-		<script src="js/jquery.form.js" type="text/javascript" charset="utf-8"></script>
-		<script src="js/jquery.taconite.js" type="text/javascript" charset="utf-8"></script>
 		<script src="js/gs.js" type="text/javascript" charset="utf-8"></script>
 		<script type="text/javascript">
 			$(document).ready(function() {
 
 				submitScore = function(){
 					$('#scoreentry').modal({
-						backdrop: true,
+						backdrop: "static",
 						keyboard: true,
 						show: true
 					});
 				};
+				
+				$("#name").click(function () {
+					$('#scoreentry').modal({
+						backdrop: true,
+						keyboard: true,
+						show: true
+					});
+				})
+
+				$("#scoreentry").bind("hide", function () {
+					name = $("#namemodal").val().replace(/\W/g, ''); 
+					if (name) {
+						$("#name a").html(name);
+					}
+				})
+
+				$("#submitname").click(function () {
+					$("#scoreentry").modal('hide');
+				})
 
 				$('#about').click(function(){
 					$('#modal-about').modal({
@@ -69,6 +86,7 @@
 		 				<li id="togglegame"><a id="newgame">Start Game</a><a id="endgame">End Game</a></li>
 		 			</ul>
 		 			<ul class="nav secondary-nav">
+						<li id="name"><a>Name</a></li>
 		 				<li id="highscores"><a>High Scores</a></li>
 		 				<li id="about"><a>About</a></li>
 		 			</ul>
@@ -87,9 +105,9 @@
 						    	<h3>Enter Your Name</h3>
 						    </div>
 						    <div class="modal-body">
-						    	<p id="newhighscoretext">New high score!</p>
-				             	<input type="text" maxlength="20" name="namemodal" /> 
-				             	<input type="submit" name="submitname" value="Submit" />
+						    	<p id="newhighscoretext">Enter name in case of a high score ranking.</p>
+				             	<input type="text" maxlength="20" name="namemodal" id="namemodal" /> 
+				             	<input type="submit" name="submitname" value="Done" id="submitname" />
 			            	</div>
 						</div>
 			
