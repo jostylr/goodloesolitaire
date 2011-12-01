@@ -269,7 +269,7 @@ $(function() {
 		for (i = 0; i<n; i += 1) {
 			row = serverscores[i];
 			date = new Date (row.date);
-			date = date.getMonth()+'/'+date.getDay()+'/'+date.getFullYear();
+			date = date.getMonth()+1+'/'+date.getDate()+'/'+date.getFullYear();
 			htmltablebody += '<tr id="'+gid+'"><td>'+row.name+'</td><td>'+row.score+'</td><td>'+date+'</td></tr>';
 		}		
 		$("#hs").html(htmltablebody);
