@@ -1,8 +1,14 @@
 /*jslint node:true */
 /*global exports */
 
+var simpledb = require('simpledb');
+
+//var sdb = new simpledb.SimpleDB({keyid:'YOUR_AWS_KEY_ID',secret:'YOUR_AWS_SECRET_KEY'});
+	
 exports.newgame = function(gid, game) {
 	//store the game into new place
+	
+	//put (gid, game)
 };
 
 exports.update = function (gid, game, newdata) {
