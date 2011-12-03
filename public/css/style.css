@@ -307,7 +307,6 @@ table {
 	border-right: 0px;
 	border-left: 0px;
 	color: rgba(225, 225, 225, 0.7);
-	font-size: 110%;
 }
 
 .history-table td:first-child, #history td:nth-child(2) {
