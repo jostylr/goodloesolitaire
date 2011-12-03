@@ -30,6 +30,21 @@ body {
 	font-family: 'Amaranth', sans-serif;
 }
 
+#togglegame > a {
+	color: white;
+	-webkit-box-shadow: -1px -1px 1px rgba(0, 0, 0, 0.8), inset 1px 0px 1px rgba(0, 0, 0, 0.8);
+	-moz-box-shadow: -1px -1px 1px rgba(0, 0, 0, 0.8), inset 1px 0px 1px rgba(0, 0, 0, 0.8);
+	box-shadow: -2px -2px 1px rgba(0, 0, 0, 0.8), inset 1px 0px 1px rgba(0, 0, 0, 0.8);
+}
+
+#newgame {
+	background-color: rgb(63, 135, 2);
+}
+
+#endgame {
+	background-color: rgb(160, 17, 9);
+}
+
 /*.content {
 	-webkit-transform: perspective(500px) rotateX(3deg);
 	transform: perspective(500px) rotateX(3deg);
