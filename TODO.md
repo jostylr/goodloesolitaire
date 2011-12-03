@@ -12,6 +12,8 @@ REQ: When deck is used up, hide the deck.
 
 REQ: When deck is used up, game automatically ends, and high score modal pops up, it's easy to unintentionally click outside of that region (as if you were still playing), losing your chance to input your high score name. Clicking outside the modal should not dismiss it in this case. There should be a "No thanks" button instead.
 
+REQ: When a score is added to high scores, highlight it.
+
 ## 2.0
 
 1. Animation for new deck, discard card, draw card
