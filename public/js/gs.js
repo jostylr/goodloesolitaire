@@ -280,7 +280,7 @@ $(function() {
 			} else {
 				rowClass = "";
 			}
-			htmltablebody += '<tr '+rowClass+' id="'+row.gid+'"><td>'+row.name+'</td><td>'+row.score+'</td><td>'+date+'</td></tr>';
+			htmltablebody += '<tr '+rowClass+' id="'+row.gid+'"><td>'+(i+1)+'.</td><td>'+row.name+'</td><td>'+row.score+'</td><td>'+date+'</td></tr>';
 			tempOldHighScores[row.gid] = true;
 		}		
 		oldHighScores = tempOldHighScores;
@@ -317,7 +317,7 @@ $(function() {
 		if (count === 4) {
 			domid =  (type === 'newhand') ? "#m4" : "#dr4";
 		} else if (count === 5) {
-			domid =  (type === 'oldhand') ? "#m5" : "#dr5";
+			domid =  (type === 'newhand') ? "#m5" : "#dr5";
 		} else {
 			return false;
 		}
