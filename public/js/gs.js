@@ -9,6 +9,7 @@ $(function() {
 	var type = 'basic'; //toggle options
 	var scoredata = [];
 	var name = false;
+	var oldHighScores = false;
 	
   var commands;
 	
@@ -262,16 +263,27 @@ $(function() {
 	};
 
 	var loadHighScores = function (serverscores) {
-		var i, n, row, date; 
+		var i, n, row, date, tempOldHighScores, rowClass; 
 		highscores = serverscores; 
 		n = serverscores.length;
+		tempOldHighScores = {};
 		var htmltablebody = '';
 		for (i = 0; i<n; i += 1) {
 			row = serverscores[n-1-i];
 			date = new Date (row.date);
 			date = date.getMonth()+1+'/'+date.getDate()+'/'+date.getFullYear();
-			htmltablebody += '<tr id="'+gid+'"><td>'+row.name+'</td><td>'+row.score+'</td><td>'+date+'</td></tr>';
+			if (gid === row.gid) {
+				rowClass = 'class = "newHighScore"';
+			} else if (oldHighScores && !(oldHighScores.hasOwnProperty(row.gid)) ) {
+				//new high scores from others added
+				rowClass = 'class = "otherNewHighScores"';
+			} else {
+				rowClass = "";
+			}
+			htmltablebody += '<tr '+rowClass+' id="'+row.gid+'"><td>'+row.name+'</td><td>'+row.score+'</td><td>'+date+'</td></tr>';
+			tempOldHighScores[row.gid] = true;
 		}		
+		oldHighScores = tempOldHighScores;
 		$("#hs").html(htmltablebody);
 	};
 
@@ -427,16 +439,26 @@ $(function() {
 				console.log(JSON.stringify(data));
 			});			
 		},
-		'viewscores' : function () {
+		'viewscores' : function (callback) {
 			get('viewscores', function (data) {
-				console.log(JSON.stringify(data));				
+				console.log(JSON.stringify(data));
+				console.log("viewscores", callback);
 				loadHighScores(data);
+				if (callback) {
+					callback();
+				} 
 			});
 		}
 		
 	};
 
+	
+	//preload high scores for highscore figuring
 	commands.viewscores(); 
+
+
+
+
 
 	//name entry
 	var	scoreentrysubmit = function  (evnt) {
@@ -461,9 +483,20 @@ $(function() {
 
 
 $("#newgame").live('click', commands.shuffle);
-$("#highscores").click(function() {$('input[name=viewscores]').click(); });
+//$("#highscores").click(function() {$('input[name=viewscores]').click(); });
 $("#drawcards").click(commands.drawcards);
 $("#endgame").live('click', commands.endgame );
+//attaching high score behavior
+
+$('#highscores').click(function () {
+	commands.viewscores(function(){
+		$('#modal-highscores').modal({
+			backdrop: true,
+			keyboard: true,
+			show: true
+		});
+	});
+});
 
 akeys = function (evnt) {
         var key = evnt.keyCode; 
@@ -473,7 +506,7 @@ akeys = function (evnt) {
         case 51: $('#hand li:nth-child(3)').click(); break;
         case 52: $('#hand li:nth-child(4)').click(); break;
         case 53: $('#hand li:nth-child(5)').click(); break;
-        case 13: $('#drawcards').click(); return false; //space drawcards
+        case 13: $('#drawcards').click(); return false; //enter drawcards
        }
 
 };
