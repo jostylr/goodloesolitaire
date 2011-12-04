@@ -330,6 +330,11 @@ table {
 	margin-left: -150px;
 }
 
+#modal-highscores .newHighScore {
+	color: #404040;
+	font-weight: bold;
+}
+
 #table-highscores {
 	font-size: 18px;
 }
@@ -337,7 +342,7 @@ table {
 #table-highscores td {
 	border-right: 0px;
 	border-left: 0px;
-	width: 50%;
+	width: 70%;
 }
 
 #table-highscores td:first-child {
