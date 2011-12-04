@@ -26,7 +26,7 @@ var sortbyranks = function (a,b) {return rankings[b[0]] - rankings[a[0]];};
 var analyzehand = function (hand, wilds) {
 	var wildcount = 0;
 	var flush, straight, grouping, calls;
-	var r, s, rankcount, suitcount, subrc, low, rankdiff; 
+	var r, s, rankcount, suitcount, subrc, low, rankdiff, potentialRanking; 
 	var suits = {'s' :0,'c' :0, 'd' :0,'h' :0};
 	var ranks = {'2' :0, '3':0,'4':0, '5':0, '6':0,'7':0, '8': 0, '9':0, 'T':0, 'J':0, 'Q':0, 'K':0, 'A':0};
 	//bin suits, ranks or wilds
@@ -90,7 +90,11 @@ var analyzehand = function (hand, wilds) {
 		rankdiff = rankings[rankcount[0][0]] - rankings[rankcount[rankcount.length-1][0]];
 		if (rankdiff < 5 ) {
 			//adding in cards at the end. 
-			straight = ["s", reverserankings[rankings[rankcount[0][0]]+(4-rankdiff)]];
+			potentialRanking = rankings[rankcount[0][0]]+(4-rankdiff);
+			if (potentialRanking > 12) {
+				potentialRanking = 12;
+			}
+			straight = ["s", reverserankings[potentialRanking]];
 			calls.push(straight);
 		}  else {
 			//Aces can be low!
@@ -161,6 +165,7 @@ getting the high card right:
 console.log(analyzehand(["Kh", "2c", "Th", "Jh", "Qh"], wilds.yes)); 
 console.log(analyzehand(["Kh", "2c", "Th", "Jc", "Qh"], wilds.yes)); 
 console.log(analyzehand(["2h", "2c", "2s", "3h", "Ah"], wilds.yes)); 
+console.log(analyzehand(["Ah","Qd","2s","Kc","2h"], wilds.yes)); 
 */
 
 
