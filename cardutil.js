@@ -4,6 +4,7 @@
 
 var major = {"5" :9, "sf":8, "4":7, "fh":6, "f":5, "s":4, "3":3, "2p":2, "2":1, "1":0};
 var rankings = {'2' :0, '3':1,'4':2, '5':3, '6':4,'7':5, '8': 6, '9':7, 'T':8, 'J':9, 'Q':10, 'K':11, 'A':12};
+var reverserankings = ['2' , '3','4', '5', '6','7', '8', '9', 'T', 'J', 'Q', 'K', 'A'];
 
 var wilds = {
 	'yes' : function (card) {
@@ -25,7 +26,7 @@ var sortbyranks = function (a,b) {return rankings[b[0]] - rankings[a[0]];};
 var analyzehand = function (hand, wilds) {
 	var wildcount = 0;
 	var flush, straight, grouping, calls;
-	var r, s, rankcount, suitcount, subrc, low; 
+	var r, s, rankcount, suitcount, subrc, low, rankdiff; 
 	var suits = {'s' :0,'c' :0, 'd' :0,'h' :0};
 	var ranks = {'2' :0, '3':0,'4':0, '5':0, '6':0,'7':0, '8': 0, '9':0, 'T':0, 'J':0, 'Q':0, 'K':0, 'A':0};
 	//bin suits, ranks or wilds
@@ -86,15 +87,18 @@ var analyzehand = function (hand, wilds) {
 	//check for straight 
 	if ( (rankcount.length + wildcount === 5) ) {
 		rankcount.sort(sortbyranks);
-		if ((rankings[rankcount[0][0]] - rankings[rankcount[rankcount.length-1][0]] ) < 5 ) {
-			straight = ["s", rankcount[0][0]];
+		rankdiff = rankings[rankcount[0][0]] - rankings[rankcount[rankcount.length-1][0]];
+		if (rankdiff < 5 ) {
+			//adding in cards at the end. 
+			straight = ["s", reverserankings[rankings[rankcount[0][0]]+(4-rankdiff)]];
 			calls.push(straight);
 		}  else {
 			//Aces can be low!
 			rankings['A']  = -1;
 			rankcount.sort(sortbyranks);
-			if ((rankings[rankcount[0][0]] - rankings[rankcount[rankcount.length-1][0]] ) < 5 ) {
-				straight = ["s", rankcount[0][0]];
+			rankdiff = rankings[rankcount[0][0]] - rankings[rankcount[rankcount.length-1][0]];
+			if ( rankdiff < 5 ) {
+				straight = ["s", reverserankings[rankings[rankcount[0][0]]+(4-rankdiff)]];
 				calls.push(straight);
 			} else {
 				straight = false; 
@@ -153,7 +157,12 @@ console.log(analyzehand(["As", "Kd", "Qc", "Jh", "2s"], wilds));
 console.log(analyzehand(["As", "Ks", "Qs", "Js", "2d"], wilds)); 
 console.log(analyzehand(["As", "3d", "4c", "5h", "2s"], wilds)); 
 console.log(analyzehand(["As", "Ad", "Kc", "Kh", "4s"], wilds)); 
+getting the high card right:
+console.log(analyzehand(["Kh", "2c", "Th", "Jh", "Qh"], wilds.yes)); 
+console.log(analyzehand(["Kh", "2c", "Th", "Jc", "Qh"], wilds.yes)); 
+console.log(analyzehand(["2h", "2c", "2s", "3h", "Ah"], wilds.yes)); 
 */
+
 
 exports.call = function (newhand, oldhand, scoring, game) {
 	var newcall = analyzehand(newhand, wilds[game.wilds]);
