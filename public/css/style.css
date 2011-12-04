@@ -349,7 +349,7 @@ table {
 	text-align: left;
 }
 
-#table-highscores td:nth-child(2) {
+#table-highscores td:nth-child(3) {
 	text-align: right;
 }
 
