@@ -8,6 +8,8 @@ REQ: Make toppage index look nice.
 
 REQ: When a score is added to high scores, highlight it. Class of newHighScore is given for the user's new score; otherNewHighScores is given when others have scored up recently. The classes need to be styled. 
 
+REQ: Start showing streaks at x3 instead of x2.
+
 ## 2.0
 
 1. Animation for new deck, discard card, draw card
