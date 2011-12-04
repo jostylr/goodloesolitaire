@@ -64,7 +64,7 @@ exports.scoring = {
 		}
 		game.data.streak = streak;
 		game.data.score += delta;
-		game.data.level += lvl;
+		game.data.level = lvl;
 		return delta; 
 	}
 };

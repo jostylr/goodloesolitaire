@@ -8,13 +8,11 @@ REQ: Make toppage index look nice.
 
 REQ: When a score is added to high scores, highlight it. Class of newHighScore is given for the user's new score; otherNewHighScores is given when others have scored up recently. The classes need to be styled. 
 
-REQ: Start showing streaks at x3 instead of x2.
 
 ## 2.0
 
 1. Animation for new deck, discard card, draw card
 9. Add recent high scores in backend/frontend
-10. Add numbering for high scores.
 11. Detect twitter name or add link (riskier) for high score: give people a way to link back to their identity.
 13. Feature: custom link to individual game history
 14. Feature: custom link to individual game review (watch)

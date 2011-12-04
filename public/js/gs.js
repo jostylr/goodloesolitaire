@@ -216,22 +216,11 @@ $(function() {
 	
 	var inarow = function (streak, level, typechange) {
 		var streaktext;
-		if (typechange === 1) {
-			scoredata.push([1, streak, level, typechange]);
-			streaktext = "&nbsp;";			
-		} else if (typechange > 1) {
-			scoredata.push([scoredata[scoredata.length-1][0]+1, streak, level, typechange]);
+		if (typechange > 2) {
 			streaktext = streak+" in a row"+ (level ? " with a bonus of "+level+"!" : "!");			
-		} else if (typechange === -1) {
-			scoredata.push([-1, streak, level, typechange]);
+		} else {
 			streaktext = "&nbsp;";			
-		} else if (typechange < -1) {
-			scoredata.push([scoredata[scoredata.length-1][0]-1, streak, level,typechange]);
-			streaktext = "&nbsp;";			
-		} else if (typechange === 0) {
-			scoredata.push([scoredata[scoredata.length-1][0], streak, level,typechange]);
-			streaktext = "&nbsp;";			
-		}
+		} 
 	  $('#inarow').html(streaktext);
 	}; 
 
