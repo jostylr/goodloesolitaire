@@ -14,6 +14,8 @@
 
 6. Remove mobile styles?
 
+7. Acquire goodloesolitaire.com?
+
 ## 2.0
 
 1. Animation for new deck, discard card, draw card
