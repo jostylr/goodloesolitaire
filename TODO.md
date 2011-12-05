@@ -2,21 +2,28 @@
 
 ## 1.5
 
+REQ: Humbly request that we write Credits straight. It works in the origin story, but not there. "Creamed" is... weird. I'd also like to link the names to either homepage or Twitter accounts.
+
 REQ: Make hail calls have more interesting effect.
 
 REQ: Make toppage index look nice. 
 
-REQ: When a score is added to high scores, highlight it. Class of newHighScore is given for the user's new score; otherNewHighScores is given when others have scored up recently. The classes need to be styled. 
+REQ: When a score is added to high scores, highlight it. Class of newHighScore is given for the user's new score; otherNewHighScores is given when others have scored up recently. The classes need to be styled.
 
+CHK: Is input to high score field sanitized?
+
+1. Add social media buttons (Facebook links, Facebook share, Tweet, +1)
 
 ## 2.0
 
 1. Animation for new deck, discard card, draw card
 9. Add recent high scores in backend/frontend
-11. Detect twitter name or add link (riskier) for high score: give people a way to link back to their identity.
+11. Detect twitter name or add link (riskier) for high score: give people a way to link back to their identity. Optional field for twitter id.
 13. Feature: custom link to individual game history
 14. Feature: custom link to individual game review (watch)
 15. Feature: custom link to individual game replay (play)
+
+##2.5
 14. Feature: Multiple game modes:
 
 	1. Streaking
