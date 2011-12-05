@@ -10,7 +10,7 @@
 
 3. CHK: Is input to high score field sanitized?
 
-6. Remove mobile styles or move them to external stylesheet?
+6. Remove mobile styles or move them to external stylesheet? Refactor.
 
 7. Acquire goodloesolitaire.com?
 
