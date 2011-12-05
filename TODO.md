@@ -10,9 +10,7 @@
 
 3. CHK: Is input to high score field sanitized?
 
-5. REQ: Make toppage index look nice.
-
-6. Remove mobile styles?
+6. Remove mobile styles or move them to external stylesheet?
 
 7. Acquire goodloesolitaire.com?
 
@@ -25,6 +23,7 @@
 13. Feature: custom link to individual game history
 14. Feature: custom link to individual game review (watch)
 15. Feature: custom link to individual game replay (play)
+5. Use toppage to [preload](http://stackoverflow.com/questions/1059793/pre-loading-external-files-css-javascript-for-other-pages) CSS, JS, PNG
 4. Add social media buttons (Facebook links, Facebook share, Tweet, +1)
 5. Add ads
 16. [Minify CSS and JS for production](http://developer.yahoo.com/yui/compressor/)
