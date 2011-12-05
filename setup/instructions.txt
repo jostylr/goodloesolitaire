@@ -7,7 +7,7 @@ git pull in order to load gs.conf
 sudo cp gs.conf /etc/init/gs.conf
 
 load app: 
-sudo mkdir -p /var/local/sites/gs
+sudo mkdir-p /var/local/sites/gs
 sudo chown node /var/local/sites/gs
 cd /var/local/sites/gs
 sudo -u node git clone git://github.com/jostylr/goodloesolitaire.git .
@@ -37,3 +37,19 @@ Then reboot and check.
 
 to get port 80 without root running the app
 sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 3000
+
+For MongoDB:
+sudo adduser --system --shell /bin/bash -gecos 'user for running mongodb' --group --disabled-password --home /home/mongo mongo
+
+sudo mkdir -p /var/local/db
+sudo chown mongo /var/local/db
+
+Make mongodb directory
+sudo mkdir -p /var/local/mongodb
+sudo cp -r * /var/local/mongodb
+sudo chown -R mongo /var/local/mongodb
+
+sudo touch /var/log/mongod.log
+sudo chown mongo /var/log/mongod.log
+
+sudo -u mongo /var/local/mongodb/bin/mongod --fork --logpath /var/log/mongod.log --dbpath /var/local/db
