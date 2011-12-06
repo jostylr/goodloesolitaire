@@ -53,3 +53,6 @@ sudo touch /var/log/mongod.log
 sudo chown mongo /var/log/mongod.log
 
 sudo -u mongo /var/local/mongodb/bin/mongod --fork --logpath /var/log/mongod.log --dbpath /var/local/db
+
+sudo cp setup/mongo.conf /etc/init/mongo.conf
+
