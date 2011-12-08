@@ -308,13 +308,12 @@ table {
 }
 
 #modal-highscores {
-	width: 300px;
+	width: 360px;
 	margin-left: -150px;
 }
 
-#modal-highscores .newHighScore {
-	color: #404040;
-	font-weight: bold;
+#modal-highscores .newHighScore td {
+	background-color: #FFFE8B;
 }
 
 #table-highscores {
