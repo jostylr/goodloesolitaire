@@ -302,6 +302,7 @@ table {
 
 #scoreentry {
 	width: 360px;
+	margin-left: -70px;
 }
 
 #scoreentry input[type="text"] {
@@ -310,7 +311,7 @@ table {
 
 #modal-highscores {
 	width: 360px;
-	margin-left: -150px;
+	margin-left: -70px;
 }
 
 #modal-highscores .newHighScore td {
