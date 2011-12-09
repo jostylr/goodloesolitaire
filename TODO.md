@@ -2,17 +2,13 @@
 
 ## 1.5
 
-1. Humbly request that we write Credits straight. It works in the origin story, but not there. "Creamed" is... weird. I'd also like to link the names to either homepage or Twitter accounts.
+1. Change default name from Anon to Guest
 
 2. Make hail calls have more interesting effect.
 
 3. When a score is added to high scores, highlight it. Class of newHighScore is given for the user's new score; otherNewHighScores is given when others have scored up recently. The classes need to be styled.
 
 3. CHK: Is input to high score field sanitized?
-
-6. Remove mobile styles or move them to external stylesheet? Refactor.
-
-7. Acquire goodloesolitaire.com?
 
 ## 2.0
 
