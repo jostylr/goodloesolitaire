@@ -15,12 +15,13 @@
 1. Animation for new deck, discard card, draw card
 9. Add recent high scores in backend/frontend
 10. Add personal high scores
-11. Detect twitter name or add link (riskier) for high score: give people a way to link back to their identity.
+11. Detect twitter name or add link (riskier) for high score: give people a way to link back to their identity. Or login with Facebook credentials.
 13. Feature: custom link to individual game history
 14. Feature: custom link to individual game review (watch)
 15. Feature: custom link to individual game replay (play)
 5. Use toppage to [preload](http://stackoverflow.com/questions/1059793/pre-loading-external-files-css-javascript-for-other-pages) CSS, JS, PNG
 4. Add social media buttons (Facebook links, Facebook share, Tweet, +1)
+5. Add share with Facebook button when a person achieves a high score.
 5. Add ads
 16. [Minify CSS and JS for production](http://developer.yahoo.com/yui/compressor/)
 17. iOS app
