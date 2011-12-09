@@ -75,6 +75,15 @@
 		</script>
 	</head>
 	<body>
+		<div id="fb-root"></div>
+		<script>(function(d, s, id) {
+		  var js, fjs = d.getElementsByTagName(s)[0];
+		  if (d.getElementById(id)) return;
+		  js = d.createElement(s); js.id = id;
+		  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+		  fjs.parentNode.insertBefore(js, fjs);
+		}(document, 'script', 'facebook-jssdk'));</script>
+
 
 		<div class="topbar">
 			<div class="fill">
@@ -136,6 +145,9 @@
 								      <span id="m4">Miagan!</span>
 								      <span id="m5">Mulligan!</span>
 						</div>		
+						<div id="social">
+							<div class="fb-like" data-href="http://goodloesolitaire.com" data-send="true" data-width="450" data-show-faces="true" data-font="lucida grande"></div>
+						</div>
 		    		</div>
 		    		<div id="history" class="span6 history-table">
 		    			<table>
