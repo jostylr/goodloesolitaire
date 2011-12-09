@@ -1,6 +1,7 @@
 html, form {
 	height: 100%;
 	overflow-y: auto;
+	background-color: #003300;
 }
 
 body {
@@ -323,7 +324,6 @@ table {
 #table-highscores td {
 	border-right: 0px;
 	border-left: 0px;
-	width: 70%;
 }
 
 #table-highscores td:first-child {
