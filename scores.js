@@ -8,17 +8,23 @@ var highscores =  [
 {gid:"2", score:"1000", name:"B", date:Date.UTC(2011, 11, 23)}
 ];
 
-exports.highscores = highscores;
+
+exports.initializehs = function (hs) {
+	highscores = hs;
+	exports.highscores = hs;
+};
 
 exports.viewscores = function (res) {
 	res.json(highscores);
 };
 
-exports.update = function (score, gid, name) {
+exports.update = function (score, gid, name, store) {
 	if (highscores.length > 9) {highscores.shift();} 
 	highscores.unshift({gid:gid, score:score, name:name, date:Date.now()});
 	highscores.sort(function (a,b) {return a.score - b.score;});
 	console.log(highscores);
+	store(score, gid, name);
+	//console.log(highscores);
 };
 
 //scoring functions take in a diff and a game. mainly diff

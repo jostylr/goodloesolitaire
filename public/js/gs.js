@@ -261,20 +261,27 @@ $(function() {
 			row = serverscores[n-1-i];
 			date = new Date (row.date);
 			date = date.getMonth()+1+'/'+date.getDate()+'/'+date.getFullYear();
-			if (gid === row.gid) {
+			if (gid === row._id) {
 				rowClass = 'class = "newHighScore"';
-			} else if (oldHighScores && !(oldHighScores.hasOwnProperty(row.gid)) ) {
+			} else if (oldHighScores && !(oldHighScores.hasOwnProperty(row._id)) ) {
 				//new high scores from others added
 				rowClass = 'class = "otherNewHighScores"';
 			} else {
 				rowClass = "";
 			}
-			htmltablebody += '<tr '+rowClass+' id="'+row.gid+'"><td>'+(i+1)+'.</td><td>'+row.name+'</td><td>'+row.score+'</td><td>'+date+'</td></tr>';
-			tempOldHighScores[row.gid] = true;
+			htmltablebody += '<tr '+rowClass+' id="'+row._id+'"><td>'+(i+1)+'.</td><td>'+row.name+'</td><td>'+row.score+'</td><td>'+date+'</td></tr>';
+			tempOldHighScores[row._id] = true;
 		}		
 		oldHighScores = tempOldHighScores;
 		$("#hs").html(htmltablebody);
 	};
+
+
+	//retrieving high score game
+	$("#hs").click(function (event) {
+		var rowgid = $(event.target).parents("tr").attr("id");
+		commands.retrievegame(rowgid);
+	});
 
 	//toggling
 	
@@ -398,8 +405,8 @@ $(function() {
 			});	
 		}, 
 		'endgame' : function () {
-			console.log('endgame');
-			if (!name && score > highscores[0].score) {
+			console.log('endgame', name, score, highscores);
+			if (!name && score >= highscores[0].score) {
 				submitScore();  //shows modal
 				$('#scoreentry').bind('hide', function self () {
 					name = $('#namemodal').val().replace(/\W/g, '');

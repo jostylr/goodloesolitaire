@@ -6,6 +6,11 @@
 var cardutil = require('./cardutil');
 var memory = require('./memory');
 
+//for initializing high scores
+exports.initializehs = function (scores) {
+	memory.initializehs(scores.initializehs);
+};
+
 var i;
 var games = {};
 var letters = [];
@@ -23,6 +28,8 @@ var gametypes =  {
 		game.wilds = 'yes';
 	}
 };
+
+
 
 		//implement a cleanup routine 
 
@@ -64,39 +71,49 @@ exports.shuffle = function (res, id, type, scores) {
 	res.json({gid:gid, hand: hand, call: calldelta[0], cardsleft: 47, gamedata: game.data, delta : calldelta[1]});
 };
 
-exports.drawcards = function (res, draws, id, gid, scores) {
-	var game, hand, oldhand, i, score, cur, deck, calldelta; 
-	//is gid available--check!, call memory in async fashion if needed passing this function and others for callback.
-	game = games[gid]; 
-	if (game.status === 'end') {
-		res.json({'error': "Game already ended"});
-		return false; 
-	}
-	deck = game.deck;
-	oldhand = game.hand.slice(); 
-	var nocards = true;
-	
-	//check id matches gid's userid
-	
-	//main logic
-	hand = game.hand;
-	cur = game.current;
-  for (i = 0; i < 5; i += 1) {
-		try {
-			if (draws[i] === "1") {
-				if (cur >= 52) {break;}
-				nocards = false;
-				hand[i] = deck[cur];
-				cur += 1;
-			}
-		} catch (e) {
-			console.log(e);
+
+var drawcb = function (res, draws, id, gid, scores) {
+	return function (err, game) {
+		var hand, oldhand, i, score, cur, deck, calldelta; 
+		if (game.status === 'end') {
+			res.json({'error': "Game already ended"});
+			return false; 
 		}
+		deck = game.deck;
+		oldhand = game.hand.slice(); 
+		var nocards = true;
+
+		//check id matches gid's userid
+
+		//main logic
+		hand = game.hand;
+		cur = game.current;
+	  for (i = 0; i < 5; i += 1) {
+			try {
+				if (draws[i] === "1") {
+					if (cur >= 52) {break;}
+					nocards = false;
+					hand[i] = deck[cur];
+					cur += 1;
+				}
+			} catch (e) {
+				console.log(e);
+			}
+		}
+		if (nocards) {res.json({error:"no cards drawn."}); return false;}
+		calldelta = cardutil.call(hand, oldhand, scores.scoring[game.type], game);	
+		memory.update(gid, game, {hand:hand, draws:draws, data:game.data, current: cur, score:game.data.score, status:Date.now()});
+		res.json({hand:hand, call:calldelta[0], gamedata:game.data, delta:calldelta[1], cardsleft: 52-cur});
+	};
+};
+
+exports.drawcards = function (res, draws, id, gid, scores) {
+	var callback = drawcb(res, draws, id, gid, scores);
+	if (games.hasOwnProperty(gid) ) {
+		callback(null, games[gid]); 
+	} else {
+		memory.loadgame(gid, callback);
 	}
-	if (nocards) {res.json({error:"no cards drawn."}); return false;}
-	calldelta = cardutil.call(hand, oldhand, scores.scoring[game.type], game);	
-	memory.update(gid, game, {hand:hand, draws:draws, data:game.data, current: cur, score:score, status:Date.now()});
-	res.json({hand:hand, call:calldelta[0], gamedata:game.data, delta:calldelta[1], cardsleft: 52-cur});
 };
 
 exports.endgame = function (res, id, gid, scores, name) {
@@ -108,9 +125,10 @@ exports.endgame = function (res, id, gid, scores, name) {
 	}
 	memory.endgame(gid);
 	game.status = 'end';
+	console.log(scores);
 	if (game.data.score >= scores.highscores[0].score) {
 		//new highscore logic
-		scores.update(game.data.score, gid, name.replace(/\W/g, ''));
+		scores.update(game.data.score, gid, name.replace(/\W/g, ''), memory.savehighscore);
 		res.json(["highscore", game, scores.highscores]);
 	} else {
 		//no new highscore logic

@@ -8,6 +8,9 @@ var scores = require('./scores');
 var games = require('./games');
 var users = require('./users');
 
+//dealing with require issues--probably should refactor
+games.initializehs(scores);
+
 
 var setHeaders = function (req,res,next) {
 // if ajax set access control	

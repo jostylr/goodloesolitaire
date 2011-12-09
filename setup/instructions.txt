@@ -56,3 +56,6 @@ sudo -u mongo /var/local/mongodb/bin/mongod --fork --logpath /var/log/mongod.log
 
 sudo cp setup/mongo.conf /etc/init/mongo.conf
 
+
+Initial mongo db highscore creation: 
+db.highscores.insert({"score":100, "name":"default", "_id":"AAA","date":Date.now()})
