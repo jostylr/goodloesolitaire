@@ -128,7 +128,7 @@ exports.endgame = function (res, id, gid, scores, name) {
 	console.log(scores);
 	if (game.data.score >= scores.highscores[0].score) {
 		//new highscore logic
-		scores.update(game.data.score, gid, name.replace(/\W/g, ''), memory.savehighscore);
+		scores.update(game.data.score, gid, name.replace(/[^ a-zA-Z0-9_]/g, ''), memory.savehighscore);
 		res.json(["highscore", game, scores.highscores]);
 	} else {
 		//no new highscore logic

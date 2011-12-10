@@ -409,7 +409,8 @@ $(function() {
 			if (!name && score >= highscores[0].score) {
 				submitScore();  //shows modal
 				$('#scoreentry').bind('hide', function self () {
-					name = $('#namemodal').val().replace(/\W/g, '');
+					name = encodeURI($('#namemodal').val().replace(/[^ a-zA-Z0-9_]/g, ''));
+					console.log(name);
 					if (!name) {
 						name = "___";
 					}
