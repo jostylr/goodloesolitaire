@@ -69,6 +69,7 @@ body {
 #scores, #handtext, #hail {
 	font-family: 'Candal', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	line-height: 50px;
+	height: 50px;
 	text-align: center;
 	color: rgba(225, 225, 225, 0.7);
 }
@@ -143,11 +144,16 @@ body {
 
 #handtext, #hail {
 	font-size: 20px;
+	height: 50px;
 }
 
 #currentchange {
 	font-size: 30px;
 	margin-left: 30px;
+}
+
+#drawdeck {
+	height: 153px;
 }
 
 #drawdeck div {
@@ -174,6 +180,8 @@ body {
 
 #hand {
 	text-align: center;
+	height: 130px;
+	visibility: hidden;
 }
 
 #hand ul {
