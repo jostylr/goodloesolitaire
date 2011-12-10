@@ -62,7 +62,7 @@ body {
 
 .page-header {
 	visibility: hidden;
-	height: 20%;
+	height: 15%;
 	min-height: 40px;
 }
 
@@ -70,7 +70,7 @@ body {
 	font-family: 'Candal', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	line-height: 50px;
 	text-align: center;
-	height: 12%;
+	height: 75px;
 	color: rgba(225, 225, 225, 0.7);
 }
 
