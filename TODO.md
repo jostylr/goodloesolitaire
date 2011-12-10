@@ -1,7 +1,8 @@
 # To do
 
 ## 2.0
-0. On dead game, apply opacity:0.4 to everything except #social: #scores, #inarow-container, #drawdeck, #hand, #handtext, #hail.
+0. On dead game, apply opacity:0.4 to everything except #social: #scores, #inarow-container, #drawdeck, #hand, #handtext, #hail. Apply a class instead of a style directly.
+0. For #hand, use visibility: hidden instead of display: none. Or better yet, apply a CSS class instead.
 1. Animation for new deck, discard card, draw card
 2. Make hail calls have more interesting effect.
 9. Add recent high scores in backend/frontend
