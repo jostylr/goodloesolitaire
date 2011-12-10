@@ -411,7 +411,7 @@ $(function() {
 				$('#scoreentry').bind('hide', function self () {
 					name = $('#namemodal').val().replace(/\W/g, '');
 					if (!name) {
-						name = "Anon";
+						name = "___";
 					}
 					commands.endgame();
 					$('#scoreentry').unbind('hide', self); //self cleanup

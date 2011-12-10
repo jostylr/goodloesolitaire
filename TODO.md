@@ -2,7 +2,7 @@
 
 ## 1.5
 
-1. Change default name from Anon to Guest
+1. Change default name from Anon to Guest. Changed it to ___.
 
 2. Make hail calls have more interesting effect.
 
