@@ -70,14 +70,12 @@ body {
 	font-family: 'Candal', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	line-height: 50px;
 	text-align: center;
-	height: 75px;
 	color: rgba(225, 225, 225, 0.7);
 }
 
 #currentscore {
 	font-size: 60px;
 }
-
 
 .scoreplus {
 	-webkit-animation-name: scoreplus;
@@ -224,6 +222,10 @@ body {
 
 .content, .row {
 	height: 100%;
+}
+
+#social {
+	margin-top: 25px;
 }
 
 /* HISTORY */
