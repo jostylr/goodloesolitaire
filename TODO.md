@@ -1,12 +1,12 @@
 # To do
 
 ## 2.0
-
+0. On dead game, apply opacity:0.4 to everything except #social: #scores, #inarow-container, #drawdeck, #hand, #handtext, #hail.
 1. Animation for new deck, discard card, draw card
 2. Make hail calls have more interesting effect.
 9. Add recent high scores in backend/frontend
 10. Add personal high scores
-11. Detect twitter name or add link (riskier) for high score: give people a way to link back to their identity. Or login with Facebook credentials.
+11. Give people a way to link back to their identity. Detect twitter name, add link (riskier) for high score, or login thru Facebook.
 13. Feature: custom link to individual game history
 14. Feature: custom link to individual game review (watch)
 15. Feature: custom link to individual game replay (play)
