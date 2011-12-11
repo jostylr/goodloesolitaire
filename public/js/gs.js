@@ -22,7 +22,7 @@ $(function() {
 	var fadelevel = 0.4;
 
 	//initial screen faded
-	$(".main").fadeTo(100, fadelevel);
+	$(".faded").fadeTo(100, fadelevel);
 	
 	
 	//remove fade
@@ -186,11 +186,11 @@ $(function() {
 	};
 		
 	var showHand = function () {
-		$("#hand").show(); 
+		$("#hand").css("visibility", "visible"); 
 	};
 		
 	var hideHand = function () {
-		$("#hand").hide(); 
+		$("#hand").css("visibility", "hidden"); 
 	};
 	
 	//----  no hand view on startup
