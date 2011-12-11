@@ -6,7 +6,7 @@ Continually improve your hand as you draw one or more cards. Put a streak togeth
 
 ## Credits
 
-Backed in by James Taylor, frightened by Thomas Park, creamed by Stephen Goodloe.
+James Taylor and Thomas Park
 
 ## Origins
 
