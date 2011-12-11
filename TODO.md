@@ -1,5 +1,6 @@
 # To do
 
+BUG!!: After a new high score, high score modal is not escapable and background goes black. Probably relates to changing fade from .main to .faded.
 BUG: White artifacts under handtext in webkit.
 
 ## 2.0
