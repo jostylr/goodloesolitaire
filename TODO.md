@@ -1,5 +1,7 @@
 # To do
 
+BUG: White artifacts under handtext in webkit.
+
 ## 2.0
 0. When deck is less than 5, constrain card selection to less than 5.
 1. Animation for new deck, discard card, draw card
