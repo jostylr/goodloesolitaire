@@ -132,12 +132,12 @@ $(function() {
 	var numcards = function (cardsleft) {
 		$("#numcards").html(cardsleft);
 		if (cardsleft === 0) {
-			$('#drawdeck').fadeTo(400, 0.01); 
+			$('#dc').fadeTo(400, 0.5); 
 		}
 	};
 
 	var showDeck = function () {
-		$('#drawdeck').fadeTo(400, 1);
+		$('#dc').fadeTo(400, 1);
 	};
 	
 	
