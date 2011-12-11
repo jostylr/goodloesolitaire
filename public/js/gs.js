@@ -22,12 +22,12 @@ $(function() {
 	var fadelevel = 0.4;
 
 	//initial screen faded
-	$(".faded").fadeTo(100, fadelevel);
+	$(".main").fadeTo(100, fadelevel);
 	
 	
 	//remove fade
 	var removeFade =  function  () {
-		$(".faded").fadeTo(200, 1);
+		$(".main").fadeTo(200, 1);
 	};
 	
 	
@@ -298,7 +298,7 @@ $(function() {
 	};
 	
 	var endGameDisplay = function () {
-			$(".faded").fadeTo(600, fadelevel, function () {$('#modal-highscores').modal({
+			$(".main").fadeTo(600, fadelevel, function () {$('#modal-highscores').modal({
 				backdrop: true,
 				keyboard: true,
 				show: true
