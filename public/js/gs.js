@@ -298,7 +298,7 @@ $(function() {
 	};
 	
 	var endGameDisplay = function () {
-			$(".main").fadeTo(600, fadelevel, function () {$('#modal-highscores').modal({
+			$(".faded").fadeTo(600, fadelevel, function () {$('#modal-highscores').modal({
 				backdrop: true,
 				keyboard: true,
 				show: true
