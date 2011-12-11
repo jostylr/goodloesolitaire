@@ -1,6 +1,7 @@
 # To do
 
 ## 2.0
+0. When deck is less than 5, constrain card selection to less than 5.
 1. Animation for new deck, discard card, draw card
 2. Make hail calls have more interesting effect.
 9. Add recent high scores in backend/frontend
