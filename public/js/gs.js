@@ -27,7 +27,7 @@ $(function() {
 	
 	//remove fade
 	var removeFade =  function  () {
-		$(".main").fadeTo(200, 1);
+		$(".faded").fadeTo(200, 1);
 	};
 	
 	
