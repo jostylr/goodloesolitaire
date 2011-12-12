@@ -80,7 +80,6 @@ body {
 #scores, #handtext, #hail {
 	font-family: 'Candal', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	line-height: 50px;
-	height: 75px;
 	text-align: center;
 	color: rgba(225, 225, 225, 0.7);
 }
