@@ -26,10 +26,12 @@ body {
 .topbar a {
 	cursor: pointer;
 	font-family: 'Amaranth', sans-serif;
+	text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.9);
 }
 
 .brand {
 	font-family: 'Amaranth', sans-serif;
+	text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.9);
 }
 
 #togglegame > a {
@@ -58,12 +60,11 @@ body {
 }*/
 
 .main {
-	min-height: 100%;
 }
 
 .page-header {
 	position: relative;
-	min-height: 100px;
+	min-height: 140px;
 	text-align: right;
 	border-bottom: 0px solid rgba(0, 0, 0, 0);
 	-webkit-box-shadow: 0 0px 0 rgba(255, 255, 255, 0);
@@ -80,7 +81,6 @@ body {
 #scores, #handtext, #hail {
 	font-family: 'Candal', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	line-height: 50px;
-	height: 75px;
 	text-align: center;
 	color: rgba(225, 225, 225, 0.7);
 }
@@ -237,12 +237,12 @@ body {
 	opacity:0.4;
 }
 
-.container {
-	height: 80%;
+.container, .content {
+	height: 100%;
 }
 
-.content, .row {
-	height: 100%;
+.row {
+	height: 75%;
 }
 
 /* HISTORY */
