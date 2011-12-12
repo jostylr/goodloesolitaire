@@ -60,12 +60,11 @@ body {
 }*/
 
 .main {
-	min-height: 100%;
 }
 
 .page-header {
 	position: relative;
-	min-height: 100px;
+	min-height: 140px;
 	text-align: right;
 	border-bottom: 0px solid rgba(0, 0, 0, 0);
 	-webkit-box-shadow: 0 0px 0 rgba(255, 255, 255, 0);
@@ -238,12 +237,12 @@ body {
 	opacity:0.4;
 }
 
-.container {
-	height: 80%;
+.container, .content {
+	height: 100%;
 }
 
-.content, .row {
-	height: 100%;
+.row {
+	height: 75%;
 }
 
 /* HISTORY */
