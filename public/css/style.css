@@ -26,10 +26,12 @@ body {
 .topbar a {
 	cursor: pointer;
 	font-family: 'Amaranth', sans-serif;
+	text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.9);
 }
 
 .brand {
 	font-family: 'Amaranth', sans-serif;
+	text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.9);
 }
 
 #togglegame > a {
