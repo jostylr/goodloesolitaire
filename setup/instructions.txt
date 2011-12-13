@@ -59,3 +59,9 @@ sudo cp setup/mongo.conf /etc/init/mongo.conf
 
 Initial mongo db highscore creation: 
 db.highscores.insert({"score":100, "name":"default", "_id":"AAA","date":Date.now()})
+
+
+Browserify
+npm install browserify
+from browserify directory
+node ../node_modules/browserify/bin/cli.js  entry.js -o ../public/js/browserify.js -w

@@ -1,4 +1,4 @@
-/*globals exports*/
+/*globals exports, console*/
 
 var hello = "geeze";
 
@@ -20,3 +20,4 @@ exports.shorthandcall = function (call){
 
 //test
 console.log(exports.shorthandcall(['fh']));
+console.log("hithi");

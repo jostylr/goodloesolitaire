@@ -28,8 +28,6 @@ next();
 app.configure( function () {
 	app.use(setHeaders);
 	app.use(express.bodyParser());
-	var bundle = require('browserify')(__dirname + '/entry.js');
-	app.use(bundle);
 	app.use(express.static(__dirname + '/public'));	
 });
 
