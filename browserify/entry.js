@@ -1,9 +1,18 @@
 /*global $, console, submitScore, require */
 
+var events = require('events');
+
+var gcd = new events.EventEmitter(); 
+var ui = new events.EventEmitter();
+
+require('./history')(gcd, ui);
+require('./ui/history')(gcd, ui);
+
+
 $(function() {
 	
 	//!!!! initial values
-	var server = '';//'http://127.0.0.1:3000/';	
+	var server = '';//'http://127.0.0.1:3000/';			
 	var uid = '0'; //set by server
 	var gid = '0'; //set by server
 	var type = 'basic'; //toggle options
@@ -30,35 +39,8 @@ $(function() {
 		$(".main").fadeTo(200, 1);
 	};
 	
-	var shorthandcall = require("./shc.js").shc;
-	
 	//!!!! hand calling
 	
-	var oldhand = false;
-	
-	var suitHtml = {
-		c: "&#x2663;",
-		d: "&#x2666;", 
-		h: "&#x2665;",
-		s: "&#x2660;"
-	};
-	
-	var shorthand = function (hand) {
-		var i; 
-		if (!oldhand) {
-			oldhand = hand;
-		}
-		var ret = '';
-		for (i = 0; i < 5; i+=1) {
-			if (hand[i] === oldhand[i]) {
-			  ret += " "+hand[i][0] +suitHtml[hand[i][1]]+" ";	
-			} else {
-			  ret += " <strong>"+hand[i][0] +suitHtml[hand[i][1]]+"</strong> ";					
-			}
-		}
-		oldhand = hand; 
-		return ret;
-	};
 	
 	var ranks = {
 		"A": ["Aces", "Ace"], 
@@ -97,21 +79,6 @@ $(function() {
 	};
 	
 	//!!!! history
-	var historyCount = 0;
-	
-	var clearHistory = function () {
-		$('#history table tbody').empty();
-		historyCount = 0;
-	};
-  
-
-	var addHistory = function (data, deltalabel) {
-		historyCount += 1;
-		$('#history table tbody').prepend("<tr><td>"+historyCount+".</td><td>"+
-		   data.gamedata.score+"</td><td><span "+deltalabel+"</span></td><td class='left'>"+
-		   shorthand(data.hand)+"</td><td>"+shorthandcall(data.call)+"</td></tr>"
-		);		
-	};
 	
 	//!!!! numcards
 	var numcards = function (cardsleft) {
@@ -220,17 +187,32 @@ $(function() {
 		var delta = data.delta;
     if (delta > 0) {
 			 $("#delta").html("&#x25B2;"+delta);
-			 addHistory(data, "class='label success'>&#x25B2;"+delta);
+			 gcd.emit("prep for add history", {
+				score:data.gamedata.score, 
+				deltalabel : "class='label success'>&#x25B2;"+delta, 
+				hand: data.hand,
+				call: data.call
+			});
 			 scorepulse('scoreplus');
 			inarow(data.gamedata.streak, data.gamedata.level, data.gamedata.streak);
     } else if (delta < 0) {
 			 $("#delta").html("&#x25BC;"+(-1*delta));
-			 addHistory(data, "class='label important'>&#x25BC;"+(-1*delta));
+			 gcd.emit("prep for add history", {
+				score:data.gamedata.score, 
+				deltalabel : "class='label important'>&#x25BC;"+(-1*delta),
+				hand: data.hand,
+				call: data.call
+			});
 			 scorepulse('scoreminus');
 			inarow(data.gamedata.streak, data.gamedata.level, data.gamedata.streak);
     } else {
 			 $("#delta").html("▬");
-			 addHistory(data, "class='label'>▬");
+			 gcd.emit("prep for add history", {
+				score:data.gamedata.score, 
+				deltalabel : "class='label' >▬",
+				hand: data.hand,
+				call: data.call
+			});
 			 scorepulse('');
 			inarow(data.gamedata.streak, data.gamedata.level, 0);	
 		}
@@ -337,7 +319,7 @@ $(function() {
 	
 	commands = {
 		'shuffle' : function () {
-			 clearHistory(); 
+			 gcd.emit("clear history", {});
 			 removeFade();
 			 state = 'newhand';
 			//presend
