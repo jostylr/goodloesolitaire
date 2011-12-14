@@ -78,6 +78,10 @@ body {
 	margin-top: 60px;
 }
 
+iframe.fb_ltr {
+	height: 80px !important;
+}
+
 #scores, #handtext, #hail {
 	font-family: 'Candal', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	line-height: 50px;
