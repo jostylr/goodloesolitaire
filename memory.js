@@ -32,7 +32,7 @@ exports.initializehs = function (sciniths) {
 					console.log(err);
 					sciniths({});
 				} else {
-					console.log(docs);
+					//console.log(docs);
 					sciniths(docs);
 				}
 			});	
