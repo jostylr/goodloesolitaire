@@ -25,10 +25,20 @@ var setHeaders = function (req,res,next) {
 next();
 };
 
+var logger = function (req, res, next) {
+	console.log(req.headers);
+	res.on('end', function (arg) {
+		console.log(arg); 
+	});
+	next();
+};
+
 app.configure( function () {
+  app.use(express.logger({format:':req[Accept]  :res[Content-Type] :http-version :response-time :remote-addr :date :method :url :referrer :user-agent :status'}));
 	app.use(setHeaders);
 	app.use(express.bodyParser());
-	app.use(express.static(__dirname + '/public'));	
+	app.use(logger);
+	app.use(express["static"](__dirname + '/public'));	
 });
 
 
@@ -62,3 +72,5 @@ app.get('/shuffle/:id/:type', function (req, res) {
 //    res.json([req.params.com, req.params.id, req.body]);
 
 app.listen(3000);
+
+console.log("node started", Date.now());
