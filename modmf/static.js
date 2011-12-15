@@ -202,7 +202,7 @@ var send = exports.send = function(req, res, next, options){
           	+ '/'
           	+ stat.size);
 				} else {
-					res.statusCode = 206; 
+					chunkSize = requestedLength; 
 				}
       // invalid
       } else {
