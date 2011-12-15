@@ -17,7 +17,7 @@ request.on('response',  function (response) {
   console.log('HEADERS: ' + JSON.stringify(response.headers));
   response.setEncoding('utf8');
   response.on('data', function (chunk) {
-    console.log('BODY: ' + chunk);
+    //console.log('BODY: ' + chunk);
   });
 });
 
@@ -34,7 +34,7 @@ req2.on('response',  function (response) {
   console.log('HEADERS: ' + JSON.stringify(response.headers));
   response.setEncoding('utf8');
   response.on('data', function (chunk) {
-    console.log('BODY: ' + chunk);
+    //console.log('BODY: ' + chunk);
   });
 });
 
