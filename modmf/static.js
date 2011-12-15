@@ -202,7 +202,7 @@ var send = exports.send = function(req, res, next, options){
           	+ '/'
           	+ stat.size);
 				} else {
-					chunkSize = requestedLength; 
+					chunkSize = requestedLength-10; 
 				}
       // invalid
       } else {
