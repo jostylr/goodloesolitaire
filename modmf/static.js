@@ -201,7 +201,9 @@ var send = exports.send = function(req, res, next, options){
           	+ opts.end
           	+ '/'
           	+ stat.size);
-				} 
+				} else {
+					res.statusCode = 206; 
+				}
       // invalid
       } else {
         return fn
