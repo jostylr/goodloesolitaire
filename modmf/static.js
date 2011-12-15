@@ -6,7 +6,7 @@
  * MIT Licensed
  */
 
-//goes in connect:  mv ./modmf/static.js  ./node_modules/express/node_modules/connect/lib/middleware/static.js
+//goes in connect:  cp ./modmf/static.js  ./node_modules/express/node_modules/connect/lib/middleware/static.js
 
 /**
  * Module dependencies.
@@ -192,7 +192,7 @@ var send = exports.send = function(req, res, next, options){
         opts.start = ranges[0].start;
         opts.end = ranges[0].end;
 				requestedLength = opts.end - opts.start + 1;
-        if (requestedLength < stat.size) {
+        if ((requestedLength < stat.size) || (opts.start !== 0)) {
 					chunkSize = requestedLength;
         	res.statusCode = 206;
         	res.setHeader('Content-Range', 'bytes '
@@ -201,9 +201,7 @@ var send = exports.send = function(req, res, next, options){
           	+ opts.end
           	+ '/'
           	+ stat.size);
-				} else {
-					chunkSize = requestedLength-10;  
-				}
+				} 
       // invalid
       } else {
         return fn
