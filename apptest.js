@@ -7,7 +7,7 @@ request = cli.request('GET', '/', {
   host: 'goodloesolitaire.com',
   accept: '*/*',
   'accept-encoding': 'deflate, gzip',
-  range: 'bytes=0-40960',
+  range: 'bytes=0-300',
   connection: 'close' 
 });
 
@@ -17,7 +17,7 @@ request.on('response',  function (response) {
   console.log('HEADERS: ' + JSON.stringify(response.headers));
   response.setEncoding('utf8');
   response.on('data', function (chunk) {
-    //console.log('BODY: ' + chunk);
+  console.log('BODY: ' + chunk);
   });
 });
 
