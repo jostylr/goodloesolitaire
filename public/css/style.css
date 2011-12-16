@@ -78,7 +78,7 @@ body {
 	margin-top: 60px;
 }
 
-iframe.fb_ltr {
+.fb-like>span>iframe {
 	height: 80px !important;
 }
 
