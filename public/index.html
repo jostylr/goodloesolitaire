@@ -16,7 +16,7 @@
 
 		<title>Goodloe Solitaire</title>
 		<meta name="Title" content="Goodloe Solitaire" />
-        <meta name="Description" content="Continually improve your hand as you draw cards. Put a streak together to really boost your score. Twos are crazy wild!" />
+        <meta name="Description" content="Improve your hand by drawing cards. Put a streak together to really boost your score. Twos are crazy wild!" />
 		<link rel="shortcut icon" href="images/favicon.ico" />
 		<script src="js/jquery.min.js"></script>
 		<script src="js/bootstrap-twipsy.js"></script>
@@ -91,10 +91,9 @@
 		  var js, fjs = d.getElementsByTagName(s)[0];
 		  if (d.getElementById(id)) return;
 		  js = d.createElement(s); js.id = id;
-		  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+		  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=280560425329333";
 		  fjs.parentNode.insertBefore(js, fjs);
 		}(document, 'script', 'facebook-jssdk'));</script>
-
 
 		<div class="topbar">
 			<div class="fill">
@@ -106,7 +105,8 @@
 		 				<li id="about"><a>About</a></li>
 		 			</ul>
 		 			<ul class="nav secondary-nav">
-						<li id="name"><a>Guest</a></li>
+		 				<li><div class="fb-login-button" data-show-faces="false" data-width="200"></div></li>
+						<li id="name"><a>Log In</a></li>
 		 			</ul>
 		 		</div>
 
@@ -117,13 +117,13 @@
   			<div class="content">
   				<div class="page-header">
   					<div id="social">
-	    				<div class="fb-like" data-href="http://goodloesolitaire.com" data-send="true" data-width="340" data-show-faces="true" data-colorscheme="dark"></div>
+	    			<div class="fb-like" data-href="http://goodloesolitaire.com" data-send="true" data-width="340" data-show-faces="true" data-colorscheme="dark"></div>
 					</div>
   				</div>
 		    	<div class="row">
 		    		<div class="span10 main">
 		    			<div id="scores">
-		    				<span id="currentscore"><span id="score" class="scoreminus">0</span></span>
+		    				<span id="currentscore"><span id="score">0</span></span>
 		    				<span id="currentchange"><span id="delta"></span></span>
 			    		</div>
 			    		<div id="inarow-container"><span id="inarow">&nbsp;</span></div>
