@@ -42,6 +42,7 @@ table{margin-bottom:0;}
 .history-table::-webkit-scrollbar-track{background-color:#021802;-webkit-box-shadow:inset 1px 2px 2px rgba(0, 0, 0, 0.8),0 0 0 rgba(0, 0, 0, 0);-moz-box-shadow:inset 1px 2px 2px rgba(0, 0, 0, 0.8),0 0 0 rgba(0, 0, 0, 0);box-shadow:inset 1px 2px 2px rgba(0, 0, 0, 0.8),0 0 0 rgba(0, 0, 0, 0);}
 .history-table::-webkit-scrollbar-button{width:0;height:0;display:none;}
 .modal h3,.modal h4{font-family:'Amaranth',sans-serif;}
+.modal a.close{opacity:0.8;}
 #scoreentry{width:360px;margin-left:-180px;}#scoreentry input[type="text"]{width:200px;}
 #modal-highscores{width:360px;margin-left:-180px;}#modal-highscores .newHighScore td{background-color:#FFFE8B;}
 #modal-highscores #table-highscores{font-size:18px;}#modal-highscores #table-highscores td{border-right:0px;border-left:0px;}
