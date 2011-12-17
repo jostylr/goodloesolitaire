@@ -12,6 +12,24 @@ module.exports = function (gcd, ui) {
 		gcde = gcd;
 };
 
+//from gamecontrol
+
+if (!name && score >= highscores[0].score) {
+	submitScore();  //shows modal
+	$('#scoreentry').bind('hide', function self () {
+		name = encodeURI($('#namemodal').val().replace(/[^ a-zA-Z0-9_]/g, ''));
+		console.log(name);
+		if (!name) {
+			name = "___";
+		}
+		
+		commands.endgame();
+		$('#scoreentry').unbind('hide', self); //self cleanup
+	});
+} else {
+	gcde.emit("send endgame");
+
+
 
 //!!!! scoreManagement	
 var score;

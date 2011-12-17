@@ -2,30 +2,57 @@
 
 //loading a hand
 
-var handcall; 
+var switchtoend, switchtostart, endgame, newgame, ; 
 
 var gcde, uie;
 
 module.exports = function (gcd, ui) {
-	ui.on("")
+	
+	ui.on("game started", switchtoend);
+	
+	ui.on("gamed ended", switchtostart);
+	
+	$("#newgame").live('click', newgame);
+	$("#endgame").live('click', endgame);
+	
 		uie = ui; 
 		gcde = gcd;
 };
 
 
-	//toggling
+switchtoend = function () {
+	$("#togglegame").html('<a id="endgame">End Game</a>');				
+};
 	
-	var toggleGameControl = function (type) {
-		if (type === "shuffling") {
-			$("#togglegame").html('<a id="endgame">End Game</a>');
-//			$("#newgame").hide();
-//			$("#endgame").show();
-		} else if (type === "ending") {
-			$("#togglegame").html('<a id="newgame">Start Game</a>');
-//			$("#endgame").hide();
-//			$("#newgame").show();			
-		}
-	};
+switchtostart = function () {
+	$("#togglegame").html('<a id="endgame">End Game</a>');			
+};
+	
+newgame = function () {
+	gcde.emit("newgame");
+}
+
+endgame = function () {
+	gcde.emit("check score and name");
+}
+
+
+
+		
+		get('endgame/'+uid+"/"+gid+"/"+name, function (data){
+			console.log(JSON.stringify(data));
+			if (data.error) {
+				console.log(data.error); 
+				clearCards(); 
+				return false;
+			}
+			loadHighScores(data[2]);
+			endGameDisplay();
+			toggleGameControl("ending");
+		});
+}
+
+	
 	
 	var endGameDisplay = function () {
 			$(".main").fadeTo(600, fadelevel, function () {$('#modal-highscores').modal({
@@ -35,6 +62,8 @@ module.exports = function (gcd, ui) {
 			});});
 			$("#hand li").removeClass('draw').removeClass('backing');
 	};
+	
+	
 	
 	'shuffle' : function () {
 		 gcd.emit("clear history", {});
@@ -56,30 +85,7 @@ module.exports = function (gcd, ui) {
 	},
 	
 	'endgame' : function () {
-		console.log('endgame', name, score, highscores);
-		if (!name && score >= highscores[0].score) {
-			submitScore();  //shows modal
-			$('#scoreentry').bind('hide', function self () {
-				name = encodeURI($('#namemodal').val().replace(/[^ a-zA-Z0-9_]/g, ''));
-				console.log(name);
-				if (!name) {
-					name = "___";
-				}
-				commands.endgame();
-				$('#scoreentry').unbind('hide', self); //self cleanup
-			});
-		} else {
-			get('endgame/'+uid+"/"+gid+"/"+name, function (data){
-				console.log(JSON.stringify(data));
-				if (data.error) {
-					console.log(data.error); 
-					clearCards(); 
-					return false;
-				}
-				loadHighScores(data[2]);
-				endGameDisplay();
-				toggleGameControl("ending");
-			});
+
 		}
 	},
 	'retrievegame' : function (gid) {
@@ -112,8 +118,3 @@ module.exports = function (gcd, ui) {
 
 	$('html').bind('keyup', akeys);
 
-
-	$("#newgame").live('click', commands.shuffle);
-	//$("#highscores").click(function() {$('input[name=viewscores]').click(); });
-	$("#endgame").live('click', commands.endgame );
-	//attaching high score behavior
