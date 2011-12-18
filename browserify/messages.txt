@@ -1,0 +1,8 @@
+game started
+
+
+
+gamed ended  // click end game 
+	check score and name 
+	send endgame // sent when name, high score resolved
+	

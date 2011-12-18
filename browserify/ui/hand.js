@@ -15,7 +15,8 @@ module.exports = function (gcd, ui) {
 
 //!!!! hand calling
 
-
+//restore cards
+$("#hand li").removeClass('draw').removeClass('backing');
 
 
 

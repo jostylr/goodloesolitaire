@@ -1,49 +1,45 @@
 /*globals $, module, console*/
 
+//ui
+
 //loading a hand
 
-var handcall; 
+var a, b;
 
-var gcde, uie;
+var gcd, ui;
 
-module.exports = function (gcd, ui) {
+module.exports = function (gcde, uie) {
+	gcd = gcde;
+	ui = uie;
+
 	ui.on("")
 		uie = ui; 
 		gcde = gcd;
 };
 
-//from gamecontrol
-
-if (!name && score >= highscores[0].score) {
-	submitScore();  //shows modal
-	$('#scoreentry').bind('hide', function self () {
-		name = encodeURI($('#namemodal').val().replace(/[^ a-zA-Z0-9_]/g, ''));
-		console.log(name);
-		if (!name) {
-			name = "___";
-		}
+a = {
+	'add score entry' : function () {
+		$('#scoreentry').bind('hide', function self () {
+			name = encodeURI($('#namemodal').val().replace(/[^ a-zA-Z0-9_]/g, ''));
+			if (!name) {
+				name = "___";
+			}
+			$('#scoreentry').unbind('hide', self); //self cleanup
+			gcd.emit('send endgame');
+		});
+	},
+	function  () {
 		
-		commands.endgame();
-		$('#scoreentry').unbind('hide', self); //self cleanup
-	});
-} else {
-	gcde.emit("send endgame");
+	}
+};
 
+//main is faded
+ function () {$('#modal-highscores').modal({
+	backdrop: true,
+	keyboard: true,
+	show: true
+});
 
-
-//!!!! scoreManagement	
-var score;
-var highscores = [];
-
-var inarow = function (streak, level, typechange) {
-	var streaktext;
-	if (typechange > 2) {
-		streaktext = streak+" in a row"+ (level ? " with a bonus of "+level+"!" : "!");			
-	} else {
-		streaktext = "&nbsp;";			
-	} 
-  $('#inarow').html(streaktext);
-}; 
 
 var scorepulse = function (scoreclass) {
 	$('#score, #delta').removeClass("scoreminus scoreplus");

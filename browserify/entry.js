@@ -5,12 +5,22 @@ var events = require('events');
 var gcd = new events.EventEmitter(); 
 var ui = new events.EventEmitter();
 
+var data = {};
+
 /*
 var eventdebugger = function (evem) {
 	var _emit = evem.emit;
-	evem.emit = function () {
-		console.log(JSON.stringify(arguments));
+	evem.emit = function (ev, arg) {
+		console.log(ev, JSON.stringify(arg));
 		_emit.apply(this, arguments);
+		var list = evem.listeners(ev);
+		for (i = 0; i < n; i += 1) {
+			if (list[i].hasOwnProperty("desc")) {
+				console.log("listener", list[i].desc);
+			} else {
+				console.log("listener with no description");
+			}
+		}
 	};
 };
 
@@ -23,8 +33,8 @@ console.log("running");
 */
 
 
-require('./logic/history')(gcd, ui);
-require('./ui/history')(gcd, ui);
+require('./logic/history')(gcd, ui, data);
+require('./ui/history')(gcd, ui, data);
 
 
 $(function() { 
@@ -35,33 +45,7 @@ $(function() {
 
 
 
-/*		
-	var uid = '0'; //set by server
-	var gid = '0'; //set by server
-	var type = 'basic'; //toggle options
-	var scoredata = [];
-	var name = false;
-	var oldHighScores = false;
 	
-  var commands;
-	
-	var akeys; 
-	
-	//initial hiding
-	$("#endgame").hide(); 
-	
-	//!!!! fading
-	var fadelevel = 0.4;
-
-	//initial screen faded
-	$(".main").fadeTo(100, fadelevel);
-*/
-
-	
-
-
-	
-	var state; //for hail call
 
 
 

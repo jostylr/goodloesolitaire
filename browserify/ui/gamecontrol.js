@@ -1,110 +1,72 @@
 /*globals $, module, console*/
 
+//ui
+
 //loading a hand
 
-var switchtoend, switchtostart, endgame, newgame, ; 
+var a = {};
 
-var gcde, uie;
+var fadelevel = 0.4;
 
-module.exports = function (gcd, ui) {
+
+var gcd, ui;
+
+module.exports = function (gcde, uie) {
+	gcd = gcde;
+	uie = ui;
 	
-	ui.on("game started", switchtoend);
+	ui.on("game started", a["install endgame"]);
 	
-	ui.on("gamed ended", switchtostart);
+	ui.on("gamed ended", a["install startgame"]);
+
+	ui.on("end game", a["emit check score/name"]);
 	
-	$("#newgame").live('click', newgame);
-	$("#endgame").live('click', endgame);
+	ui.once("name registered", a["skip name"]);
 	
-		uie = ui; 
-		gcde = gcd;
-};
-
-
-switchtoend = function () {
-	$("#togglegame").html('<a id="endgame">End Game</a>');				
-};
-	
-switchtostart = function () {
-	$("#togglegame").html('<a id="endgame">End Game</a>');			
-};
-	
-newgame = function () {
-	gcde.emit("newgame");
-}
-
-endgame = function () {
-	gcde.emit("check score and name");
-}
-
-
-
+	ui.on("ready", function () {
+		$("#newgame").live('click', a["emit new game"]);
+		$("#endgame").live('click', a["emit end game"]);
+		$("#endgame").hide(); 
+		$(".main").fadeTo(100, fadelevel);
 		
-		get('endgame/'+uid+"/"+gid+"/"+name, function (data){
-			console.log(JSON.stringify(data));
-			if (data.error) {
-				console.log(data.error); 
-				clearCards(); 
-				return false;
-			}
-			loadHighScores(data[2]);
-			endGameDisplay();
-			toggleGameControl("ending");
-		});
-}
+	});
+};
 
-	
-	
-	var endGameDisplay = function () {
-			$(".main").fadeTo(600, fadelevel, function () {$('#modal-highscores').modal({
-				backdrop: true,
-				keyboard: true,
-				show: true
-			});});
-			$("#hand li").removeClass('draw').removeClass('backing');
-	};
-	
-	
-	
-	'shuffle' : function () {
-		 gcd.emit("clear history", {});
-		 removeFade();
-		 state = 'newhand';
-		//presend
-		get('shuffle/'+uid+'/'+type, function (data) {
-			//postsend
-			console.log(JSON.stringify(data));
-			gid = data.gid;
-			loadHand(data.hand);
-			showHand(); 
-			makeCall(data.call);
-			loadScore(data);
-			numcards(data.cardsleft);
-			showDeck(); 
-			toggleGameControl('shuffling');
-		});
-	},
-	
-	'endgame' : function () {
 
-		}
+a = {
+  "install endgame" : function () {
+		$("#togglegame").html('<a id="endgame">End Game</a>');				
 	},
-	'retrievegame' : function (gid) {
-		get('retrievegame/'+gid,  function (data){				
-			console.log(JSON.stringify(data));
-		});			
+	"install startgame": function () {
+		$("#togglegame").html('<a id="endgame">End Game</a>');			
 	},
-	
-	
-	
-	//remove fade
-	var removeFade =  function  () {
+	"emit new game" : function () {
+		gcd.emit("new game");
+	}, 
+	"emit end game" : function () {
+		ui.emit("end game");
+		gcd.emit("end game");
+	},
+	"emit check score/name" : function () {
+		gcd.emit("check score and name"); //removed after usage
+	},
+	"skip name" : function () {
+		ui.removeListener("end game", a["emit check"]);
+		ui.on("end game", function () {
+			gcd.emit("send end game");
+		}); 
+	},
+	"remove main fade" : function  () {
 		$(".main").fadeTo(200, 1);
-	};
-	
-	
-	
-	akeys = function (evnt) {
-	        var key = evnt.keyCode; 
+	},
+	"fade main" : function  () {
+		$(".main").fadeTo(600, fadelevel, function () {
+			ui.emit("main is faded");
+		});
+		ui.emit("restore cards");
+	},
+	"hand key bindings": function (evnt) {
+	       var key = evnt.keyCode; 
 	       switch (key) {
 	        case 49: $('#hand li:nth-child(1)').click(); break;//1 card as visible
 	        case 50: $('#hand li:nth-child(2)').click(); break;
@@ -113,8 +75,18 @@ endgame = function () {
 	        case 53: $('#hand li:nth-child(5)').click(); break;
 	        case 13: $('#drawcards').click(); return false; //enter drawcards
 	       }
+	},
+	"bind hand keys" : function () {
+		$('html').bind('keyup', a["hand key bindings"]);
+	},
+	"unbind hand keys" : function () {
+		$('html').unbind('keyup', a["hand key bindings"]);
+	}
+};
 
-	};
+	
+	
 
-	$('html').bind('keyup', akeys);
+	
+	
 
