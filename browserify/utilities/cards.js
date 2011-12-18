@@ -48,7 +48,7 @@ var suitHtml = {
 
 var oldHand = false;
 
-exports.shorthand = function (hand) {
+exports["generate short hand string"] = function (hand) {
 	var i; 
 	if (!oldHand) {
 		oldHand = hand;
@@ -65,7 +65,7 @@ exports.shorthand = function (hand) {
 	return ret;
 };
 
-exports.shorthandcall = function (call){
+exports["generate short version of call"] = function (call){
 	switch (call[0]) {
 		case "5":  return "5K";
 		case "sf": return "SF";

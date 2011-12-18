@@ -1,3 +1,29 @@
+/*globals $, module, console, require*/
+
+var file = 'ui/hand: ';
+
+var gcd, ui;
+
+var a;
+
+module.exports = function (gcde, uie, data) {
+	ui = uie; 
+	gcd = gcde;
+		
+	
+};
+
+a = {
+	
+};
+
+var fname; 
+
+for (fname in a) {
+	a[fname].desc = file+fname;
+}
+
+
 /*globals $, module, console*/
 
 //loading a hand
@@ -136,44 +162,5 @@ var hailCall= function (count, type){
 	
 	$('#hail >span').hide();
 	
-	
-	
-	'drawcards' : function () {
-		//get draws
-		var draws = '';
-		var nocards = true;
-		var drawcount = 0; 
-		$("#hand li").each(function (){
-			if ($(this).hasClass('draw')) {
-				draws += '1';
-				nocards = false;
-				drawcount += 1; 
-			} else {
-				draws += '0';
-			}
-		});
-		if (nocards) {
-			console.log("no cards selected."); 
-			clearCards(); 
-			return false;
-		}
-		hailCall(drawcount, state);
-		state = 'oldhand';
-		flipCards(); 
-		get('drawcards/'+uid+'/'+gid+'/'+draws, function (data){
-			if (data.error) {
-				console.log(data.error); 
-				clearCards(); 
-				return false;
-			}
-			console.log(JSON.stringify(data));
-			loadHand(data.hand);
-			makeCall(data.call);
-			loadScore(data);
-			numcards(data.cardsleft);	  
-		});	
-	},
-	
-	$("#drawcards").click(commands.drawcards);
 	
 	

@@ -1,52 +1,37 @@
-/*globals module, console, require*/
+/*globals $, module, console, require*/
 
-var historyCount, zeroCount, incCount, assembleTableRow, oldHand, suitHtml, shortHand, shortHandCall; 
+var file = 'logic/history: ';
 
-var gcde, uie;
+var gcd;
+
+var a;
 
 var cardutil = require('../utilities/cards');
 
-var shorthand = cardutil.shorthand, 
-		shorthandcall = cardutil.shorthandcall; 
 
-module.exports = function (gcd, ui) {
-	gcd.on("clear history", zeroCount);
-
-	gcd.on("prep for add history", incCount);
-	gcd.on("prep for add history", assembleTableRow);
-	gcd.on("prep for add history", function () {console.log("add history");});
-	
-	ui.on('add history', function () {console.log("atr expo");});
-	
-	
-	uie = ui; 
-	gcde = gcd;
-	
+module.exports = function (gcde, data) {
+	gcd = gcde;
+	gcd.on("new game requested"		, a["zero history count"]);
+	gcd.on("draw cards requested"	, a["increment history count"]);
+	gcd.on("score loaded"					, a["process row data"]);
 };
 
-historyCount = 0;
-
-zeroCount = function () {
-	historyCount = 0;
+a = {
+	"zero history count" : function (data) {
+		data.historyCount = 0;
+	}, 
+	"increment history count" : function (data) {
+		data.historyCount += 1;
+	},
+	"process row data" : function (data) {
+		data.shorthand = cardutil["generate short hand string"](data.hand);
+		data.shortcall = cardutil["generate short version of call"](data.call);
+		gcd.emit("add history", data); 
+	} 
 };
 
-incCount = function () {
-		historyCount += 1;
-};
+var fname; 
 
-
-assembleTableRow = function (info) {
-	 uie.emit("add history", {
-		num: historyCount,
-		score: info.score, 
-		deltalablel: info.deltalabel,
-		hand: shorthand(info.hand), 
-		call: shorthandcall(info.call)
-		});
-};
-
-
-
-
-
-
+for (fname in a) {
+	a[fname].desc = file+fname;
+}

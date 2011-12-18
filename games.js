@@ -129,10 +129,10 @@ exports.endgame = function (res, id, gid, scores, name) {
 	if (game.data.score >= scores.highscores[0].score) {
 		//new highscore logic
 		scores.update(game.data.score, gid, name.replace(/[^ a-zA-Z0-9_]/g, ''), memory.savehighscore);
-		res.json(["highscore", game, scores.highscores]);
+		res.json({type: "highscore", game: game, highscores: scores.highscores});
 	} else {
 		//no new highscore logic
-		res.json(["not a new highscore", game, scores.highscores]);
+		res.json({type:"not a new highscore", game: game, highscores: scores.highscores});
 	}
 };
 

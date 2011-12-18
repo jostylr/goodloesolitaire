@@ -15,7 +15,7 @@ exports.initializehs = function (hs) {
 };
 
 exports.viewscores = function (res) {
-	res.json(highscores);
+	res.json({highscores:highscores});
 };
 
 exports.update = function (score, gid, name, store) {

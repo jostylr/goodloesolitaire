@@ -1,33 +1,35 @@
-/*globals $, module, console*/
+/*globals $, module, console, require*/
 
-//ui
+var file = 'ui/gamecontrol: ';
 
-//loading a hand
+var gcd;
 
-var a = {};
+var a;
 
 var fadelevel = 0.4;
 
 
-var gcd, ui;
-
-module.exports = function (gcde, uie) {
+module.exports = function (gcde, data) {
 	gcd = gcde;
-	uie = ui;
 	
-	ui.on("game started", a["install endgame"]);
+	gcd.on("new game requested", a["remove main fade"]);
 	
-	ui.on("gamed ended", a["install startgame"]);
+	gcd.on("game started", a["install endgame"]);
+	
+	gcd.on("game ended", a["install startgame"]);
 
-	ui.on("end game", a["emit check score/name"]);
+	gcd.on("end game requested", a["emit check score/name"]);
 	
-	ui.once("name registered", a["skip name"]);
+	gcd.once("name registered", a["skip name"]);
 	
-	ui.on("ready", function () {
-		$("#newgame").live('click', a["emit new game"]);
-		$("#endgame").live('click', a["emit end game"]);
+	gcd.on("ready", function () {
+		$("#newgame").live('click', a["emit new game"](data));
+		$("#drawcards").click(a["emit draw cards"](data));
+		$("#endgame").live('click', a["emit end game"](data));
 		$("#endgame").hide(); 
 		$(".main").fadeTo(100, fadelevel);
+		$("#hs").click(a["emit retrieve game"](data));
+			
 		
 	});
 };
@@ -40,31 +42,49 @@ a = {
 	"install startgame": function () {
 		$("#togglegame").html('<a id="endgame">End Game</a>');			
 	},
-	"emit new game" : function () {
-		gcd.emit("new game");
-	}, 
-	"emit end game" : function () {
-		ui.emit("end game");
-		gcd.emit("end game");
-	},
-	"emit check score/name" : function () {
-		gcd.emit("check score and name"); //removed after usage
-	},
-	"skip name" : function () {
-		ui.removeListener("end game", a["emit check"]);
-		ui.on("end game", function () {
-			gcd.emit("send end game");
+	"skip name" : function (data) {
+		gcd.removeListener("end game", a["emit check"]);
+		gcd.on("end game", function (data) {
+			gcd.emit("send end game", data);
 		}); 
 	},
-	"remove main fade" : function  () {
+	"remove main fade" : function  (data) {
 		$(".main").fadeTo(200, 1);
 	},
 	"fade main" : function  () {
 		$(".main").fadeTo(600, fadelevel, function () {
-			ui.emit("main is faded");
+			gcd.emit("main is faded");
 		});
-		ui.emit("restore cards");
+		gcd.emit("restore cards");
 	},
+	
+	//click responses
+	"emit new game" : function (data) {
+		return function () {
+			gcd.emit("new game requested", data);
+		};
+	}, 
+	"emit draw cards" : function  (data) {
+		return function () {
+			gcd.emit("draw cards requested", data);
+		};
+	},
+	"emit end game" : function (data) {
+		return function  () {
+			gcd.emit("end game requested", data);			
+		};
+	},
+	"emit retrieve game" : function (data) {
+		return function (event) {
+			data.requestedgid = $(event.target).parents("tr").attr("id");
+			gcd.emit('old game requested', data);
+		};
+	},
+	"emit check score/name" : function (data) {
+		gcd.emit("check score and name", data); //removed after usage
+	},
+	
+	//key controls
 	"hand key bindings": function (evnt) {
 	       var key = evnt.keyCode; 
 	       switch (key) {
@@ -86,6 +106,13 @@ a = {
 
 	
 	
+var fname; 
+
+for (fname in a) {
+	a[fname].desc = file+fname;
+}
+
+
 
 	
 	
