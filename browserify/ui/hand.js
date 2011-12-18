@@ -2,19 +2,48 @@
 
 var file = 'ui/hand: ';
 
-var gcd, ui;
+var gcd;
 
 var a;
 
-module.exports = function (gcde, uie, data) {
-	ui = uie; 
+var querycards, handcall;
+
+module.exports = function (gcde, data) {
 	gcd = gcde;
 		
+	gcd.on("draw cards requested"		, a["assemble drawn cards"]);
 	
+	gcd.on("hand loaded"            , a["restore cards"]);
+
+	$('#hand li').click(function (event) {
+  		var this$ = $(this);
+      this$.toggleClass('draw');
+  });
+  
 };
 
 a = {
+	"assemble drawn cards" : function (data) {
+    var nocards = querycards(data);
+		if (nocards) {
+			gcd.emit("no discarded cards", data);
+			return false;
+		}
+		data.draws = draws;
+		gcd.emit("cards discarded", data);
+	}
 	
+	"restore cards" : function (data) {
+	  $("#hand li").removeClass('draw').removeClass('backing');
+	},
+	
+	"make full hand call" : function (data) {
+	  $("#handtext").html(handcall(data.call));
+	},
+	
+	"show deck" : function (data) {
+	  $('#dc').fadeTo(400, 1);
+	}
 };
 
 var fname; 
@@ -23,28 +52,21 @@ for (fname in a) {
 	a[fname].desc = file+fname;
 }
 
-
-/*globals $, module, console*/
-
-//loading a hand
-
-var handcall; 
-
-var gcde, uie;
-
-module.exports = function (gcd, ui) {
-	ui.on("")
-		uie = ui; 
-		gcde = gcd;
+querycards = function (data) {
+  var draws = '';
+  var nocards = true;
+  var drawcount = 0; 
+  $("#hand li").each(function (){
+  	if ($(this).hasClass('draw')) {
+  		draws += '1';
+  		nocards = false;
+  		drawcount += 1; 
+  	} else {
+  		draws += '0';
+  	}
+  });
+  return nocards;
 };
-
-
-//!!!! hand calling
-
-//restore cards
-$("#hand li").removeClass('draw').removeClass('backing');
-
-
 
 handcall = function (call, ranks) {
 	switch (call) {
@@ -62,10 +84,6 @@ handcall = function (call, ranks) {
 };
 
 
-var makeCall = function (call) {
-	$("#handtext").html(handcall(call));
-};
-
 
 
 //!!!! numcards
@@ -76,25 +94,10 @@ var numcards = function (cardsleft) {
 	}
 };
 
-var showDeck = function () {
-	$('#dc').fadeTo(400, 1);
-};
-
-
 var runoutofcards = function () {
 	commands.endgame(); 
 	//setTimeout(function () {$('input[name=endgame]').click()}, 800);
 };
-
-
-
-//!!!! card management
-//clicking cards
-$('#hand li').click(function (event) {
-		var this$ = $(this);
-    this$.toggleClass('draw');
-});
-
 
 
 //computes card image given card

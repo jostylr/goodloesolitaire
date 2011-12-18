@@ -8,16 +8,16 @@ var gcd;
 
 var a;
 
+var process;
+
 module.exports = function (gcde, data) {
 	gcd = gcde;
 	
 	gcd.on("ready"								, a["initial values"]);
 	gcd.on('new game requested'		, a["send new game"]);
-	gcd.on('draw cards requested'	, a["send draw cards"]);	
+	gcd.on('cards discarded'			, a["send draw cards"]);	
 	gcd.on('end game requested'		, a["send end game"]);
 	
-	
-	gcd.on(""											, a[""]);
 	
 };
 
@@ -29,97 +29,70 @@ a = {
 		data.name = false;		
 	},
 	
+	
+	//server calls
+	
 	"send new game": function (data) {
-		servercalls.get('shuffle/'+data.uid+'/'+data.type, function (server) {
+		servercalls.servercalls.get('shuffle/'+data.uid+'/'+data.type, function (server) {
 			if (server.error) {
 				gcd.emit("new game denied", data, server);
 				return false;
 			}
-			data.gid = server.gid;
-			gcd.emit("server started new game", data, server);
-
-	s		loadScore(data);
-//			
-			numcards(data.cardsleft);
-			showDeck(); 
+			process(data, server);
+			gcd.emit("server started new game", data);
 		});
 	},
 	
-	"send draw cards" : function () {
-		//get draws
-		var draws = '';
-		var nocards = true;
-		var drawcount = 0; 
-		$("#hand li").each(function (){
-			if ($(this).hasClass('draw')) {
-				draws += '1';
-				nocards = false;
-				drawcount += 1; 
-			} else {
-				draws += '0';
-			}
-		});
-		if (nocards) {
-			console.log("no cards selected."); 
-			clearCards(); 
-			return false;
-		}
-		hailCall(drawcount, state);
-		state = 'oldhand';
-		flipCards(); 
-		get('drawcards/'+uid+'/'+gid+'/'+draws, function (data){
-			if (data.error) {
-				console.log(data.error); 
-				clearCards(); 
+	"send draw cards" : function (data) {
+		servercalls.servercalls.get('drawcards/'+data.uid+'/'+data.gid+'/'+data.draws, function (server){
+			if (server.error) {
+				gcd.emit("failed to draw cards", data, server);
 				return false;
 			}
-			console.log(JSON.stringify(data));
-			loadHand(data.hand);
-			makeCall(data.call);
-			loadScore(data);
-			numcards(data.cardsleft);	  
+			process(data, server);
+			gcd.emit("server drew cards", data);
 		});	
 	},
 	
 	
 	"send end game" : function (data) {
-		get('endgame/'+0+"/"+data.gid+"/"+data.name, function (server){
+		servercalls.get('endgame/'+data.uid+"/"+data.gid+"/"+data.name, function (server){
 			if (server.error) {
 				gcd.emit("end game denied", data, server);
 				return false;
 			}
 			gcd.emit("server ended game", data, server);
-		})
+		});
 	},
 	
 	
 	"send view scores" : function (data) {
-		get('viewscores', function (server) {
+		servercalls.get('viewscores', function (server) {
 			if (server.error) {
 				gcd.emit("view scores denied", data, server);
 				return false;
 			}
 			gcd.emit("server sent high scores", data, server);
-		};
+		});
 	},
 
 	'send game review' : function (gid) {
-			get('retrievegame/'+gid,  function (data){				
+			servercalls.get('retrievegame/'+gid,  function (data){				
 				console.log(JSON.stringify(data));
 			});			
 		},
 
 	'send game history' : function (gid) {
-			get('retrievegame/'+gid,  function (data){				
+			servercalls.get('retrievegame/'+gid,  function (data){				
 				console.log(JSON.stringify(data));
 			});			
 		},
 		
 	'send game replay' : function (gid) {
-			get('retrievegame/'+gid,  function (data){				
+			servercalls.get('retrievegame/'+gid,  function (data){				
 				console.log(JSON.stringify(data));
 			});			
-		},
+		}
 	
 };
 
@@ -129,6 +102,20 @@ for (fname in a) {
 	a[fname].desc = file+fname;
 }
 
-	
+var process = function (data, server) {
+  data.gid  = server.gid;
+  data.hand = server.hand;
+  data.call = server.call;
+  data.cardsleft  = server.cardsleft;
+  switch (server.type) {
+		case "basic" :
+			data.streak = server.gamedata.streak;
+			data.score = server.gamedata.score;
+			data.delta = server.delta;
+		break;
+		default : 
+		break;
+	}
+};
 
 		
