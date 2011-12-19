@@ -7,52 +7,66 @@ var gcd;
 var a;
 
 module.exports = function (gcde, data) {
-	gcd = gcde;
-	
-	gcd.on("new game requested"			, a["reset hand state"]);
+  gcd = gcde;
+  
+  gcd.on("new game requested"      , a["reset hand state"]);
 
-	
-	gcd.on("server started new game", a["load hand"]);
-	gcd.on("server started new game", a["make call"]);
+  
+  gcd.on("server started new game", a["load hand"]);
+  gcd.on("server started new game", a["make call"]);
+  gcd.on("server started new game", a["note new hand"]);
+  
 
-	gcd.on("draw cards requested"		, a["check draw state"]);
+  gcd.on("cards discarded"        , a["check for a hail call"]);
+  
+  gcd.on("no cards left to draw" , a["end the game"]);
 
 
-	gcd.on(""												, a[""]);
-	
+  gcd.on(""                        , a[""]);
+  
 };
 
 a = {
-	'reset hand state' : function (data) {
-		data.state = 'newhand';
-	},
-	'load hand' : function  (data) {
-		
-		gcd.emit("hand data processed", data);
-	},
-	'make call' : function  (data) {
-		
-	}
+  'reset hand state' : function (data) {
+    data.state = 'newhand';
+  },
+  'load hand' : function  (data) {
+    
+    gcd.emit("hand data processed", data);
+  },
+  'make call' : function  (data) {
+    
+  },
+  "end the game" : function (data) {
+    gcd.emit("end game requested", data);
+  },
+  "note new hand" : function (data) {
+    data.newhand = true;
+  },
+  "check for a hail call" : function  (data) {
+    var newhand = data.newhand;
+    var count = data.drawcount;
+    if (count === 4) {
+      if (newhand) {
+        gcd.emit("miagan", data);
+      } else {
+        gcd.emit('hail mia', data);
+      }
+    } else if (count === 5) {
+      if (newhand) {
+        gcd.emit("mulligan", data);
+      } else {
+        gcd.emit('hail mar', data);
+      }      
+    }    
+  }
+  
 };
-
-//server sent cards
-			loadScore(data);
-//			
-			numcards(data.cardsleft);
-			showDeck(); 
-
-//server drew cards
-loadHand(data.hand);
-makeCall(data.call);
-loadScore(data);
-numcards(data.cardsleft);
 
 var fname; 
 
 for (fname in a) {
-	a[fname].desc = file+fname;
+  a[fname].desc = file+fname;
 }
 
-hailCall(drawcount, state);
-state = 'oldhand';
-flipCards();
+

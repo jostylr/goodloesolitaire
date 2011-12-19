@@ -3,206 +3,163 @@
       xmlns:og="http://ogp.me/ns#"
       xmlns:fb="http://www.facebook.com/2008/fbml"
       xml:lang="en" lang="en" dir="ltr">
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<meta property="og:title" content="Goodloe Solitaire" />
-		<meta property="og:type" content="game" />
-		<meta property="og:url" content="http://goodloesolitaire.com" />
-		<meta property="og:image" content="http://goodloesolitaire.com/images/logo.png" />
-		<meta property="og:site_name" content="Goodloe Solitaire" />
-		<meta property="fb:app_id" content="280560425329333" />
-		<meta property="og:locale" content="en_US" />
-		<meta property="og:description" content="Continually improve your hand as you draw cards. Put a streak together to really boost your score. Twos are crazy wild!" />
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta property="og:title" content="Goodloe Solitaire" />
+    <meta property="og:type" content="game" />
+    <meta property="og:url" content="http://goodloesolitaire.com" />
+    <meta property="og:image" content="http://goodloesolitaire.com/images/logo.png" />
+    <meta property="og:site_name" content="Goodloe Solitaire" />
+    <meta property="fb:app_id" content="280560425329333" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:description" content="Continually improve your hand as you draw cards. Put a streak together to really boost your score. Twos are crazy wild!" />
 
-		<title>Goodloe Solitaire</title>
-		<meta name="Title" content="Goodloe Solitaire" />
+    <title>Goodloe Solitaire</title>
+    <meta name="Title" content="Goodloe Solitaire" />
         <meta name="Description" content="Improve your hand by drawing cards. Put a streak together to really boost your score. Twos are crazy wild!" />
-		<link rel="shortcut icon" href="images/favicon.ico" />
-		<script src="js/jquery.min.js"></script>
-		<script src="js/bootstrap-twipsy.js"></script>
-		<script src="js/bootstrap-modal.js"></script>
-		<script src="js/browserify.js" type="text/javascript" charset="utf-8"></script>
-		<script type="text/javascript">
-			$(document).ready(function() {
-				submitScore = function(){
-					$('#scoreentry').modal({
-						backdrop: "static",
-						keyboard: true,
-						show: true
-					});
-				};
-				
-				$("#name").click(function () {
-					$('#scoreentry').modal({
-						backdrop: true,
-						keyboard: true,
-						show: true
-					});
-				})
+    <link rel="shortcut icon" href="images/favicon.ico" />
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap-twipsy.js"></script>
+    <script src="js/bootstrap-modal.js"></script>
+    <script src="js/browserify.js" type="text/javascript" charset="utf-8"></script>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link href='http://fonts.googleapis.com/css?family=Amaranth' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Candal' rel='stylesheet' type='text/css'>
+    <script type="text/javascript">
 
-				$("#scoreentry").bind("hide", function () {
-					name = $("#namemodal").val().replace(/\W/g, ''); 
-					if (name) {
-						$("#name a").html(name);
-					}
-				})
+      var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-27149058-1']);
+      _gaq.push(['_setDomainName', 'goodloepoker.com']);
+      _gaq.push(['_addIgnoredRef', 'goodloepoker.com']);
+      _gaq.push(['_trackPageview']);
 
-				$("#scoreentry").bind("show", function () {
-					$("#namemodal").attr("tabindex", 1).focus().select(); 
-				})
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
 
-				$("#submitname").click(function () {
-					$("#scoreentry").modal('hide');
-				})
+    </script>
+  </head>
+  <body>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=280560425329333";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
 
-				$('#about').click(function(){
-					$('#modal-about').modal({
-						backdrop: true,
-						keyboard: true,
-						show: true
-					});
-				});
-				
- 			});
-		</script>
-		<link rel="stylesheet" href="css/bootstrap.min.css">
-		<link rel="stylesheet" href="css/style.css">
-		<link href='http://fonts.googleapis.com/css?family=Amaranth' rel='stylesheet' type='text/css'>
-		<link href='http://fonts.googleapis.com/css?family=Candal' rel='stylesheet' type='text/css'>
-		<script type="text/javascript">
+    <div class="topbar">
+      <div class="fill">
+         <div class="container">
+           <h3 class="brand">Goodloe Solitaire</h3>
+           <ul class="nav">
+             <li id="togglegame"><a id="newgame">Start Game</a><a id="endgame">End Game</a></li>
+             <li id="highscores"><a>High Scores</a></li>
+             <li id="about"><a>About</a></li>
+           </ul>
+           <ul class="nav secondary-nav">
+             <li><div class="fb-login-button" data-show-faces="false" data-width="200"></div></li>
+            <li id="name"><a>Log In</a></li>
+           </ul>
+         </div>
 
-			var _gaq = _gaq || [];
-		  	_gaq.push(['_setAccount', 'UA-27149058-1']);
-			_gaq.push(['_setDomainName', 'goodloepoker.com']);
-			_gaq.push(['_addIgnoredRef', 'goodloepoker.com']);
-			_gaq.push(['_trackPageview']);
+       </div>
+    </div>
 
-		  (function() {
-		    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-		    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-		    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		  })();
-
-		</script>
-	</head>
-	<body>
-		<div id="fb-root"></div>
-		<script>(function(d, s, id) {
-		  var js, fjs = d.getElementsByTagName(s)[0];
-		  if (d.getElementById(id)) return;
-		  js = d.createElement(s); js.id = id;
-		  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=280560425329333";
-		  fjs.parentNode.insertBefore(js, fjs);
-		}(document, 'script', 'facebook-jssdk'));</script>
-
-		<div class="topbar">
-			<div class="fill">
-		 		<div class="container">
-		 			<h3 class="brand">Goodloe Solitaire</h3>
-		 			<ul class="nav">
-		 				<li id="togglegame"><a id="newgame">Start Game</a><a id="endgame">End Game</a></li>
-		 				<li id="highscores"><a>High Scores</a></li>
-		 				<li id="about"><a>About</a></li>
-		 			</ul>
-		 			<ul class="nav secondary-nav">
-		 				<li><div class="fb-login-button" data-show-faces="false" data-width="200"></div></li>
-						<li id="name"><a>Log In</a></li>
-		 			</ul>
-		 		</div>
-
-	 		</div>
-		</div>
-
-		<div class="container">
-  			<div class="content">
-  				<div class="page-header">
-  					<div id="social">
-	    			<div class="fb-like" data-href="http://goodloesolitaire.com" data-send="true" data-width="340" data-show-faces="true" data-colorscheme="dark"></div>
-					</div>
-  				</div>
-		    	<div class="row">
-		    		<div class="span10 main">
-		    			<div id="scores">
-		    				<span id="currentscore"><span id="score">0</span></span>
-		    				<span id="currentchange"><span id="delta"></span></span>
-			    		</div>
-			    		<div id="inarow-container"><span id="inarow">&nbsp;</span></div>
-		    			<div id="drawdeck">
-			    			<div><span id="numcards" class="label notice">52</span></div>
-			    			<div id="dc"><img id="drawcards" src="images/back.png"></div>
-		    			</div>
-			    			<div id="hand">
-				    			<ul>
-					    			<li class="card" id="card1">&nbsp;</li>
-					    			<li class="card" id="card2">&nbsp;</li>
-					    			<li class="card" id="card3">&nbsp;</li>
-					    			<li class="card" id="card4">&nbsp;</li>
-					    			<li class="card" id="card5">&nbsp;</li>
-				    			</ul>
-				    		</div>
-							<img class="hide" src="images/deck.png">
-		    			<div id="handtext"></div>
-						<div id="hail">
-							      <span id="dr4">Hail Mia!</span>
-							      <span id="dr5">Hail Mary!</span>
-							      <span id="m4">Miagan!</span>
-							      <span id="m5">Mulligan!</span>
-						</div>
-		    		</div>
-		    		<div id="history" class="span6 history-table">
-		    			<table>
-		    				<tbody>
-							</tbody>
-		    			</table>
-		    		</div>
-		   	 	</div>
-			</div>
-		</div>
+    <div class="container">
+        <div class="content">
+          <div class="page-header">
+            <div id="social">
+            <div class="fb-like" data-href="http://goodloesolitaire.com" data-send="true" data-width="340" data-show-faces="true" data-colorscheme="dark"></div>
+          </div>
+          </div>
+          <div class="row">
+            <div class="span10 main">
+              <div id="scores">
+                <span id="currentscore"><span id="score">0</span></span>
+                <span id="currentchange"><span id="delta"></span></span>
+              </div>
+              <div id="inarow-container"><span id="inarow">&nbsp;</span></div>
+              <div id="drawdeck">
+                <div><span id="numcards" class="label notice">52</span></div>
+                <div id="dc"><img id="drawcards" src="images/back.png"></div>
+              </div>
+                <div id="hand">
+                  <ul>
+                    <li class="card" id="card1">&nbsp;</li>
+                    <li class="card" id="card2">&nbsp;</li>
+                    <li class="card" id="card3">&nbsp;</li>
+                    <li class="card" id="card4">&nbsp;</li>
+                    <li class="card" id="card5">&nbsp;</li>
+                  </ul>
+                </div>
+              <img class="hide" src="images/deck.png">
+              <div id="handtext"></div>
+            <div id="hail">
+                    <span id="dr4">Hail Mia!</span>
+                    <span id="dr5">Hail Mary!</span>
+                    <span id="m4">Miagan!</span>
+                    <span id="m5">Mulligan!</span>
+            </div>
+            </div>
+            <div id="history" class="span6 history-table">
+              <table>
+                <tbody>
+              </tbody>
+              </table>
+            </div>
+            </div>
+      </div>
+    </div>
 
 
-		<div id="modal-about" class="modal hide fade">
-		    <div class="modal-header">
-		    	<a href="#" class="close">&times;</a>
-		    	<h3>About Goodloe Solitaire</h3>
-		    </div>
-		    <div class="modal-body">
-		    	<h4>How to play</h4>
-		    	<p>Continually improve your hand as you draw one or more cards. Put a streak together to really boost your score. Twos are crazy wild!</p>
-				<h4>Origins</h4>
-				<p>Mr. Stephen Goodloe had the great misfortune to find himself on a trip filled with the most honest-speaking people on Earth. He thought to himself:"This will not do!"and promptly tried to teach them poker. But, being honest, they had no money to their names.</p>
-				<p>Pondering this, he went to the top of a mountain for 30 days and 30 nights. When he came down, he had the perfect game: Goodloe Poker. Pass the hand, try to improve it, and make calls whether true or not.</p>
-				<p>Such is the commonly known history. But what is not so commonly known is that these honest folk had a hard time learning the poker hands and their relative strengths. To remedy this, Mr. Goodloe went deep into the caves for 10 days and 10 nights. When he came out, he taught these honest folk Goodloe Solitaire: just improve the hand.</p>
-				<p>And so it was that he taught these honest, happy people how to play with themselves and lie to others. All hail the Goodloe!</p>
-				<h4>Credits</h4>
-		    	<p>James Taylor and Thomas Park</p>
-		    	<p>With thanks to jQuery, Bootstrap, GitHub, node.js, and MongoDB</p>
-		    </div>
-		</div>
+    <div id="modal-about" class="modal hide fade">
+        <div class="modal-header">
+          <a href="#" class="close">&times;</a>
+          <h3>About Goodloe Solitaire</h3>
+        </div>
+        <div class="modal-body">
+          <h4>How to play</h4>
+          <p>Continually improve your hand as you draw one or more cards. Put a streak together to really boost your score. Twos are crazy wild!</p>
+        <h4>Origins</h4>
+        <p>Mr. Stephen Goodloe had the great misfortune to find himself on a trip filled with the most honest-speaking people on Earth. He thought to himself:"This will not do!"and promptly tried to teach them poker. But, being honest, they had no money to their names.</p>
+        <p>Pondering this, he went to the top of a mountain for 30 days and 30 nights. When he came down, he had the perfect game: Goodloe Poker. Pass the hand, try to improve it, and make calls whether true or not.</p>
+        <p>Such is the commonly known history. But what is not so commonly known is that these honest folk had a hard time learning the poker hands and their relative strengths. To remedy this, Mr. Goodloe went deep into the caves for 10 days and 10 nights. When he came out, he taught these honest folk Goodloe Solitaire: just improve the hand.</p>
+        <p>And so it was that he taught these honest, happy people how to play with themselves and lie to others. All hail the Goodloe!</p>
+        <h4>Credits</h4>
+          <p>James Taylor and Thomas Park</p>
+          <p>With thanks to jQuery, Bootstrap, GitHub, node.js, and MongoDB</p>
+        </div>
+    </div>
 
-		<div id="modal-highscores" class="modal hide fade">
-		    <div class="modal-header">
-		    	<a href="#" class="close">&times;</a>
-		    	<h3>High Scores</h3>
-		    </div>
-		    <div class="modal-body">
-		    	<table id="table-highscores" class="zebra-striped">
-					<tbody id="hs">
-					</tbody>
-				 </table>
-		    </div>
-		</div>
-	  
-	  	<div id="scoreentry" class="modal hide fade">
-			<div class="modal-header">
-		    	<a href="#" class="close">&times;</a>
-		    	<h3>Enter Your Name</h3>
-		    </div>
-		    <div class="modal-body">
-		    	<p id="newhighscoretext">Enter your name for high scores.</p>
-             	<input type="text" maxlength="20" name="namemodal" id="namemodal" autofocus="autofocus" placeholder="Guest" /> 
-             	<input type="submit" name="submitname" value="Done" id="submitname" />
-        	</div>
-		</div>
+    <div id="modal-highscores" class="modal hide fade">
+        <div class="modal-header">
+          <a href="#" class="close">&times;</a>
+          <h3>High Scores</h3>
+        </div>
+        <div class="modal-body">
+          <table id="table-highscores" class="zebra-striped">
+          <tbody id="hs">
+          </tbody>
+         </table>
+        </div>
+    </div>
+    
+      <div id="scoreentry" class="modal hide fade">
+      <div class="modal-header">
+          <a href="#" class="close">&times;</a>
+          <h3>Enter Your Name</h3>
+        </div>
+        <div class="modal-body">
+          <p id="newhighscoretext">Enter your name for high scores.</p>
+               <input type="text" maxlength="20" name="namemodal" id="namemodal" autofocus="autofocus" placeholder="Guest" /> 
+               <input type="submit" name="submitname" value="Done" id="submitname" />
+          </div>
+    </div>
 
-	</body>
+  </body>
 </html>

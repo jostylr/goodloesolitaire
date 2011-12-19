@@ -9,5 +9,5 @@ gcd.on('new cards', gcd.emit('new cards', ...))
 gcd.on('new cards', style.emit('remove backing'))
 
 
-need to write a quick script for grabbing all .emit and .on lines and organizing them into a nice file. So auto documentation. 
 
+scores, history
