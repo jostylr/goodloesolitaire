@@ -1,26 +1,29 @@
 /*globals $, module, console, require*/
 
-var file = 'logic/gamecontrol: ';
+var file = 'type/name: ';
 
-var gcd, ui;
+var gcd;
 
-var a;
+var a, install;
 
-module.exports = function (gcde, uie, data) {
-	ui = uie; 
-	gcd = gcde;
-		
-	
+module.exports = function (gcde, data) {
+  gcd = gcde;
+  
+  install(data);
+  
 };
 
 a = {
-	
+  
 };
 
-var fname; 
 
-for (fname in a) {
-	a[fname].desc = file+fname;
-}
+install = function (data) {
+  
+  var fname; 
 
-gcd.on(""												, a[""]);
+  for (fname in a) {
+    a[fname].desc = file+fname;
+  }  
+};
+

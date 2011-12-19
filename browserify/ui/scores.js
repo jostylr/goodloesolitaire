@@ -11,16 +11,16 @@ module.exports = function (gcde, data) {
   
   install(data); //for initializing click functions, mostly
   
-  gcd.on("draw cards"            , a["clear streak"]);  
-  gcd.on("streak"                ,  a["call streak"]);
-  gcd.on(""                      , a["add score entry"]);
-  gcd.on("high scores loaded"    , a["display high scores"]);
-  gcd.on(""                      , a["pulse scores"]);
-  gcd.on("name entry hidden"    , a["emit submit name" ]);
-  gcd.on("name entry shown"     , a["focus into name modal"]);
-  gcd.on("name submitted"       , a["get name value"]);
-  gcd.on("name entry shown"      , a["bind name entry keys"]);
-  gcd.on("name submitted"       , a["unbind name entry keys"]);
+  gcd.on("draw cards"             , a["clear streak"]);  
+  gcd.on("streak"                 ,  a["call streak"]);
+  gcd.on(""                       , a["add score entry"]);
+  gcd.on("high scores loaded"     , a["display high scores"]);
+  gcd.on(""                       , a["pulse scores"]);
+  gcd.on("name entry hidden"      , a["emit submit name" ]);
+  gcd.on("name entry shown"       , a["focus into name modal"]);
+  gcd.on("name submitted"         , a["get name value"]);
+  gcd.on("name entry shown"       , a["bind name entry keys"]);
+  gcd.on("name submitted"         , a["unbind name entry keys"]);
 
   gcd.on("ready", function () {
     $('#highscores')    .bind("click", a["retrieve high scores for viewing"]);

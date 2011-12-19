@@ -13,7 +13,7 @@ var querycards, handcall, hail, computecardposition;
 module.exports = function (gcde, data) {
   gcd = gcde;
     
-  gcd.on("draw cards requested"    , a["assemble drawn cards"]);
+  gcd.on("draw cards requested"   , a["assemble drawn cards"]);
   gcd.on("cards discarded"        , a["use backing for discarded cards"]);
   
   gcd.on("hand loaded"            , a["restore cards"]);

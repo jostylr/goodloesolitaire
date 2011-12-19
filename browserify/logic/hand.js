@@ -11,7 +11,6 @@ module.exports = function (gcde, data) {
   
   gcd.on("new game requested"      , a["reset hand state"]);
 
-  
   gcd.on("server started new game", a["load hand"]);
   gcd.on("server started new game", a["make call"]);
   gcd.on("server started new game", a["note new hand"]);
@@ -20,10 +19,6 @@ module.exports = function (gcde, data) {
   gcd.on("cards discarded"        , a["check for a hail call"]);
   
   gcd.on("no cards left to draw" , a["end the game"]);
-
-
-  gcd.on(""                        , a[""]);
-  
 };
 
 a = {

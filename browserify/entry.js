@@ -34,12 +34,12 @@ console.log("running");
 
 require('./logic/gamecontrol'  )(gcd, data);
 require('./logic/history'      )(gcd, data);
-require('./logic/hand'        )(gcd, data);
-require('./logic/scores'      )(gcd, data);
+require('./logic/hand'         )(gcd, data);
+require('./logic/scores'       )(gcd, data);
 
 require('./ui/gamecontrol'    )(gcd, data);
 require('./ui/history'        )(gcd, data);
-require('./ui/hand'            )(gcd, data);
+require('./ui/hand'           )(gcd, data);
 require('./ui/score'          )(gcd, data);
 
 

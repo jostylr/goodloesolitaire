@@ -14,9 +14,9 @@ module.exports = function (gcde, data) {
   gcd = gcde;
   
   gcd.on("ready"                , a["initial values"]);
-  gcd.on('new game requested'    , a["send new game"]);
+  gcd.on('new game requested'   , a["send new game"]);
   gcd.on('cards discarded'      , a["send draw cards"]);  
-  gcd.on('end game requested'    , a["send end game"]);
+  gcd.on('end game requested'   , a["send end game"]);
   gcd.on('high scores requested', a["send view scores"]);
   
   
