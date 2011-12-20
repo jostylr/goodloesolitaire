@@ -807,7 +807,8 @@ module.exports = function (gcde, data) {
 
   gcd.on("server started new game", a["make call"]);
   gcd.on("server started new game", a["note new hand"]);
-  
+
+  gcd.on("hail call checked"      , a["note old hand"]);
 
   gcd.on("cards discarded"        , a["check for a hail call"]);
   
@@ -827,6 +828,9 @@ a = {
   "note new hand" : function (data) {
     data.newhand = true;
   },
+  "note old hand" : function (data) {
+    data.newhand = false;
+  },
   "check for a hail call" : function  (data) {
     var newhand = data.newhand;
     var count = data.drawcount;
@@ -840,9 +844,10 @@ a = {
       if (newhand) {
         gcd.emit("mulligan", data);
       } else {
-        gcd.emit('hail mar', data);
+        gcd.emit('hail mary', data);
       }      
-    }    
+    }
+    gcd.emit("hail call checked", data);
   }
   
 };
