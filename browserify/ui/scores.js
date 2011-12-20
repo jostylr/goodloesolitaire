@@ -15,6 +15,7 @@ module.exports = function (gcde, data) {
   gcd.on("new game requested"     , a["clear streak"]);
   gcd.on("streak"                 , a["call streak"]); //
   gcd.on("name entry shown"       , a["add score entry"]); //send endgame
+  gcd.on("end game requested"     , a["add listener to show high scores"]);
 //  gcd.on("high scores checked"    , a["display high scores"]);//
   gcd.on("server started new game" , a["pulse positive score"]);
   gcd.on("negative change in score", a["pulse negative score"]);
@@ -48,6 +49,9 @@ a = {
       $('#scoreentry').unbind('hide', self); //self cleanup
       gcd.emit('send endgame');
     });
+  },
+  "add listener to show high scores" : function (data) {
+    gcd.once("high scores checked", a["display high scores"]);
   },
   'display high scores' : function (data) {
     var row, rowclass, n, i, date;

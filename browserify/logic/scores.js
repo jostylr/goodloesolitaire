@@ -15,6 +15,7 @@ module.exports = function (gcde, data) {
   gcd.on("server drew cards"        , a["check for streak"]); // streak OR nothing
   
   gcd.on("server sent high scores"  , a["look for new high scores"]);  // high scores checked
+  gcd.on("server ended game"        , a["look for new high scores"]);  // high scores checked
   
   gcd.on("ready"                    , a["initialize score data"]);
     
