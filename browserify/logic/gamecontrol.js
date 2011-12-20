@@ -57,7 +57,11 @@ a = {
   
   
   "send end game" : function (data) {
-    servercalls.get('endgame/'+data.uid+"/"+data.gid+"/"+data.name, function (server){
+    var name = data.name;
+    if (!name) {
+      name = "___";
+    }
+    servercalls.get('endgame/'+data.uid+"/"+data.gid+"/"+name, function (server){
       if (server.error) {
         gcd.emit("end game denied", data, server);
         return false;

@@ -554,7 +554,11 @@ a = {
   
   
   "send end game" : function (data) {
-    servercalls.get('endgame/'+data.uid+"/"+data.gid+"/"+data.name, function (server){
+    var name = data.name;
+    if (!name) {
+      name = "___";
+    }
+    servercalls.get('endgame/'+data.uid+"/"+data.gid+"/"+name, function (server){
       if (server.error) {
         gcd.emit("end game denied", data, server);
         return false;
@@ -970,13 +974,16 @@ module.exports = function (gcde, data) {
   
   gcd.on("new game requested" , a["remove main fade"]);
   
-  gcd.on("game started"       , a["install endgame"]);
-  gcd.on("game started"       , a["bind hand keys"]);
-  gcd.on("game started"       , a["listen for name entry"]);
+  gcd.on("server started new game", a["install endgame"]);
+  gcd.on("server started new game", a["bind hand keys"]);
+  gcd.on("server started new game", a["listen for name entry"]);
+  gcd.on("server started new game", a["remove main fade"]);
   
-  gcd.on("game ended"         , a["install startgame"]);
-  gcd.on("game ended"         , a["unbind hand keys"]);
-  gcd.on("game ended"         , a["remove listen for name entry"]);
+  gcd.on("server ended game"      , a["install startgame"]);
+  gcd.on("server ended game"      , a["unbind hand keys"]);
+  gcd.on("server ended game"      , a["remove listen for name entry"]);
+  gcd.on("server ended game"      , a["fade main"]);
+  
 
   gcd.on("end game requested" , a["emit check score/name"]);
   
@@ -994,7 +1001,7 @@ a = {
     $("#togglegame").html('<a id="endgame">End Game</a>');        
   },
   "install startgame": function () {
-    $("#togglegame").html('<a id="endgame">End Game</a>');      
+    $("#togglegame").html('<a id="newgame">Start Game</a>');      
   },
   "skip name" : function (data) {
     gcd.removeListener("end game", a["emit check"]);
@@ -1005,11 +1012,10 @@ a = {
   "remove main fade" : function  (data) {
     $(".main").fadeTo(200, 1);
   },
-  "fade main" : function  () {
+  "fade main" : function  (data) {
     $(".main").fadeTo(600, fadelevel, function () {
-      gcd.emit("main is faded");
+      gcd.emit("main is faded", data);
     });
-    gcd.emit("restore cards");
   },
   
 
@@ -1579,7 +1585,7 @@ var eventdebugger = function (evem) {
       }
     } else {
       console.log(eventlogger.length+". "+ev);
-      eventlogger.push([ev, JSON.parse(JSON.stringify(data))]);
+      eventlogger.push([ev, (data) ? JSON.parse(JSON.stringify(data)) : {}]);
       var list = evem.listeners(ev);
       //console.log("list"+list)
       var i, n; 
