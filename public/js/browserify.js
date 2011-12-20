@@ -1165,7 +1165,8 @@ require.define("/ui/hand.js", function (require, module, exports, __dirname, __f
 
 var file = 'ui/hand: ';
 
-var deck = require('../utilities/cards').deck;
+var cardutil = require('../utilities/cards');
+var deck = cardutil.deck;
 
 var gcd;
 
@@ -1189,6 +1190,7 @@ module.exports = function (gcde, data) {
 
   
   gcd.on("hand loaded"            , a["restore cards"]);
+  gcd.on("hand loaded"            , a["make full hand call"]);
   
   
   gcd.on("no cards left to draw"  , a["remove deck"]);
@@ -1231,6 +1233,7 @@ a = {
   },
   
   "make full hand call" : function (data) {
+    console.log(handcall(data.call));
     $("#handtext").html(handcall(data.call));
   },
   
@@ -1322,8 +1325,9 @@ querycards = function () {
   return [draws, drawcount];
 };
 
-handcall = function (call, ranks) {
-  switch (call) {
+handcall = function (call) {
+  var ranks = cardutil.handcall(call)[1];
+  switch (call[0]) {
     case "5":  return "Five "+ranks[0]; 
     case "sf": return ranks[0]+" High Straight Flush"; 
     case "4":  return "Four "+ranks[0]+" and a "+ranks[1]+" kicker"; 
@@ -1334,6 +1338,7 @@ handcall = function (call, ranks) {
     case "2p": return "Two pair: "+ranks[0]+", "+ranks[1]+" and a "+ranks[2]+" kicker"; 
     case "2":  return "Pair of "+ranks[0]+" with "+ranks[1]+", "+ranks[2]+", "+ranks[3]+" kickers"; 
     case "1":  return  ranks[0]+" high  and "+ranks[1]+", "+ranks[2]+", "+ranks[3]+", "+ranks[4]+" kickers"; 
+    default :  return "";
   }
 };
 
@@ -1378,6 +1383,7 @@ module.exports = function (gcde, data) {
   install(data); //for initializing click functions, mostly
   
   gcd.on("draw cards"             , a["clear streak"]); //
+  gcd.on("new game requested"     , a["clear streak"]);
   gcd.on("streak"                 , a["call streak"]); //
   gcd.on("name entry shown"       , a["add score entry"]); //send endgame
 //  gcd.on("high scores checked"    , a["display high scores"]);//
