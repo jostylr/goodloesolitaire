@@ -38,6 +38,9 @@ module.exports = function (gcde, data) {
 };
 
 a = {
+  "update number of cards" : function () {
+    console.log("just a stub");
+  },
   "load hand" : function (data) {
     var hand = data.hand;
     $('#hand li').each(function () {

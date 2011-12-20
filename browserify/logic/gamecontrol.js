@@ -34,7 +34,7 @@ a = {
   //server calls
   
   "send new game": function (data) {
-    servercalls.servercalls.get('shuffle/'+data.uid+'/'+data.type, function (server) {
+    servercalls.get('shuffle/'+data.uid+'/'+data.type, function (server) {
       if (server.error) {
         gcd.emit("new game denied", data, server);
         return false;
@@ -45,7 +45,7 @@ a = {
   },
   
   "send draw cards" : function (data) {
-    servercalls.servercalls.get('drawcards/'+data.uid+'/'+data.gid+'/'+data.draws, function (server){
+    servercalls.get('drawcards/'+data.uid+'/'+data.gid+'/'+data.draws, function (server){
       if (server.error) {
         gcd.emit("failed to draw cards", data, server);
         return false;
@@ -77,7 +77,8 @@ a = {
         gcd.emit("view scores denied", data, server);
         return false;
       }
-      gcd.emit("server sent high scores", data, server);
+      data.highscores = server.highscores; 
+      gcd.emit("server sent high scores", data);
     });
   },
 

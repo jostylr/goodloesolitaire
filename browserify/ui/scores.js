@@ -11,11 +11,13 @@ module.exports = function (gcde, data) {
   
   install(data); //for initializing click functions, mostly
   
-  gcd.on("draw cards"             , a["clear streak"]);  
-  gcd.on("streak"                 ,  a["call streak"]);
-  gcd.on(""                       , a["add score entry"]);
-  gcd.on("high scores loaded"     , a["display high scores"]);
-  gcd.on(""                       , a["pulse scores"]);
+  gcd.on("draw cards"             , a["clear streak"]); //
+  gcd.on("streak"                 , a["call streak"]); //
+  gcd.on("name entry shown"       , a["add score entry"]); //send endgame
+  gcd.on("high scores checked"    , a["display high scores"]);//
+  gcd.on("negative change in score", a["pulse negative score"]);
+  gcd.on("positive change in score", a["pulse positive score"]);  
+  gcd.on("no change in score"     , a["no score change"]);    
   gcd.on("name entry hidden"      , a["emit submit name" ]);
   gcd.on("name entry shown"       , a["focus into name modal"]);
   gcd.on("name submitted"         , a["get name value"]);
@@ -57,15 +59,46 @@ a = {
       gcd.emit('send endgame');
     });
   },
-  'display high scores' : function () {$('#modal-highscores').modal({
+  'display high scores' : function (data) {
+    var row, rowclass, n, i, date;
+    n = data.highscores.length;
+    var htmltablebody = '';
+    for (i = 0; i<n; i += 1) {
+      row = data.highscores[n-1-i];
+      date = new Date (row.date);
+      date = date.getMonth()+1+'/'+date.getDate()+'/'+date.getFullYear();
+      if (row.ownscore) {
+        rowclass = 'class="newHighScore"';
+      }
+      if (row.externalnewscore) {
+        rowclass = 'class="otherNewHighScore"';
+      }
+      htmltablebody += '<tr '+rowclass+' id="'+row._id+'"><td>'+(i+1)+'.</td><td>'+row.name+'</td><td>'+row.score+'</td><td>'+date+'</td></tr>';
+    }    
+    $("#hs").html(htmltablebody);    
+    
+    $('#modal-highscores').modal({
       backdrop: true,
       keyboard: true,
       show: true
     });
   }, 
-  "pulse scores" : function (data) {
+  "pulse negative score" : function (data) {
+    $("#score").html(data.gamedata.score);
+    $("#delta").html("&#x25BC;"+(-1*data.delta));
     $('#score, #delta').removeClass("scoreminus scoreplus");
-    setTimeout(function () {$('#score, #delta').addClass(data.scoreclass);}, 5);
+    setTimeout(function () {$('#score, #delta').addClass("scoreminus");}, 5);
+  },
+  "pulse positive score" : function (data) {
+    $("#score").html(data.gamedata.score);
+    $("#delta").html("&#x25B2;"+data.delta);
+    $('#score, #delta').removeClass("scoreminus scoreplus");
+    setTimeout(function () {$('#score, #delta').addClass("scoreplus");}, 5);
+  },
+  "no score change" : function (data) {
+    $("#score").html(data.gamedata.score);
+    $("#delta").html("▬");
+    $('#score, #delta').removeClass("scoreminus scoreplus");
   },
   
   

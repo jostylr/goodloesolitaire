@@ -494,117 +494,1025 @@ EventEmitter.prototype.listeners = function(type) {
 
 });
 
-require.define("/history.js", function (require, module, exports, __dirname, __filename) {
-    /*globals module, console*/
+require.define("/logic/gamecontrol.js", function (require, module, exports, __dirname, __filename) {
+    /*globals $, module, console, require*/
 
-var historyCount, zeroCount, incCount, assembleTableRow, oldHand, suitHtml, shortHand, shortHandCall; 
+var file = 'logic/gamecontrol: ';
 
-var gcde, uie;
+var servercalls = require('../utilities/server');
 
-module.exports = function (gcd, ui) {
-	gcd.on("clear history", zeroCount);
+var gcd;
 
-	gcd.on("prep for add history", incCount);
-	gcd.on("prep for add history", assembleTableRow);
-	gcd.on("prep for add history", function () {console.log("add history")});
+var a;
+
+var process;
+
+module.exports = function (gcde, data) {
+  gcd = gcde;
+  
+  gcd.on("ready"                , a["initial values"]);
+  gcd.on('new game requested'   , a["send new game"]);
+  gcd.on('cards discarded'      , a["send draw cards"]);  
+  gcd.on('end game requested'   , a["send end game"]);
+  gcd.on('high scores requested', a["send view scores"]);
+  
+  
+};
+
+a = {
+  "initial values" : function (data) {
+    data.uid = '0'; //set by server
+    data.gid = '0'; //set by server
+    data.type = 'basic'; //toggle options
+    data.name = false;    
+  },
+  
+  
+  //server calls
+  
+  "send new game": function (data) {
+    servercalls.get('shuffle/'+data.uid+'/'+data.type, function (server) {
+      if (server.error) {
+        gcd.emit("new game denied", data, server);
+        return false;
+      }
+      process(data, server);
+      gcd.emit("server started new game", data);
+    });
+  },
+  
+  "send draw cards" : function (data) {
+    servercalls.get('drawcards/'+data.uid+'/'+data.gid+'/'+data.draws, function (server){
+      if (server.error) {
+        gcd.emit("failed to draw cards", data, server);
+        return false;
+      }
+      process(data, server);
+      gcd.emit("server drew cards", data);
+      if (data.cardsleft <= 0) {
+        gcd.emit("no cards left to draw", data);
+      }
+      
+    });  
+  },
+  
+  
+  "send end game" : function (data) {
+    servercalls.get('endgame/'+data.uid+"/"+data.gid+"/"+data.name, function (server){
+      if (server.error) {
+        gcd.emit("end game denied", data, server);
+        return false;
+      }
+      gcd.emit("server ended game", data, server);
+    });
+  },
+  
+  
+  "send view scores" : function (data) {
+    servercalls.get('viewscores', function (server) {
+      if (server.error) {
+        gcd.emit("view scores denied", data, server);
+        return false;
+      }
+      data.highscores = server.highscores; 
+      gcd.emit("server sent high scores", data);
+    });
+  },
+
+  'send game review' : function (gid) {
+      servercalls.get('retrievegame/'+gid,  function (data){        
+        console.log(JSON.stringify(data));
+      });      
+    },
+
+  'send game history' : function (gid) {
+      servercalls.get('retrievegame/'+gid,  function (data){        
+        console.log(JSON.stringify(data));
+      });      
+    },
+    
+  'send game replay' : function (gid) {
+      servercalls.get('retrievegame/'+gid,  function (data){        
+        console.log(JSON.stringify(data));
+      });      
+    }
+  
+};
+
+var fname; 
+
+for (fname in a) {
+  a[fname].desc = file+fname;
+}
+
+var process = function (data, server) {
+  data.gid  = server.gid;
+  data.hand = server.hand;
+  data.call = server.call;
+  data.cardsleft  = server.cardsleft;
+  switch (server.type) {
+    case "basic" :
+      data.streak = server.gamedata.streak;
+      data.score = server.gamedata.score;
+      data.delta = server.delta;
+    break;
+    default : 
+    break;
+  }
+};
+
+    
+
+});
+
+require.define("/utilities/server.js", function (require, module, exports, __dirname, __filename) {
+    /*globals $, exports, console*/
+
+//server interaction. A thin wrapper around jquery server methods
 	
+var server = '';//'http://127.0.0.1:3000/';	
 	
+console.log("server")
 	
-	uie = ui; 
-	gcde = gcd;
-	
+exports.put = function (command, data, callback) {
+	$.ajax(server + command, {
+		type: 'POST',
+		data: JSON.stringify(data),
+		contentType: 'application/json',
+		dataType: "json",
+		success: callback || function (data, status) {console.log(command, data, status);},
+		error  : function() { console.log("error response"); }
+	});
 };
 
-historyCount = 0;
-
-zeroCount = function () {
-	historyCount = 0;
+exports.get = function (command, callback) {
+	$.ajax(server + command, {
+		type: 'GET',
+		contentType: 'application/json',
+		dataType: "json",
+		success: callback || function (data, status) {console.log(command, data, status);},
+		error  : function() { console.log("error response"); }
+	});
 };
 
-incCount = function () {
-		historyCount +=1;
+});
+
+require.define("/logic/history.js", function (require, module, exports, __dirname, __filename) {
+    /*globals $, module, console, require*/
+
+var file = 'logic/history: ';
+
+var gcd;
+
+var a;
+
+var cardutil = require('../utilities/cards');
+
+
+module.exports = function (gcde, data) {
+  gcd = gcde;
+  gcd.on("new game requested"    , a["zero history count"]);
+  gcd.on("draw cards requested"  , a["increment history count"]);
+  gcd.on("score loaded"          , a["process row data"]);
 };
 
-
-assembleTableRow = function (info) {
-	 uie.emit("add history", {
-		num: historyCount,
-		score: info.score, 
-		deltalablel: info.deltalabel,
-		hand: shortHand(info.hand), 
-		call: shortHandCall(info.call)
-		});
+a = {
+  "zero history count" : function (data) {
+    data.historyCount = 0;
+  }, 
+  "increment history count" : function (data) {
+    data.historyCount += 1;
+  },
+  "process row data" : function (data) {
+    data.shorthand = cardutil["generate short hand string"](data.hand);
+    data.shortcall = cardutil["generate short version of call"](data.call);
+    gcd.emit("add history", data); 
+  } 
 };
 
+var fname; 
 
-oldHand = false;
+for (fname in a) {
+  a[fname].desc = file+fname;
+}
+});
 
-suitHtml = {
-	c: "&#x2663;",
-	d: "&#x2666;", 
-	h: "&#x2665;",
-	s: "&#x2660;"
+require.define("/utilities/cards.js", function (require, module, exports, __dirname, __filename) {
+    /*globals exports */
+  
+var ranks = {
+    "A": ["Aces", "Ace"], 
+    "K": ["Kings","King"],
+    "Q": ["Queens","Queen"] ,
+    "J": ["Jacks","Jack"],
+    "T": ["Tens","Ten"],
+    "9": ["Nines","Nine"],
+    "8": ["Eights","Eight"],
+    "7": ["Sevens","Seven"],
+    "6": ["Sixes","Six"],
+    "5": ["Fives","Five"],
+    "4": ["Fours","Four"],
+    "3": ["Threes","Three"],
+    "2": ["Twos", "Two"]
+};
+      
+
+exports.deck = ["2c",  "2d",  "2h",  "2s",  "3c",  "3d",  "3h",  "3s",  "4c",  "4d",  "4h",  "4s",  "5c",  "5d",  "5h",  "5s",  
+          "6c",  "6d",  "6h",  "6s",  "7c",  "7d",  "7h",  "7s",  "8c",  "8d",  "8h",  "8s",  "9c",  "9d",  "9h",  "9s", 
+          "Tc",  "Td",  "Th",  "Ts",  "Jc",  "Jd",  "Jh",  "Js",  "Qc",  "Qd",  "Qh",  "Qs",  "Kc",  "Kd",  "Kh",  "Ks", 
+          "Ac",  "Ad",  "Ah",  "As"
+];   
+
+exports.handcall = function (call) {
+  switch (call[0]) {
+    case "5":  return ["5" , [ranks[call[1]][0] ]]; 
+    case "sf": return ["sf", [ranks[call[1]][1] ]];
+    case "4":  return ["4" , [ranks[call[1]][0], ranks[call[2]][1] ]]; 
+    case "fh": return ["fh", [ranks[call[1]][0], ranks[call[2]][0] ]]; 
+    case "f":  return ["f" , [ranks[call[1]][1] ]]; 
+    case "s":  return ["s" , [ranks[call[1]][1] ]]; 
+    case "3":  return ["3" , [ranks[call[1]][0], ranks[call[2]][1], ranks[call[3]][1] ]]; 
+    case "2p": return ["2p", [ranks[call[1]][0], ranks[call[2]][0], ranks[call[3]][1] ]];
+    case "2":  return ["2" , [ranks[call[1]][0], ranks[call[2]][1], ranks[call[3]][1], ranks[call[4]][1] ]]; 
+    case "1":  return ["1" , [ranks[call[1]][1], ranks[call[2]][1], ranks[call[3]][1], ranks[call[4]][1], ranks[call[5]][1] ]]; 
+  }
 };
 
-shortHand = function (hand) {
-	var i; 
-	if (!oldHand) {
-		oldHand = hand;
-	}
-	var ret = '';
-	for (i = 0; i < 5; i+=1) {
-		if (hand[i] === oldHand[i]) {
-		  ret += " "+hand[i][0] +suitHtml[hand[i][1]]+" ";	
-		} else {
-		  ret += " <strong>"+hand[i][0] +suitHtml[hand[i][1]]+"</strong> ";					
-		}
-	}
-	oldHand = hand; 
-	return ret;
+  
+var suitHtml = {
+  c: "&#x2663;",
+  d: "&#x2666;", 
+  h: "&#x2665;",
+  s: "&#x2660;"
 };
 
-shortHandCall = function (call){
-	switch (call[0]) {
-		case "5":  return "5K";
-		case "sf": return "SF";
-		case "4":  return "4K";
-		case "fh": return "FH";
-		case "f":  return "Fl";
-		case "s":  return "St";
-		case "3":  return "3K";
-		case "2p": return "2P";
-		case "2":  return "1P";
-		case "1":  return "▬" ;
-	}
+var oldHand = false;
+
+exports["generate short hand string"] = function (hand) {
+  var i; 
+  if (!oldHand) {
+    oldHand = hand;
+  }
+  var ret = [];
+  for (i = 0; i < 5; i+=1) {
+    if (hand[i] === oldHand[i]) {
+      ret.push('old', [hand[i][0], suitHtml[hand[i][1]]]);  
+    } else {
+      ret.push('new', [hand[i][0], suitHtml[hand[i][1]]]);
+    }
+  }
+  oldHand = hand; 
+  return ret;
 };
 
+exports["generate short version of call"] = function (call){
+  switch (call[0]) {
+    case "5":  return "5K";
+    case "sf": return "SF";
+    case "4":  return "4K";
+    case "fh": return "FH";
+    case "f":  return "Fl";
+    case "s":  return "St";
+    case "3":  return "3K";
+    case "2p": return "2P";
+    case "2":  return "1P";
+    case "1":  return "▬" ;
+  }
+};
+
+});
+
+require.define("/logic/hand.js", function (require, module, exports, __dirname, __filename) {
+    /*globals $, module, console*/
+
+var file = 'logic/hand: ';
+
+var gcd;
+
+var a;
+
+module.exports = function (gcde, data) {
+  gcd = gcde;
+  
+  gcd.on("new game requested"      , a["reset hand state"]);
+
+  gcd.on("server started new game", a["load hand"]);
+  gcd.on("server started new game", a["make call"]);
+  gcd.on("server started new game", a["note new hand"]);
+  
+
+  gcd.on("cards discarded"        , a["check for a hail call"]);
+  
+  gcd.on("no cards left to draw" , a["end the game"]);
+};
+
+a = {
+  'reset hand state' : function (data) {
+    data.state = 'newhand';
+  },
+  'load hand' : function  (data) {
+    
+    gcd.emit("hand data processed", data);
+  },
+  'make call' : function  (data) {
+    
+  },
+  "end the game" : function (data) {
+    gcd.emit("end game requested", data);
+  },
+  "note new hand" : function (data) {
+    data.newhand = true;
+  },
+  "check for a hail call" : function  (data) {
+    var newhand = data.newhand;
+    var count = data.drawcount;
+    if (count === 4) {
+      if (newhand) {
+        gcd.emit("miagan", data);
+      } else {
+        gcd.emit('hail mia', data);
+      }
+    } else if (count === 5) {
+      if (newhand) {
+        gcd.emit("mulligan", data);
+      } else {
+        gcd.emit('hail mar', data);
+      }      
+    }    
+  }
+  
+};
+
+var fname; 
+
+for (fname in a) {
+  a[fname].desc = file+fname;
+}
 
 
 
 });
 
+require.define("/logic/scores.js", function (require, module, exports, __dirname, __filename) {
+    /*globals $, module, console, require*/
+
+var file = 'logic/score: ';
+
+var gcd;
+
+var a;
+
+module.exports = function (gcde, data) {
+  gcd = gcde;
+
+  gcd.on("server drew cards"        , a["check delta"]);  // (negative OR positive OR no) change in score
+  gcd.on("server drew cards"        , a["check for streak"]); // streak OR nothing
+  
+  gcd.on("server sent high scores"  , a["look for new high scores"]);  // high scores checked
+  
+  gcd.on("ready", function (data) {
+    data.score = 0;
+    data.highscores = [];
+    data["old high scores"] = false;
+  });
+    
+  
+};
+
+a = {
+  
+  'check score/name' : function (data) {
+    if (!data.name && data.score >= data.highscores[0].score) {
+      gcd.emit("name requested for high score", data);
+      // submitScore();  //shows modal
+    } else {
+      gcd.emit("send endgame");    
+    }
+  },
+  
+  
+  "check delta" : function  (data) {
+    var delta = data.delta;
+    if (delta < 0) {
+      gcd.emit("negative change in score", data);
+    } else if (delta > 0) {
+      gcd.emit("positive change in score", data);
+    } else {
+      gcd.emit("no change in score", data);
+    }
+  },
+  "check for streak" : function  (data) {
+    if ((data.streak >2) && (data.delta >0)) {
+      gcd.emit("streak", data);
+    }
+  },
+  
+  "look for new high scores" : function  (data) {
+    var i, n, row, date, tempOldHighScores, rowClass, highscores;
+    highscores = data.highscores; 
+    n = highscores.length;
+    tempOldHighScores = {};
+    for (i = 0; i<n; i += 1) {
+      row = highscores[n-1-i];
+      if (data.gid === row._id) {
+        row.ownscore = true;
+      } else if (data.oldHighScores && !(data.oldHighScores.hasOwnProperty(row._id)) ) {
+        //new high scores from others added
+        row.externalnewscore = true;
+      }
+      tempOldHighScores[row._id] = true;
+    }    
+    data.oldHighScores = tempOldHighScores;
+    gcd.emit("high scores checked");
+  }
+  
+};
+
+var fname; 
+
+for (fname in a) {
+  a[fname].desc = file+fname;
+}
+
+
+});
+
+require.define("/ui/gamecontrol.js", function (require, module, exports, __dirname, __filename) {
+    /*globals $, module, console, require*/
+
+var file = 'ui/gamecontrol: ';
+
+var gcd;
+
+var a, install;
+
+var fadelevel = 0.4;
+
+
+module.exports = function (gcde, data) {
+  gcd = gcde;
+  
+  install(data);
+  
+  gcd.on("new game requested" , a["remove main fade"]);
+  
+  gcd.on("game started"       , a["install endgame"]);
+  gcd.on("game started"       , a["bind hand keys"]);
+  gcd.on("game started"       , a["listen for name entry"]);
+  
+  gcd.on("game ended"         , a["install startgame"]);
+  gcd.on("game ended"         , a["unbind hand keys"]);
+  gcd.on("game ended"         , a["remove listen for name entry"]);
+
+  gcd.on("end game requested" , a["emit check score/name"]);
+  
+  gcd.once("name registered"  , a["skip name"]);
+  
+  
+  gcd.on("ready", function () {
+    $("#newgame").live('click', a["emit new game"](data));
+    $("#drawcards").click(a["emit draw cards"](data));
+    $("#endgame").live('click', a["emit end game"](data));
+    $("#endgame").hide(); 
+    $(".main").fadeTo(100, fadelevel);
+    $("#hs").click(a["emit retrieve game"](data));
+    $("#about").click(a["show about"]);
+  
+    
+  });
+};
+
+
+a = {
+  "install endgame" : function () {
+    $("#togglegame").html('<a id="endgame">End Game</a>');        
+  },
+  "install startgame": function () {
+    $("#togglegame").html('<a id="endgame">End Game</a>');      
+  },
+  "skip name" : function (data) {
+    gcd.removeListener("end game", a["emit check"]);
+    gcd.on("end game", function (data) {
+      gcd.emit("send end game", data);
+    }); 
+  },
+  "remove main fade" : function  (data) {
+    $(".main").fadeTo(200, 1);
+  },
+  "fade main" : function  () {
+    $(".main").fadeTo(600, fadelevel, function () {
+      gcd.emit("main is faded");
+    });
+    gcd.emit("restore cards");
+  },
+  
+
+  "emit check score/name" : function (data) {
+    gcd.emit("check score and name", data); //removed after usage
+  },
+  "show about" : function () {
+    $('#modal-about').modal({
+      backdrop: true,
+      keyboard: true,
+      show: true
+    });
+  },
+
+  //key clicks
+  "hand key bindings": function (evnt) {
+         var key = evnt.keyCode; 
+         switch (key) {
+          case 49: $('#hand li:nth-child(1)').click(); break;//1 card as visible
+          case 50: $('#hand li:nth-child(2)').click(); break;
+          case 51: $('#hand li:nth-child(3)').click(); break;
+          case 52: $('#hand li:nth-child(4)').click(); break;
+          case 53: $('#hand li:nth-child(5)').click(); break;
+          case 13: $('#drawcards').click(); return false; //enter drawcards
+         }
+  },
+  "bind hand keys" : function () {
+    $('html').bind('keyup', a["hand key bindings"]);
+  },
+  "unbind hand keys" : function () {
+    $('html').unbind('keyup', a["hand key bindings"]);
+  },
+  "listen for name entry" : function () {
+    gcd.on("name entry shown"      , a["bind hand keys"]);
+    gcd.on("name submitted"       , a["unbind hand keys"]);
+  },
+  "remove listen for name entry" : function () {
+    gcd.removeListener("name entry shown", a["bind hand keys"]);
+    gcd.removeListener("name submitted"  , a["unbind hand keys"]);
+  }
+  
+};
+
+install = function (data) {
+  a["emit new game"] = function () {
+    gcd.emit("new game requested", data);
+  };
+   
+  a["emit draw cards"] = function () {
+    gcd.emit("draw cards requested", data);
+  };
+  
+  a["emit end game"] = function  () {
+    gcd.emit("end game requested", data);      
+  };
+  
+  a["emit retrieve game"] = function (event) {
+    data.requestedgid = $(event.target).parents("tr").attr("id");
+    gcd.emit('old game requested', data);
+  };
+  
+  var fname; 
+  for (fname in a) {
+    a[fname].desc = file+fname;
+  }
+  
+};
+});
+
 require.define("/ui/history.js", function (require, module, exports, __dirname, __filename) {
-    /*globals $, module, console*/
+    /*globals $, module, console, require*/
 
-var emptyTable, addRow;
+var file = 'ui/history: ';
 
-module.exports = function (gcd, ui) {
-	gcd.on("clear history", emptyTable);
-	
-	ui.on("add history", addRow);
-	
+var gcd;
+
+var a;
+
+var deltalabel; 
+
+module.exports = function (gcde, data) {
+  gcd = gcde;
+    
+  gcd.on("clear history", a['empty history body']);
+  
+  gcd.on("add history", a['add row to history']);
+  
+  
 };
 
-emptyTable = function () {
-	$('#history table tbody').empty();
+a = {
+  'empty history body' :  function () {
+    $('#history table tbody').empty();
+  },
+  
+  'add row to history' :  function (data) {
+    $('#history table tbody').prepend(
+      "<tr><td>" + data.num + ".</td><td>" +
+      data.score + "</td><td><span " + deltalabel(data.delta) + "</span></td><td class='left'>" +
+      a["assemble the hand's short call"](data.shorthand) +
+      "</td><td>" + data.shortcall + "</td></tr>"
+      );    
+  }, 
+  
+  "assemble the hand's short call" :  function (hand) {
+    var i, n, c, shc; 
+    n = hand.length; 
+    shc = '';
+    for (i= 0; i <n; i += 1) {
+      c = hand[i];
+      if (c[0] === "new") {
+        shc += " <strong>"+c[1] +c[2]+"</strong> ";          
+      } else {
+        shc += " " + c[1] + c[2] + " ";                
+      }
+    }
+    return shc; 
+  }
 };
 
-addRow = function (info) {
-	$('#history table tbody').prepend("<tr><td>"+info.num+".</td><td>"+
-		   info.score+"</td><td><span "+info.deltalabel+"</span></td><td class='left'>"+
-		   info.hand+"</td><td>"+info.call+"</td></tr>"
-		);		
+var fname; 
+
+for (fname in a) {
+  a[fname].desc = file+fname;
+}
+
+deltalabel = function (delta) {
+  if (delta > 0) {
+    return "class='label success'>&#x25B2;"+delta;
+  } else if (delta <0 ) {
+    return "class='label important'>&#x25BC;"+(-1*delta);
+  } else {
+    return "class='label' >▬";
+  }
 };
+
+});
+
+require.define("/ui/hand.js", function (require, module, exports, __dirname, __filename) {
+    /*globals $, module, console, require*/
+
+var file = 'ui/hand: ';
+
+var deck = require('../utilities/cards').deck;
+
+var gcd;
+
+var a;
+
+var querycards, handcall, hail, computecardposition;
+
+module.exports = function (gcde, data) {
+  gcd = gcde;
+    
+  gcd.on("draw cards requested"   , a["assemble drawn cards"]);
+  gcd.on("cards discarded"        , a["use backing for discarded cards"]);
+  
+  gcd.on("hand loaded"            , a["restore cards"]);
+  gcd.on("server drew cards"      , a["update number of cards"]);
+  gcd.on("no cards left to draw"  , a["remove deck"]);
+
+
+  gcd.on("miagan"                 , a["display miagan"]);
+  gcd.on("hail mia"               , a["display hail mia"]);
+  gcd.on("mulligan"               , a["display mulligan"]);
+  gcd.on("hail mary"              , a["display hail mary"]);
+  
+
+  gcd.on("ready", function () {
+   $('#hand li').bind("click"     , a["toggle draw class"](data)); 
+   
+   $('#hail >span').hide();
+   
+   a["hide hand"](); 
+  });
+  
+};
+
+a = {
+  "update number of cards" : function () {
+    console.log("just a stub");
+  },
+  "load hand" : function (data) {
+    var hand = data.hand;
+    $('#hand li').each(function () {
+      var cardnum = this.id[4]-1;
+      var pos = computecardposition(data, hand[cardnum]);
+      $(this).css("background-position", "-"+pos[0]+"px -"+pos[1]+"px");
+    });
+    gcd.emit("hand loaded", data);
+  },
+  
+  "assemble drawn cards" : function (data) {
+    var carddata = querycards(data);
+    if (carddata[1] === 0) {
+      gcd.emit("no discarded cards", data);
+      return false;
+    }
+    data.drawcount = carddata[1];
+    data.draws = carddata[0];
+    gcd.emit("cards discarded", data);
+  },
+  
+  "restore cards" : function () {
+    $("#hand li").removeClass('draw').removeClass('backing');
+  },
+  
+  "make full hand call" : function (data) {
+    $("#handtext").html(handcall(data.call));
+  },
+  
+  "show deck" : function () {
+    $('#dc').fadeTo(400, 1);
+  },
+  
+  "update number of cards left" : function  (data) {
+    $("#numcards").html(data.cardsleft);
+  },
+  
+  "remove deck" : function () {
+    $('#dc').fadeTo(400, 0.5); 
+  },
+  
+  "toggle draw class" : function (data) {
+    return function (event) {
+      var drawcount;
+      if (data.cardsleft < 5) {
+        drawcount = querycards[1];
+        if (drawcount >= data.cardsleft) {
+          gcd.emit("not enough cards left", data);
+          return false;
+        } 
+      }
+      var this$ = $(this);
+      this$.toggleClass('draw');
+    };
+  },
+  
+  "use backing for discarded cards": function () {
+   $(".draw").addClass('backing');   
+  },
+  
+  //hail calls
+  "display miagan" : function    () {
+    hail("#m4");
+  },
+  "display hail mia" : function  () {
+    hail("#dr4");
+  },
+  "display mulligan" : function  () {
+    hail("#m5");
+  },
+  "display hail mary" : function () {
+    hail("#dr5");
+  },
+  
+  //initial hand display
+  "hide hand" : function () {
+    $("#hand").css("visibility", "visible"); 
+  },
+  
+  "show hand" : function () {
+    $("#hand").css("visibility", "hidden"); 
+  }
+  
+};
+
+var fname; 
+
+for (fname in a) {
+  a[fname].desc = file+fname;
+}
+
+querycards = function () {
+  var draws = '';
+  var drawcount = 0;
+  $("#hand li").each(function (){
+    if ($(this).hasClass('draw')) {
+      draws += '1';
+      drawcount += 1;
+    } else {
+      draws += '0';
+    }
+  });
+  return [draws, drawcount];
+};
+
+handcall = function (call, ranks) {
+  switch (call) {
+    case "5":  return "Five "+ranks[0]; 
+    case "sf": return ranks[0]+" High Straight Flush"; 
+    case "4":  return "Four "+ranks[0]+" and a "+ranks[1]+" kicker"; 
+    case "fh": return "Full House: "+ranks[0]+" over "+ranks[1]; 
+    case "f":  return ranks[0]+" Low Flush"; 
+    case "s":  return ranks[0]+" High Straight"; 
+    case "3":  return "Three "+ranks[0]+" and  "+ranks[1]+", "+ranks[2]+" kickers"; 
+    case "2p": return "Two pair: "+ranks[0]+", "+ranks[1]+" and a "+ranks[2]+" kicker"; 
+    case "2":  return "Pair of "+ranks[0]+" with "+ranks[1]+", "+ranks[2]+", "+ranks[3]+" kickers"; 
+    case "1":  return  ranks[0]+" high  and "+ranks[1]+", "+ranks[2]+", "+ranks[3]+", "+ranks[4]+" kickers"; 
+  }
+};
+
+hail = function (domid) {
+  $(domid).fadeIn(600).fadeOut(600);  
+};
+
+
+computecardposition = function (data, card) {
+  var i;
+  for (i = 0; i<52; i+=1) {
+    if (card === deck[i]) {
+      return [(i % 8)*86, Math.floor(i/8)*120];
+    }
+  }
+  gcd.emit("card not found", data, card);
+  return [0, 0];
+};
+
+
+
+
+  
+  
+  
+  
+
+});
+
+require.define("/ui/scores.js", function (require, module, exports, __dirname, __filename) {
+    /*globals $, module, console, require*/
+
+var file = 'ui/scores: ';
+
+var gcd;
+
+var a, install;
+
+module.exports = function (gcde, data) {
+  gcd = gcde;
+  
+  install(data); //for initializing click functions, mostly
+  
+  gcd.on("draw cards"             , a["clear streak"]); //
+  gcd.on("streak"                 , a["call streak"]); //
+  gcd.on("name entry shown"       , a["add score entry"]); //send endgame
+  gcd.on("high scores checked"    , a["display high scores"]);//
+  gcd.on("negative change in score", a["pulse negative score"]);
+  gcd.on("positive change in score", a["pulse positive score"]);  
+  gcd.on("no change in score"     , a["no score change"]);    
+  gcd.on("name entry hidden"      , a["emit submit name" ]);
+  gcd.on("name entry shown"       , a["focus into name modal"]);
+  gcd.on("name submitted"         , a["get name value"]);
+  gcd.on("name entry shown"       , a["bind name entry keys"]);
+  gcd.on("name submitted"         , a["unbind name entry keys"]);
+
+  gcd.on("ready", function () {
+    $('#highscores')    .bind("click", a["retrieve high scores for viewing"]);
+    $("#name")          .bind("click", a["name entry requested"]);
+    $("#submitname")    .bind("click", a["hide name entry"]);
+    $("#scoreentry")    .bind("hide" , a["emit name entry hidden"]);
+    
+    
+    gcd.emit("high scores requested", data);
+    
+    a["install score entry"](data);
+    a["initialize name"](data);
+    
+  });
+  
+};
+
+
+
+a = {
+  'clear streak' : function  (data) {
+    $('#inarow').html("&nbsp;");
+  }, 
+  'call streak' : function  (data) {
+    $('#inarow').html(data.streak+" in a row"+ (data.level ? " with a bonus of "+data.level+"!" : "!"));
+  },
+  'add score entry' : function (data) {
+    $('#scoreentry').bind('hide', function self () {
+      data.name = encodeURI($('#namemodal').val().replace(/[^ a-zA-Z0-9_]/g, ''));
+      if (!data.name) {
+        data.name = "___";
+      }
+      $('#scoreentry').unbind('hide', self); //self cleanup
+      gcd.emit('send endgame');
+    });
+  },
+  'display high scores' : function (data) {
+    var row, rowclass, n, i, date;
+    n = data.highscores.length;
+    var htmltablebody = '';
+    for (i = 0; i<n; i += 1) {
+      row = data.highscores[n-1-i];
+      date = new Date (row.date);
+      date = date.getMonth()+1+'/'+date.getDate()+'/'+date.getFullYear();
+      if (row.ownscore) {
+        rowclass = 'class="newHighScore"';
+      }
+      if (row.externalnewscore) {
+        rowclass = 'class="otherNewHighScore"';
+      }
+      htmltablebody += '<tr '+rowclass+' id="'+row._id+'"><td>'+(i+1)+'.</td><td>'+row.name+'</td><td>'+row.score+'</td><td>'+date+'</td></tr>';
+    }    
+    $("#hs").html(htmltablebody);    
+    
+    $('#modal-highscores').modal({
+      backdrop: true,
+      keyboard: true,
+      show: true
+    });
+  }, 
+  "pulse negative score" : function (data) {
+    $("#score").html(data.gamedata.score);
+    $("#delta").html("&#x25BC;"+(-1*data.delta));
+    $('#score, #delta').removeClass("scoreminus scoreplus");
+    setTimeout(function () {$('#score, #delta').addClass("scoreminus");}, 5);
+  },
+  "pulse positive score" : function (data) {
+    $("#score").html(data.gamedata.score);
+    $("#delta").html("&#x25B2;"+data.delta);
+    $('#score, #delta').removeClass("scoreminus scoreplus");
+    setTimeout(function () {$('#score, #delta').addClass("scoreplus");}, 5);
+  },
+  "no score change" : function (data) {
+    $("#score").html(data.gamedata.score);
+    $("#delta").html("▬");
+    $('#score, #delta').removeClass("scoreminus scoreplus");
+  },
+  
+  
+  "install score entry" : function  () {
+    $('#scoreentry').modal({
+      backdrop: "static",
+      keyboard: true,
+      show: true
+    }); 
+  },
+  
+  "focus into name modal" : function () {
+    $("#namemodal").attr("tabindex", 1).focus().select(); 
+  },
+  
+  "get name value" : function (data) {
+    var name = $("#namemodal").val().replace(/\W/g, ''); 
+    if (name) {
+      $("#name a").html(name);
+      data.name = name;
+    }
+  }, 
+  
+  "initialize name" : function (data) {
+    data.name = '';
+  }, 
+  
+  "bind name entry keys" : function (data) {
+    $('html').bind('keyup', a["keys for name entry"]);
+  },
+  
+  "unbind name entry keys" : function (data) {
+    $('html').unbind('keyup', a["keys for name entry"]);
+  }
+  
+};
+
+install = function (data) {
+  a["emit submit name"] = function () {
+      gcd.emit("name submitted", data);
+  };
+
+  a["retrieve high scores for viewing"] = function () {
+    gcd.once("server sent high scores", a["display high scores"]);
+    gcd.emit("high scores requested", data);
+  };
+  
+  a["name entry requested"] = function () {
+    $('#scoreentry').modal({
+      backdrop: true,
+      keyboard: true,
+      show: true
+    });
+    gcd.emit("name entry displayed", data);
+  };
+  
+  a["hide name entry"] = function () {
+    $("#scoreentry").modal('hide');
+  };
+  
+  a["emit name entry hidden"] = function () {
+    gcd.emit("name entry hidden", data);
+  };
+  
+  a["keys for name entry"] = function  (evnt) {
+    if (evnt.keyCode === 13) {
+      a["hide name entry"]();
+      return false;
+    } 
+  };
+  
+  var fname; 
+  for (fname in a) {
+    a[fname].desc = file+fname;
+  }
+
+};
+
+
 });
 
 require.define("/entry.js", function (require, module, exports, __dirname, __filename) {
@@ -613,482 +1521,59 @@ require.define("/entry.js", function (require, module, exports, __dirname, __fil
 var events = require('events');
 
 var gcd = new events.EventEmitter(); 
-var ui = new events.EventEmitter();
 
-require('./history')(gcd, ui);
-require('./ui/history')(gcd, ui);
+var data = {};
 
 
-$(function() {
-	
-	//!!!! initial values
-	var server = '';//'http://127.0.0.1:3000/';			
-	var uid = '0'; //set by server
-	var gid = '0'; //set by server
-	var type = 'basic'; //toggle options
-	var scoredata = [];
-	var name = false;
-	var oldHighScores = false;
-	
-  var commands;
-	
-	var akeys; 
-	
-	//initial hiding
-	$("#endgame").hide(); 
-	
-	//!!!! fading
-	var fadelevel = 0.4;
-
-	//initial screen faded
-	$(".main").fadeTo(100, fadelevel);
-	
-	
-	//remove fade
-	var removeFade =  function  () {
-		$(".main").fadeTo(200, 1);
-	};
-	
-	//!!!! hand calling
-	
-	
-	var ranks = {
-		"A": ["Aces", "Ace"], 
-		"K": ["Kings","King"],
-		"Q": ["Queens","Queen"] ,
-		"J": ["Jacks","Jack"],
-		"T": ["Tens","Ten"],
-		"9": ["Nines","Nine"],
-		"8": ["Eights","Eight"],
-		"7": ["Sevens","Seven"],
-		"6": ["Sixes","Six"],
-		"5": ["Fives","Five"],
-		"4": ["Fours","Four"],
-		"3": ["Threes","Three"],
-		"2": ["Twos", "Two"]
-		};
-         
-	
-	var handcall = function (call) {
-		switch (call[0]) {
-			case "5":  return "Five "+ranks[call[1]][0]; 
-			case "sf": return ranks[call[1]][1]+" High Straight Flush"; 
-			case "4":  return "Four "+ranks[call[1]][0]+" and a "+ranks[call[2]][1]+" kicker"; 
-			case "fh": return "Full House: "+ranks[call[1]][0]+" over "+ranks[call[2]][0]; 
-			case "f":  return ranks[call[1]][1]+" Low Flush"; 
-			case "s":  return ranks[call[1]][1]+" High Straight"; 
-			case "3":  return "Three "+ranks[call[1]][0]+" and  "+ranks[call[2]][1]+", "+ranks[call[3]][1]+" kickers"; 
-			case "2p": return "Two pair: "+ranks[call[1]][0]+", "+ranks[call[2]][0]+" and a "+ranks[call[3]][1]+" kicker"; 
-			case "2":  return "Pair of "+ranks[call[1]][0]+" with "+ranks[call[2]][1]+", "+ranks[call[3]][1]+", "+ranks[call[4]][1]+" kickers"; 
-			case "1":  return  ranks[call[1]][1]+" high  and "+ranks[call[2]][1]+", "+ranks[call[3]][1]+", "+ranks[call[4]][1]+", "+ranks[call[5]][1]+" kickers"; 
-		}
-	};
-	
-	var makeCall = function (call) {
-		$("#handtext").html(handcall(call));
-	};
-	
-	//!!!! history
-	
-	//!!!! numcards
-	var numcards = function (cardsleft) {
-		$("#numcards").html(cardsleft);
-		if (cardsleft === 0) {
-			$('#dc').fadeTo(400, 0.5); 
-		}
-	};
-
-	var showDeck = function () {
-		$('#dc').fadeTo(400, 1);
-	};
-	
-	
-	var runoutofcards = function () {
-		commands.endgame(); 
-		//setTimeout(function () {$('input[name=endgame]').click()}, 800);
-	};
-
-  
-	
-	//!!!! card management
-	//clicking cards
-  $('#hand li').click(function (event) {
-			var this$ = $(this);
-      this$.toggleClass('draw');
-  });
-	
-	
-	var deck = ["2c",  "2d",  "2h",  "2s",  "3c",  "3d",  "3h",  "3s",  "4c",  "4d",  "4h",  "4s",  "5c",  "5d",  "5h",  "5s",  
-					"6c",  "6d",  "6h",  "6s",  "7c",  "7d",  "7h",  "7s",  "8c",  "8d",  "8h",  "8s",  "9c",  "9d",  "9h",  "9s", 
-				  "Tc",  "Td",  "Th",  "Ts",  "Jc",  "Jd",  "Jh",  "Js",  "Qc",  "Qd",  "Qh",  "Qs",  "Kc",  "Kd",  "Kh",  "Ks", 
-				  "Ac",  "Ad",  "Ah",  "As"
-	];
-	
-	//computes card image given card
-	var computeCard = function (card) {
-		var i;
-		for (i = 0; i<52; i+=1) {
-			if (card === deck[i]) {
-				return [(i % 8)*86, Math.floor(i/8)*120];
-			}
-		}
-		console.log("card not found", card);
-		return [0, 0];
-	};
-	
-	var flipCards = function () {
-		$(".draw").addClass('backing');	
-	};
-		
-	var clearCards = function () {
-		$('#hand li').
-			removeClass('draw').
-			removeClass('backing')
-		;
-	};
-		
-	var showHand = function () {
-		$("#hand").css("visibility", "visible"); 
-	};
-		
-	var hideHand = function () {
-		$("#hand").css("visibility", "hidden"); 
-	};
-	
-	//----  no hand view on startup
-	hideHand(); 
-	
-	
-	//cards get hand
-	var loadHand = function (hand) {
-		$('#hand li').each(function () {
-			var cardnum = this.id[4]-1;
-			var pos = computeCard(hand[cardnum]);
-			$(this).
-				css("background-position", "-"+pos[0]+"px -"+pos[1]+"px").
-				removeClass('draw').
-				removeClass('backing')
-			;
-		});
-	};
-	
-	//!!!! scoreManagement	
-	var score;
-	var highscores = [];
-	
-	var inarow = function (streak, level, typechange) {
-		var streaktext;
-		if (typechange > 2) {
-			streaktext = streak+" in a row"+ (level ? " with a bonus of "+level+"!" : "!");			
-		} else {
-			streaktext = "&nbsp;";			
-		} 
-	  $('#inarow').html(streaktext);
-	}; 
-
-	var scorepulse = function (scoreclass) {
-		$('#score, #delta').removeClass("scoreminus scoreplus");
-		setTimeout(function () {$('#score, #delta').addClass(scoreclass);}, 5);
-	};
-
-	var loadScore = function (data) {
-		score = data.gamedata.score;
-		$("#score").html(data.gamedata.score);
-		var delta = data.delta;
-    if (delta > 0) {
-			 $("#delta").html("&#x25B2;"+delta);
-			 gcd.emit("prep for add history", {
-				score:data.gamedata.score, 
-				deltalabel : "class='label success'>&#x25B2;"+delta, 
-				hand: data.hand,
-				call: data.call
-			});
-			 scorepulse('scoreplus');
-			inarow(data.gamedata.streak, data.gamedata.level, data.gamedata.streak);
-    } else if (delta < 0) {
-			 $("#delta").html("&#x25BC;"+(-1*delta));
-			 gcd.emit("prep for add history", {
-				score:data.gamedata.score, 
-				deltalabel : "class='label important'>&#x25BC;"+(-1*delta),
-				hand: data.hand,
-				call: data.call
-			});
-			 scorepulse('scoreminus');
-			inarow(data.gamedata.streak, data.gamedata.level, data.gamedata.streak);
-    } else {
-			 $("#delta").html("▬");
-			 gcd.emit("prep for add history", {
-				score:data.gamedata.score, 
-				deltalabel : "class='label' >▬",
-				hand: data.hand,
-				call: data.call
-			});
-			 scorepulse('');
-			inarow(data.gamedata.streak, data.gamedata.level, 0);	
-		}
-	};
-
-	var loadHighScores = function (serverscores) {
-		var i, n, row, date, tempOldHighScores, rowClass; 
-		highscores = serverscores; 
-		n = serverscores.length;
-		tempOldHighScores = {};
-		var htmltablebody = '';
-		for (i = 0; i<n; i += 1) {
-			row = serverscores[n-1-i];
-			date = new Date (row.date);
-			date = date.getMonth()+1+'/'+date.getDate()+'/'+date.getFullYear();
-			if (gid === row._id) {
-				rowClass = 'class = "newHighScore"';
-			} else if (oldHighScores && !(oldHighScores.hasOwnProperty(row._id)) ) {
-				//new high scores from others added
-				rowClass = 'class = "otherNewHighScores"';
-			} else {
-				rowClass = "";
-			}
-			htmltablebody += '<tr '+rowClass+' id="'+row._id+'"><td>'+(i+1)+'.</td><td>'+row.name+'</td><td>'+row.score+'</td><td>'+date+'</td></tr>';
-			tempOldHighScores[row._id] = true;
-		}		
-		oldHighScores = tempOldHighScores;
-		$("#hs").html(htmltablebody);
-	};
-
-
-	//retrieving high score game
-	$("#hs").click(function (event) {
-		var rowgid = $(event.target).parents("tr").attr("id");
-		commands.retrievegame(rowgid);
-	});
-
-	//toggling
-	
-	var toggleGameControl = function (type) {
-		if (type === "shuffling") {
-			$("#togglegame").html('<a id="endgame">End Game</a>');
-//			$("#newgame").hide();
-//			$("#endgame").show();
-		} else if (type === "ending") {
-			$("#togglegame").html('<a id="newgame">Start Game</a>');
-//			$("#endgame").hide();
-//			$("#newgame").show();			
-		}
-	};
-	
-	var endGameDisplay = function () {
-			$(".main").fadeTo(600, fadelevel, function () {$('#modal-highscores').modal({
-				backdrop: true,
-				keyboard: true,
-				show: true
-			});});
-			$("#hand li").removeClass('draw').removeClass('backing');
-	};
-	
-	
-	//hail call
- var hailCall= function (count, type){  
-	  var domid = '';
-		if (count === 4) {
-			domid =  (type === 'newhand') ? "#m4" : "#dr4";
-		} else if (count === 5) {
-			domid =  (type === 'newhand') ? "#m5" : "#dr5";
-		} else {
-			return false;
-		}
-    $(domid).fadeIn(600).fadeOut(600);
-	};
-	
-	$('#hail >span').hide(); 
-	
-	
-	
-	//!!!! server
-		
-	var put = function (command, data, callback) {
-		$.ajax(server + command, {
-			type: 'POST',
-			data: JSON.stringify(data),
-			contentType: 'application/json',
-			dataType: "json",
-			success: callback || function (data, status) {console.log(command, data, status);},
-			error  : function() { console.log("error response"); }
-		});
-	};
-	
-	var get = function (command, callback) {
-		$.ajax(server + command, {
-			type: 'GET',
-			contentType: 'application/json',
-			dataType: "json",
-			success: callback || function (data, status) {console.log(command, data, status);},
-			error  : function() { console.log("error response"); }
-		});
-	};
-
-	
-	var state; //for hail call
-	
-	commands = {
-		'shuffle' : function () {
-			 gcd.emit("clear history", {});
-			 removeFade();
-			 state = 'newhand';
-			//presend
-			get('shuffle/'+uid+'/'+type, function (data) {
-				//postsend
-				console.log(JSON.stringify(data));
-				gid = data.gid;
-				loadHand(data.hand);
-				showHand(); 
-				makeCall(data.call);
-				loadScore(data);
-				numcards(data.cardsleft);
-				showDeck(); 
-				toggleGameControl('shuffling');
-			});
-		},
-		'drawcards' : function () {
-			//get draws
-			var draws = '';
-			var nocards = true;
-			var drawcount = 0; 
-			$("#hand li").each(function (){
-				if ($(this).hasClass('draw')) {
-					draws += '1';
-					nocards = false;
-					drawcount += 1; 
-				} else {
-					draws += '0';
-				}
-			});
-			if (nocards) {
-				console.log("no cards selected."); 
-				clearCards(); 
-				return false;
-			}
-			hailCall(drawcount, state);
-			state = 'oldhand';
-			flipCards(); 
-			get('drawcards/'+uid+'/'+gid+'/'+draws, function (data){
-				if (data.error) {
-					console.log(data.error); 
-					clearCards(); 
-					return false;
-				}
-				console.log(JSON.stringify(data));
-				loadHand(data.hand);
-				makeCall(data.call);
-				loadScore(data);
-				numcards(data.cardsleft);	  
-			});	
-		}, 
-		'endgame' : function () {
-			console.log('endgame', name, score, highscores);
-			if (!name && score >= highscores[0].score) {
-				submitScore();  //shows modal
-				$('#scoreentry').bind('hide', function self () {
-					name = encodeURI($('#namemodal').val().replace(/[^ a-zA-Z0-9_]/g, ''));
-					console.log(name);
-					if (!name) {
-						name = "___";
-					}
-					commands.endgame();
-					$('#scoreentry').unbind('hide', self); //self cleanup
-				});
-			} else {
-				get('endgame/'+uid+"/"+gid+"/"+name, function (data){
-					console.log(JSON.stringify(data));
-					if (data.error) {
-						console.log(data.error); 
-						clearCards(); 
-						return false;
-					}
-					loadHighScores(data[2]);
-					endGameDisplay();
-					toggleGameControl("ending");
-				});
-			}
-		},
-		'retrievegame' : function (gid) {
-			get('retrievegame/'+gid,  function (data){				
-				console.log(JSON.stringify(data));
-			});			
-		},
-		'viewscores' : function (callback) {
-			get('viewscores', function (data) {
-				console.log(JSON.stringify(data));
-				console.log("viewscores", callback);
-				loadHighScores(data);
-				if (callback) {
-					callback();
-				} 
-			});
-		}
-		
-	};
-
-	
-	//preload high scores for highscore figuring
-	commands.viewscores(); 
-
-
-
-
-
-	//name entry
-	var	scoreentrysubmit = function  (evnt) {
-		if (evnt.keyCode === 13) {
-			$("input[name=submitname]").click(); 
-			return false;
-		} 
-	};
-
-
-	//remapping keys upon modal name change toggle
-	$('#scoreentry').
-		bind('show', function () {
-			$('html').unbind('keyup', akeys);
-			$('html').bind('keyup', scoreentrysubmit);
-		}).
-		bind('hide', function () {
-			$('html').unbind('keyup', scoreentrysubmit);
-			$('html').bind('keyup', akeys);
-		});
-
-
-
-$("#newgame").live('click', commands.shuffle);
-//$("#highscores").click(function() {$('input[name=viewscores]').click(); });
-$("#drawcards").click(commands.drawcards);
-$("#endgame").live('click', commands.endgame );
-//attaching high score behavior
-
-$('#highscores').click(function () {
-	commands.viewscores(function(){
-		$('#modal-highscores').modal({
-			backdrop: true,
-			keyboard: true,
-			show: true
-		});
-	});
-});
-
-akeys = function (evnt) {
-        var key = evnt.keyCode; 
-       switch (key) {
-        case 49: $('#hand li:nth-child(1)').click(); break;//1 card as visible
-        case 50: $('#hand li:nth-child(2)').click(); break;
-        case 51: $('#hand li:nth-child(3)').click(); break;
-        case 52: $('#hand li:nth-child(4)').click(); break;
-        case 53: $('#hand li:nth-child(5)').click(); break;
-        case 13: $('#drawcards').click(); return false; //enter drawcards
-       }
-
+var eventdebugger = function (evem) {
+  var _emit = evem.emit;
+  evem.emit = function (ev, data) {
+    console.log(ev, JSON.stringify(data));
+    var list = evem.listeners(ev);
+    console.log("list"+list)
+    var i, n; 
+    for (i = 0; i < n; i += 1) {
+      if (list[i].hasOwnProperty("desc")) {
+        console.log("listener: ", list[i].desc);
+      } else {
+        console.log("listener with no description");
+      }
+    }
+    _emit.apply(this, arguments);
+  };
 };
 
-$('html').bind('keyup', akeys);
+eventdebugger(gcd);
+
+//$ = function (arg) {arg();};
+
+console.log("running");
 
 
-}); //end ready function 
+
+require('./logic/gamecontrol'  )(gcd, data);
+require('./logic/history'      )(gcd, data);
+require('./logic/hand'         )(gcd, data);
+require('./logic/scores'       )(gcd, data);
+
+require('./ui/gamecontrol'    )(gcd, data);
+require('./ui/history'        )(gcd, data);
+require('./ui/hand'           )(gcd, data);
+require('./ui/scores'         )(gcd, data);
+
+
+$(function() { 
+  console.log("hi")
+  gcd.emit("ready", data);
+});
+
+
+
+  
+
+
+
+
 
 });
 require("/entry.js");

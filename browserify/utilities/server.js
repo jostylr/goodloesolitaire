@@ -4,6 +4,8 @@
 	
 var server = '';//'http://127.0.0.1:3000/';	
 	
+console.log("server")
+	
 exports.put = function (command, data, callback) {
 	$.ajax(server + command, {
 		type: 'POST',
