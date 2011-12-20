@@ -4,21 +4,19 @@ var file = 'logic/score: ';
 
 var gcd;
 
-var a;
+var a, install;
 
 module.exports = function (gcde, data) {
   gcd = gcde;
+  
+  install(data);
 
   gcd.on("server drew cards"        , a["check delta"]);  // (negative OR positive OR no) change in score
   gcd.on("server drew cards"        , a["check for streak"]); // streak OR nothing
   
   gcd.on("server sent high scores"  , a["look for new high scores"]);  // high scores checked
   
-  gcd.on("ready", function (data) {
-    data.score = 0;
-    data.highscores = [];
-    data["old high scores"] = false;
-  });
+  gcd.on("ready"                    , a["initialize score data"]);
     
   
 };
@@ -67,14 +65,22 @@ a = {
       tempOldHighScores[row._id] = true;
     }    
     data.oldHighScores = tempOldHighScores;
-    gcd.emit("high scores checked");
+    gcd.emit("high scores checked", data);
   }
   
 };
 
-var fname; 
-
-for (fname in a) {
-  a[fname].desc = file+fname;
-}
-
+install = function (data) {
+   a["initialize score data"] = function (data) {
+    data.score = 0;
+    data.highscores = [];
+    data["old high scores"] = false;
+  };
+  
+  
+  var fname; 
+  for (fname in a) {
+    a[fname].desc = file+fname;
+  }
+  
+};

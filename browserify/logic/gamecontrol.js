@@ -6,29 +6,25 @@ var servercalls = require('../utilities/server');
 
 var gcd;
 
-var a;
+var a, install;
 
 var process;
 
 module.exports = function (gcde, data) {
   gcd = gcde;
   
-  gcd.on("ready"                , a["initial values"]);
+  install(data);
+  
   gcd.on('new game requested'   , a["send new game"]);
   gcd.on('cards discarded'      , a["send draw cards"]);  
   gcd.on('end game requested'   , a["send end game"]);
   gcd.on('high scores requested', a["send view scores"]);
-  
+
+  gcd.on("ready"                , a["initialize values"]);  
   
 };
 
 a = {
-  "initial values" : function (data) {
-    data.uid = '0'; //set by server
-    data.gid = '0'; //set by server
-    data.type = 'basic'; //toggle options
-    data.name = false;    
-  },
   
   
   //server calls
@@ -102,18 +98,30 @@ a = {
   
 };
 
-var fname; 
+install = function (data) {
+  a["initialize values"] = function (data) {
+    data.uid = '0'; //set by server
+    data.gid = '0'; //set by server
+    data.type = 'basic'; //toggle options
+    data.name = false;    
+  };
+  
+  var fname; 
 
-for (fname in a) {
-  a[fname].desc = file+fname;
-}
+  for (fname in a) {
+    a[fname].desc = file+fname;
+  }  
+};
 
-var process = function (data, server) {
-  data.gid  = server.gid;
+
+process = function (data, server) {
+  if (server.hasOwnProperty("gid")) {
+    data.gid  = server.gid;
+  }
   data.hand = server.hand;
   data.call = server.call;
   data.cardsleft  = server.cardsleft;
-  switch (server.type) {
+  switch (data.type) {
     case "basic" :
       data.streak = server.gamedata.streak;
       data.score = server.gamedata.score;

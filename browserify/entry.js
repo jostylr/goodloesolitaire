@@ -1,4 +1,4 @@
-/*global $, console, submitScore, require */
+/*global $, console, submitScore, require, eventlogger, hashevents */
 
 var events = require('events');
 
@@ -6,19 +6,31 @@ var gcd = new events.EventEmitter();
 
 var data = {};
 
+eventlogger = [];
+hashevents = {};
 
 var eventdebugger = function (evem) {
   var _emit = evem.emit;
   evem.emit = function (ev, data) {
-    console.log(ev, JSON.stringify(data));
-    var list = evem.listeners(ev);
-    console.log("list"+list)
-    var i, n; 
-    for (i = 0; i < n; i += 1) {
-      if (list[i].hasOwnProperty("desc")) {
-        console.log("listener: ", list[i].desc);
+    if (ev === "newListener") {
+      if (hashevents.hasOwnProperty(data)) {
+        hashevents[data] += 1;
       } else {
-        console.log("listener with no description");
+        hashevents[data] = 1;
+      }
+    } else {
+      console.log(eventlogger.length+". "+ev);
+      eventlogger.push([ev, JSON.stringify(data)]);
+      var list = evem.listeners(ev);
+      //console.log("list"+list)
+      var i, n; 
+      n = list.length; 
+      for (i = 0; i < n; i += 1) {
+        if (list[i].hasOwnProperty("desc")) {
+          console.log("listener: ", list[i].desc);
+        } else {
+          console.log("listener with no description");
+        }
       }
     }
     _emit.apply(this, arguments);
@@ -45,7 +57,6 @@ require('./ui/scores'         )(gcd, data);
 
 
 $(function() { 
-  console.log("hi")
   gcd.emit("ready", data);
 });
 

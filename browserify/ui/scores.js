@@ -14,7 +14,7 @@ module.exports = function (gcde, data) {
   gcd.on("draw cards"             , a["clear streak"]); //
   gcd.on("streak"                 , a["call streak"]); //
   gcd.on("name entry shown"       , a["add score entry"]); //send endgame
-  gcd.on("high scores checked"    , a["display high scores"]);//
+//  gcd.on("high scores checked"    , a["display high scores"]);//
   gcd.on("negative change in score", a["pulse negative score"]);
   gcd.on("positive change in score", a["pulse positive score"]);  
   gcd.on("no change in score"     , a["no score change"]);    
@@ -24,19 +24,7 @@ module.exports = function (gcde, data) {
   gcd.on("name entry shown"       , a["bind name entry keys"]);
   gcd.on("name submitted"         , a["unbind name entry keys"]);
 
-  gcd.on("ready", function () {
-    $('#highscores')    .bind("click", a["retrieve high scores for viewing"]);
-    $("#name")          .bind("click", a["name entry requested"]);
-    $("#submitname")    .bind("click", a["hide name entry"]);
-    $("#scoreentry")    .bind("hide" , a["emit name entry hidden"]);
-    
-    
-    gcd.emit("high scores requested", data);
-    
-    a["install score entry"](data);
-    a["initialize name"](data);
-    
-  });
+  gcd.on("ready"                  , a['initialize name/score clicks, modals, high scores']);
   
 };
 
@@ -84,19 +72,19 @@ a = {
     });
   }, 
   "pulse negative score" : function (data) {
-    $("#score").html(data.gamedata.score);
+    $("#score").html(data.score);
     $("#delta").html("&#x25BC;"+(-1*data.delta));
     $('#score, #delta').removeClass("scoreminus scoreplus");
     setTimeout(function () {$('#score, #delta').addClass("scoreminus");}, 5);
   },
   "pulse positive score" : function (data) {
-    $("#score").html(data.gamedata.score);
+    $("#score").html(data.score);
     $("#delta").html("&#x25B2;"+data.delta);
     $('#score, #delta').removeClass("scoreminus scoreplus");
     setTimeout(function () {$('#score, #delta').addClass("scoreplus");}, 5);
   },
   "no score change" : function (data) {
-    $("#score").html(data.gamedata.score);
+    $("#score").html(data.score);
     $("#delta").html("▬");
     $('#score, #delta').removeClass("scoreminus scoreplus");
   },
@@ -106,7 +94,7 @@ a = {
     $('#scoreentry').modal({
       backdrop: "static",
       keyboard: true,
-      show: true
+      show: false
     }); 
   },
   
@@ -137,12 +125,27 @@ a = {
 };
 
 install = function (data) {
+  a['initialize name/score clicks, modals, high scores'] = function () {
+    $('#highscores')    .bind("click", a["retrieve high scores for viewing"]);
+    $("#name")          .bind("click", a["name entry requested"]);
+    $("#submitname")    .bind("click", a["hide name entry"]);
+    $("#scoreentry")    .bind("hide" , a["emit name entry hidden"]);
+    
+    
+    gcd.emit("high scores requested", data);
+    
+    a["install score entry"](data);
+    a["initialize name"](data);
+    
+  };
+  
+  
   a["emit submit name"] = function () {
       gcd.emit("name submitted", data);
   };
 
   a["retrieve high scores for viewing"] = function () {
-    gcd.once("server sent high scores", a["display high scores"]);
+    gcd.once("high scores checked", a["display high scores"]);
     gcd.emit("high scores requested", data);
   };
   

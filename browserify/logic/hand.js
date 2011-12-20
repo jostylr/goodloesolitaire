@@ -11,7 +11,6 @@ module.exports = function (gcde, data) {
   
   gcd.on("new game requested"      , a["reset hand state"]);
 
-  gcd.on("server started new game", a["load hand"]);
   gcd.on("server started new game", a["make call"]);
   gcd.on("server started new game", a["note new hand"]);
   
@@ -24,10 +23,6 @@ module.exports = function (gcde, data) {
 a = {
   'reset hand state' : function (data) {
     data.state = 'newhand';
-  },
-  'load hand' : function  (data) {
-    
-    gcd.emit("hand data processed", data);
   },
   'make call' : function  (data) {
     

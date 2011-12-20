@@ -6,18 +6,28 @@ var deck = require('../utilities/cards').deck;
 
 var gcd;
 
-var a;
+var a, install;
 
 var querycards, handcall, hail, computecardposition;
 
 module.exports = function (gcde, data) {
   gcd = gcde;
+  
+  install(data);
     
   gcd.on("draw cards requested"   , a["assemble drawn cards"]);
   gcd.on("cards discarded"        , a["use backing for discarded cards"]);
   
+  gcd.on("server started new game", a["load hand"]);
+  gcd.on("server started new game", a["update number of cards left"]);
+
+  gcd.on("server drew cards"      , a["load hand"]);
+  gcd.on("server drew cards"      , a["update number of cards left"]);
+
+  
   gcd.on("hand loaded"            , a["restore cards"]);
-  gcd.on("server drew cards"      , a["update number of cards"]);
+  
+  
   gcd.on("no cards left to draw"  , a["remove deck"]);
 
 
@@ -27,20 +37,11 @@ module.exports = function (gcde, data) {
   gcd.on("hail mary"              , a["display hail mary"]);
   
 
-  gcd.on("ready", function () {
-   $('#hand li').bind("click"     , a["toggle draw class"](data)); 
-   
-   $('#hail >span').hide();
-   
-   a["hide hand"](); 
-  });
+  gcd.on("ready", a["initialize draw card click, hide hail, hand"]);
   
 };
 
 a = {
-  "update number of cards" : function () {
-    console.log("just a stub");
-  },
   "load hand" : function (data) {
     var hand = data.hand;
     $('#hand li').each(function () {
@@ -117,20 +118,32 @@ a = {
   
   //initial hand display
   "hide hand" : function () {
-    $("#hand").css("visibility", "visible"); 
+    $("#hand").css("visibility", "hidden"); 
+    gcd.once("hand loaded", a["show hand"]);
   },
   
   "show hand" : function () {
-    $("#hand").css("visibility", "hidden"); 
+    $("#hand").css("visibility", "visible"); 
   }
   
 };
 
-var fname; 
 
-for (fname in a) {
-  a[fname].desc = file+fname;
-}
+install = function (data) {
+  a["initialize draw card click, hide hail, hand"] = function () {
+   $('#hand li').bind("click"     , a["toggle draw class"](data)); 
+   
+   $('#hail >span').hide();
+   
+   a["hide hand"](); 
+  };
+  
+  var fname; 
+  for (fname in a) {
+    a[fname].desc = file+fname;
+  }  
+};
+
 
 querycards = function () {
   var draws = '';

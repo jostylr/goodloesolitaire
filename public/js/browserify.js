@@ -503,29 +503,25 @@ var servercalls = require('../utilities/server');
 
 var gcd;
 
-var a;
+var a, install;
 
 var process;
 
 module.exports = function (gcde, data) {
   gcd = gcde;
   
-  gcd.on("ready"                , a["initial values"]);
+  install(data);
+  
   gcd.on('new game requested'   , a["send new game"]);
   gcd.on('cards discarded'      , a["send draw cards"]);  
   gcd.on('end game requested'   , a["send end game"]);
   gcd.on('high scores requested', a["send view scores"]);
-  
+
+  gcd.on("ready"                , a["initialize values"]);  
   
 };
 
 a = {
-  "initial values" : function (data) {
-    data.uid = '0'; //set by server
-    data.gid = '0'; //set by server
-    data.type = 'basic'; //toggle options
-    data.name = false;    
-  },
   
   
   //server calls
@@ -599,18 +595,30 @@ a = {
   
 };
 
-var fname; 
+install = function (data) {
+  a["initialize values"] = function (data) {
+    data.uid = '0'; //set by server
+    data.gid = '0'; //set by server
+    data.type = 'basic'; //toggle options
+    data.name = false;    
+  };
+  
+  var fname; 
 
-for (fname in a) {
-  a[fname].desc = file+fname;
-}
+  for (fname in a) {
+    a[fname].desc = file+fname;
+  }  
+};
 
-var process = function (data, server) {
-  data.gid  = server.gid;
+
+process = function (data, server) {
+  if (server.hasOwnProperty("gid")) {
+    data.gid  = server.gid;
+  }
   data.hand = server.hand;
   data.call = server.call;
   data.cardsleft  = server.cardsleft;
-  switch (server.type) {
+  switch (data.type) {
     case "basic" :
       data.streak = server.gamedata.streak;
       data.score = server.gamedata.score;
@@ -796,7 +804,6 @@ module.exports = function (gcde, data) {
   
   gcd.on("new game requested"      , a["reset hand state"]);
 
-  gcd.on("server started new game", a["load hand"]);
   gcd.on("server started new game", a["make call"]);
   gcd.on("server started new game", a["note new hand"]);
   
@@ -809,10 +816,6 @@ module.exports = function (gcde, data) {
 a = {
   'reset hand state' : function (data) {
     data.state = 'newhand';
-  },
-  'load hand' : function  (data) {
-    
-    gcd.emit("hand data processed", data);
   },
   'make call' : function  (data) {
     
@@ -860,21 +863,19 @@ var file = 'logic/score: ';
 
 var gcd;
 
-var a;
+var a, install;
 
 module.exports = function (gcde, data) {
   gcd = gcde;
+  
+  install(data);
 
   gcd.on("server drew cards"        , a["check delta"]);  // (negative OR positive OR no) change in score
   gcd.on("server drew cards"        , a["check for streak"]); // streak OR nothing
   
   gcd.on("server sent high scores"  , a["look for new high scores"]);  // high scores checked
   
-  gcd.on("ready", function (data) {
-    data.score = 0;
-    data.highscores = [];
-    data["old high scores"] = false;
-  });
+  gcd.on("ready"                    , a["initialize score data"]);
     
   
 };
@@ -923,18 +924,25 @@ a = {
       tempOldHighScores[row._id] = true;
     }    
     data.oldHighScores = tempOldHighScores;
-    gcd.emit("high scores checked");
+    gcd.emit("high scores checked", data);
   }
   
 };
 
-var fname; 
-
-for (fname in a) {
-  a[fname].desc = file+fname;
-}
-
-
+install = function (data) {
+   a["initialize score data"] = function (data) {
+    data.score = 0;
+    data.highscores = [];
+    data["old high scores"] = false;
+  };
+  
+  
+  var fname; 
+  for (fname in a) {
+    a[fname].desc = file+fname;
+  }
+  
+};
 });
 
 require.define("/ui/gamecontrol.js", function (require, module, exports, __dirname, __filename) {
@@ -969,17 +977,9 @@ module.exports = function (gcde, data) {
   gcd.once("name registered"  , a["skip name"]);
   
   
-  gcd.on("ready", function () {
-    $("#newgame").live('click', a["emit new game"](data));
-    $("#drawcards").click(a["emit draw cards"](data));
-    $("#endgame").live('click', a["emit end game"](data));
-    $("#endgame").hide(); 
-    $(".main").fadeTo(100, fadelevel);
-    $("#hs").click(a["emit retrieve game"](data));
-    $("#about").click(a["show about"]);
+  gcd.on("ready"              , a["initialize game clicks, hide stuff"]);
   
-    
-  });
+
 };
 
 
@@ -1048,6 +1048,18 @@ a = {
 };
 
 install = function (data) {
+   a["initialize game clicks, hide stuff"] = function () {
+    $("#newgame").live('click', a["emit new game"]);
+    $("#drawcards").click(a["emit draw cards"]);
+    $("#endgame").live('click', a["emit end game"]);
+    $("#endgame").hide(); 
+    $(".main").fadeTo(100, fadelevel);
+    $("#hs").click(a["emit retrieve game"]);
+    $("#about").click(a["show about"]);
+  
+    
+  };
+  
   a["emit new game"] = function () {
     gcd.emit("new game requested", data);
   };
@@ -1151,18 +1163,28 @@ var deck = require('../utilities/cards').deck;
 
 var gcd;
 
-var a;
+var a, install;
 
 var querycards, handcall, hail, computecardposition;
 
 module.exports = function (gcde, data) {
   gcd = gcde;
+  
+  install(data);
     
   gcd.on("draw cards requested"   , a["assemble drawn cards"]);
   gcd.on("cards discarded"        , a["use backing for discarded cards"]);
   
+  gcd.on("server started new game", a["load hand"]);
+  gcd.on("server started new game", a["update number of cards left"]);
+
+  gcd.on("server drew cards"      , a["load hand"]);
+  gcd.on("server drew cards"      , a["update number of cards left"]);
+
+  
   gcd.on("hand loaded"            , a["restore cards"]);
-  gcd.on("server drew cards"      , a["update number of cards"]);
+  
+  
   gcd.on("no cards left to draw"  , a["remove deck"]);
 
 
@@ -1172,20 +1194,11 @@ module.exports = function (gcde, data) {
   gcd.on("hail mary"              , a["display hail mary"]);
   
 
-  gcd.on("ready", function () {
-   $('#hand li').bind("click"     , a["toggle draw class"](data)); 
-   
-   $('#hail >span').hide();
-   
-   a["hide hand"](); 
-  });
+  gcd.on("ready", a["initialize draw card click, hide hail, hand"]);
   
 };
 
 a = {
-  "update number of cards" : function () {
-    console.log("just a stub");
-  },
   "load hand" : function (data) {
     var hand = data.hand;
     $('#hand li').each(function () {
@@ -1262,20 +1275,32 @@ a = {
   
   //initial hand display
   "hide hand" : function () {
-    $("#hand").css("visibility", "visible"); 
+    $("#hand").css("visibility", "hidden"); 
+    gcd.once("hand loaded", a["show hand"]);
   },
   
   "show hand" : function () {
-    $("#hand").css("visibility", "hidden"); 
+    $("#hand").css("visibility", "visible"); 
   }
   
 };
 
-var fname; 
 
-for (fname in a) {
-  a[fname].desc = file+fname;
-}
+install = function (data) {
+  a["initialize draw card click, hide hail, hand"] = function () {
+   $('#hand li').bind("click"     , a["toggle draw class"](data)); 
+   
+   $('#hail >span').hide();
+   
+   a["hide hand"](); 
+  };
+  
+  var fname; 
+  for (fname in a) {
+    a[fname].desc = file+fname;
+  }  
+};
+
 
 querycards = function () {
   var draws = '';
@@ -1349,7 +1374,7 @@ module.exports = function (gcde, data) {
   gcd.on("draw cards"             , a["clear streak"]); //
   gcd.on("streak"                 , a["call streak"]); //
   gcd.on("name entry shown"       , a["add score entry"]); //send endgame
-  gcd.on("high scores checked"    , a["display high scores"]);//
+//  gcd.on("high scores checked"    , a["display high scores"]);//
   gcd.on("negative change in score", a["pulse negative score"]);
   gcd.on("positive change in score", a["pulse positive score"]);  
   gcd.on("no change in score"     , a["no score change"]);    
@@ -1359,19 +1384,7 @@ module.exports = function (gcde, data) {
   gcd.on("name entry shown"       , a["bind name entry keys"]);
   gcd.on("name submitted"         , a["unbind name entry keys"]);
 
-  gcd.on("ready", function () {
-    $('#highscores')    .bind("click", a["retrieve high scores for viewing"]);
-    $("#name")          .bind("click", a["name entry requested"]);
-    $("#submitname")    .bind("click", a["hide name entry"]);
-    $("#scoreentry")    .bind("hide" , a["emit name entry hidden"]);
-    
-    
-    gcd.emit("high scores requested", data);
-    
-    a["install score entry"](data);
-    a["initialize name"](data);
-    
-  });
+  gcd.on("ready"                  , a['initialize name/score clicks, modals, high scores']);
   
 };
 
@@ -1419,19 +1432,19 @@ a = {
     });
   }, 
   "pulse negative score" : function (data) {
-    $("#score").html(data.gamedata.score);
+    $("#score").html(data.score);
     $("#delta").html("&#x25BC;"+(-1*data.delta));
     $('#score, #delta').removeClass("scoreminus scoreplus");
     setTimeout(function () {$('#score, #delta').addClass("scoreminus");}, 5);
   },
   "pulse positive score" : function (data) {
-    $("#score").html(data.gamedata.score);
+    $("#score").html(data.score);
     $("#delta").html("&#x25B2;"+data.delta);
     $('#score, #delta').removeClass("scoreminus scoreplus");
     setTimeout(function () {$('#score, #delta').addClass("scoreplus");}, 5);
   },
   "no score change" : function (data) {
-    $("#score").html(data.gamedata.score);
+    $("#score").html(data.score);
     $("#delta").html("▬");
     $('#score, #delta').removeClass("scoreminus scoreplus");
   },
@@ -1441,7 +1454,7 @@ a = {
     $('#scoreentry').modal({
       backdrop: "static",
       keyboard: true,
-      show: true
+      show: false
     }); 
   },
   
@@ -1472,12 +1485,27 @@ a = {
 };
 
 install = function (data) {
+  a['initialize name/score clicks, modals, high scores'] = function () {
+    $('#highscores')    .bind("click", a["retrieve high scores for viewing"]);
+    $("#name")          .bind("click", a["name entry requested"]);
+    $("#submitname")    .bind("click", a["hide name entry"]);
+    $("#scoreentry")    .bind("hide" , a["emit name entry hidden"]);
+    
+    
+    gcd.emit("high scores requested", data);
+    
+    a["install score entry"](data);
+    a["initialize name"](data);
+    
+  };
+  
+  
   a["emit submit name"] = function () {
       gcd.emit("name submitted", data);
   };
 
   a["retrieve high scores for viewing"] = function () {
-    gcd.once("server sent high scores", a["display high scores"]);
+    gcd.once("high scores checked", a["display high scores"]);
     gcd.emit("high scores requested", data);
   };
   
@@ -1516,7 +1544,7 @@ install = function (data) {
 });
 
 require.define("/entry.js", function (require, module, exports, __dirname, __filename) {
-    /*global $, console, submitScore, require */
+    /*global $, console, submitScore, require, eventlogger, hashevents */
 
 var events = require('events');
 
@@ -1524,19 +1552,31 @@ var gcd = new events.EventEmitter();
 
 var data = {};
 
+eventlogger = [];
+hashevents = {};
 
 var eventdebugger = function (evem) {
   var _emit = evem.emit;
   evem.emit = function (ev, data) {
-    console.log(ev, JSON.stringify(data));
-    var list = evem.listeners(ev);
-    console.log("list"+list)
-    var i, n; 
-    for (i = 0; i < n; i += 1) {
-      if (list[i].hasOwnProperty("desc")) {
-        console.log("listener: ", list[i].desc);
+    if (ev === "newListener") {
+      if (hashevents.hasOwnProperty(data)) {
+        hashevents[data] += 1;
       } else {
-        console.log("listener with no description");
+        hashevents[data] = 1;
+      }
+    } else {
+      console.log(eventlogger.length+". "+ev);
+      eventlogger.push([ev, JSON.stringify(data)]);
+      var list = evem.listeners(ev);
+      //console.log("list"+list)
+      var i, n; 
+      n = list.length; 
+      for (i = 0; i < n; i += 1) {
+        if (list[i].hasOwnProperty("desc")) {
+          console.log("listener: ", list[i].desc);
+        } else {
+          console.log("listener with no description");
+        }
       }
     }
     _emit.apply(this, arguments);
@@ -1563,7 +1603,6 @@ require('./ui/scores'         )(gcd, data);
 
 
 $(function() { 
-  console.log("hi")
   gcd.emit("ready", data);
 });
 

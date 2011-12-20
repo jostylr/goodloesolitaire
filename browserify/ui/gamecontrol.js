@@ -29,17 +29,9 @@ module.exports = function (gcde, data) {
   gcd.once("name registered"  , a["skip name"]);
   
   
-  gcd.on("ready", function () {
-    $("#newgame").live('click', a["emit new game"](data));
-    $("#drawcards").click(a["emit draw cards"](data));
-    $("#endgame").live('click', a["emit end game"](data));
-    $("#endgame").hide(); 
-    $(".main").fadeTo(100, fadelevel);
-    $("#hs").click(a["emit retrieve game"](data));
-    $("#about").click(a["show about"]);
+  gcd.on("ready"              , a["initialize game clicks, hide stuff"]);
   
-    
-  });
+
 };
 
 
@@ -108,6 +100,18 @@ a = {
 };
 
 install = function (data) {
+   a["initialize game clicks, hide stuff"] = function () {
+    $("#newgame").live('click', a["emit new game"]);
+    $("#drawcards").click(a["emit draw cards"]);
+    $("#endgame").live('click', a["emit end game"]);
+    $("#endgame").hide(); 
+    $(".main").fadeTo(100, fadelevel);
+    $("#hs").click(a["emit retrieve game"]);
+    $("#about").click(a["show about"]);
+  
+    
+  };
+  
   a["emit new game"] = function () {
     gcd.emit("new game requested", data);
   };
