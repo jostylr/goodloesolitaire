@@ -126,6 +126,7 @@ process = function (data, server) {
       data.streak = server.gamedata.streak;
       data.score = server.gamedata.score;
       data.delta = server.delta;
+      data.level = server.gamedata.level;
     break;
     default : 
     break;

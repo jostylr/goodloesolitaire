@@ -623,6 +623,7 @@ process = function (data, server) {
       data.streak = server.gamedata.streak;
       data.score = server.gamedata.score;
       data.delta = server.delta;
+      data.level = server.gamedata.level;
     break;
     default : 
     break;
@@ -1375,6 +1376,7 @@ module.exports = function (gcde, data) {
   gcd.on("streak"                 , a["call streak"]); //
   gcd.on("name entry shown"       , a["add score entry"]); //send endgame
 //  gcd.on("high scores checked"    , a["display high scores"]);//
+  gcd.on("server started new game" , a["pulse positive score"]);
   gcd.on("negative change in score", a["pulse negative score"]);
   gcd.on("positive change in score", a["pulse positive score"]);  
   gcd.on("no change in score"     , a["no score change"]);    
@@ -1566,7 +1568,7 @@ var eventdebugger = function (evem) {
       }
     } else {
       console.log(eventlogger.length+". "+ev);
-      eventlogger.push([ev, JSON.stringify(data)]);
+      eventlogger.push([ev, JSON.parse(JSON.stringify(data))]);
       var list = evem.listeners(ev);
       //console.log("list"+list)
       var i, n; 

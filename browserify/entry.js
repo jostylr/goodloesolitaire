@@ -20,7 +20,7 @@ var eventdebugger = function (evem) {
       }
     } else {
       console.log(eventlogger.length+". "+ev);
-      eventlogger.push([ev, JSON.stringify(data)]);
+      eventlogger.push([ev, JSON.parse(JSON.stringify(data))]);
       var list = evem.listeners(ev);
       //console.log("list"+list)
       var i, n; 
