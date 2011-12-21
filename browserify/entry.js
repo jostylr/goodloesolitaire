@@ -1,4 +1,4 @@
-/*global $, console, submitScore, require, eventlogger, hashevents */
+/*global $, console, submitScore, require*/
 
 var events = require('events');
 
@@ -6,48 +6,7 @@ var gcd = new events.EventEmitter();
 
 var data = {};
 
-eventlogger = [];
-hashevents = {};
-
-var eventdebugger = function (evem) {
-  var _emit = evem.emit;
-  evem.emit = function (ev, data) {
-    if (ev === "newListener") {
-      if (hashevents.hasOwnProperty(data)) {
-        hashevents[data] += 1;
-      } else {
-        hashevents[data] = 1;
-      }
-    } else {
-      console.log(eventlogger.length+". "+ev);
-      eventlogger.push([ev, (data) ? JSON.parse(JSON.stringify(data)) : {}]);
-      var list = evem.listeners(ev);
-      //console.log("list"+list)
-      var i, n; 
-      n = list.length; 
-      for (i = 0; i < n; i += 1) {
-        if (list[i].hasOwnProperty("desc")) {
-          console.log("listener: ", list[i].desc);
-        } else {
-          console.log("listener with no description");
-        }
-      }
-    }
-    _emit.apply(this, arguments);
-  };
-  evem.once = function(type, listener) {
-    var self = this;
-    var g = function g () {
-      self.removeListener(type, g);
-      listener.apply(this, arguments);
-    };
-    g.desc = listener.desc+" (once)";
-    self.on(type, g);
-    return this;
-  };
-};
-
-eventdebugger(gcd);
+require('./debugging')(gcd);
 
 //$ = function (arg) {arg();};
 
