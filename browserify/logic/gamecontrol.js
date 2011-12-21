@@ -18,7 +18,7 @@ module.exports = function (gcde, data) {
   gcd.on('new game requested'   , a["send new game"]);
   gcd.on('cards discarded'      , a["send draw cards"]);  
   
-  gcd.on('no highscore'         , a["send end game"]);
+  gcd.on('no highscore at end of game'  , a["send end game"]);
   gcd.on('name requested for high score', a["watch name to send end game"]);
   gcd.on("name submitted"       , a["attach end to request"]);
   
@@ -36,7 +36,7 @@ a = {
   },
   
   "attach end to request" : function (data) {
-    gcd.removeListener("no highscore", a["send end game"]);
+    gcd.removeListener("no highscore at end of game", a["send end game"]);
     gcd.on("end game requested", a["send end game"]);
   },
   
@@ -70,8 +70,10 @@ a = {
   
   
   "send end game" : function (data) {
-    var name = data.name;
-    if (!name) {
+    var name;
+    if (data.hasOwnProperty("name") && data.name) {
+      name = data.name;
+    } else {
       name = "___";
     }
     servercalls.get('endgame/'+data.uid+"/"+data.gid+"/"+name, function (server){

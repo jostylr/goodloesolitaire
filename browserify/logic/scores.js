@@ -32,7 +32,7 @@ a = {
       gcd.emit("name requested for high score", data);
       // submitScore();  //shows modal
     } else {
-      gcd.emit("no highscore at end of game");    
+      gcd.emit("no highscore at end of game", data);    
     }
   },
   
