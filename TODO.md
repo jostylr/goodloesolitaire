@@ -1,5 +1,6 @@
 # To do
 
+BUG: When "not enough cards" reached, can't unselect cards.
 BUG: White artifacts under handtext in webkit.
 
 ## 2.0
