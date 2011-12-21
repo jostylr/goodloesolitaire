@@ -69,97 +69,96 @@
 
        </div>
     </div>
-
-    <div class="container">
-        <div class="content">
-          <div class="page-header">
-            <div id="social">
-            <div class="fb-like" data-href="http://goodloesolitaire.com" data-send="true" data-width="340" data-show-faces="true" data-colorscheme="dark"></div>
-          </div>
-          </div>
-          <div class="row">
-            <div class="span10 main">
-              <div id="scores">
-                <span id="currentscore"><span id="score">0</span></span>
-                <span id="currentchange"><span id="delta"></span></span>
-              </div>
-              <div id="inarow-container"><span id="inarow">&nbsp;</span></div>
-              <div id="drawdeck">
-                <div><span id="numcards" class="label notice">52</span></div>
-                <div id="dc"><img id="drawcards" src="images/back.png"></div>
-              </div>
-                <div id="hand">
-                  <ul>
-                    <li class="card" id="card1">&nbsp;</li>
-                    <li class="card" id="card2">&nbsp;</li>
-                    <li class="card" id="card3">&nbsp;</li>
-                    <li class="card" id="card4">&nbsp;</li>
-                    <li class="card" id="card5">&nbsp;</li>
-                  </ul>
+      <div class="container">
+          <div class="content">
+            <div class="page-header">
+              <div id="social">
+              <div class="fb-like" data-href="http://goodloesolitaire.com" data-send="true" data-width="340" data-show-faces="true" data-colorscheme="dark"></div>
+            </div>
+            </div>
+            <div class="row">
+              <div class="span10 main">
+                <div id="scores">
+                  <span id="currentscore"><span id="score">0</span></span>
+                  <span id="currentchange"><span id="delta"></span></span>
                 </div>
-              <img class="hide" src="images/deck.png">
-              <div id="handtext"></div>
-            <div id="hail">
-                    <span id="dr4">Hail Mia!</span>
-                    <span id="dr5">Hail Mary!</span>
-                    <span id="m4">Miagan!</span>
-                    <span id="m5">Mulligan!</span>
-            </div>
-            </div>
-            <div id="history" class="span6 history-table">
-              <table>
-                <tbody>
-              </tbody>
-              </table>
-            </div>
+                <div id="inarow-container"><span id="inarow">&nbsp;</span></div>            <div id="hail">
+                      <span id="dr4">Hail Mia!</span>
+                      <span id="dr5">Hail Mary!</span>
+                      <span id="m4">Miagan!</span>
+                      <span id="m5">Mulligan!</span>
+              </div>
+                <div id="drawdeck">
+                  <div>
+                  <span id="numcards" class="label notice">52</span></div>
+                  <div id="dc"><img id="drawcards" src="images/back.png"></div>
+                </div>
+                  <div id="hand">
+                    <ul>
+                      <li class="card" id="card1">&nbsp;</li>
+                      <li class="card" id="card2">&nbsp;</li>
+                      <li class="card" id="card3">&nbsp;</li>
+                      <li class="card" id="card4">&nbsp;</li>
+                      <li class="card" id="card5">&nbsp;</li>
+                    </ul>
+                  </div>
+                <img class="hide" src="images/deck.png">
+                <div id="handtext"></div>
+              </div>
+              <div id="history" class="span6 history-table">
+                <table>
+                  <tbody>
+                </tbody>
+                </table>
+              </div>
+              </div>
+        </div>
+      </div>
+
+
+      <div id="modal-about" class="modal hide fade">
+          <div class="modal-header">
+            <a href="#" class="close">&times;</a>
+            <h3>About Goodloe Solitaire</h3>
+          </div>
+          <div class="modal-body">
+            <h4>How to play</h4>
+            <p>Continually improve your hand as you draw one or more cards. Put a streak together to really boost your score. Twos are crazy wild!</p>
+          <h4>Origins</h4>
+          <p>Mr. Stephen Goodloe had the great misfortune to find himself on a trip filled with the most honest-speaking people on Earth. He thought to himself:"This will not do!"and promptly tried to teach them poker. But, being honest, they had no money to their names.</p>
+          <p>Pondering this, he went to the top of a mountain for 30 days and 30 nights. When he came down, he had the perfect game: Goodloe Poker. Pass the hand, try to improve it, and make calls whether true or not.</p>
+          <p>Such is the commonly known history. But what is not so commonly known is that these honest folk had a hard time learning the poker hands and their relative strengths. To remedy this, Mr. Goodloe went deep into the caves for 10 days and 10 nights. When he came out, he taught these honest folk Goodloe Solitaire: just improve the hand.</p>
+          <p>And so it was that he taught these honest, happy people how to play with themselves and lie to others. All hail the Goodloe!</p>
+          <h4>Credits</h4>
+            <p>James Taylor and Thomas Park</p>
+            <p>With thanks to jQuery, Bootstrap, GitHub, node.js, and MongoDB</p>
+          </div>
+      </div>
+
+      <div id="modal-highscores" class="modal hide fade">
+          <div class="modal-header">
+            <a href="#" class="close">&times;</a>
+            <h3>High Scores</h3>
+          </div>
+          <div class="modal-body">
+            <table id="table-highscores" class="zebra-striped">
+            <tbody id="hs">
+            </tbody>
+           </table>
+          </div>
+      </div>
+
+        <div id="scoreentry" class="modal hide fade">
+        <div class="modal-header">
+            <a href="#" class="close">&times;</a>
+            <h3>Enter Your Name</h3>
+          </div>
+          <div class="modal-body">
+            <p id="newhighscoretext">Enter your name for high scores.</p>
+                 <input type="text" maxlength="20" name="namemodal" id="namemodal" autofocus="autofocus" placeholder="Guest" /> 
+                 <input type="submit" name="submitname" value="Done" id="submitname" />
             </div>
       </div>
-    </div>
 
-
-    <div id="modal-about" class="modal hide fade">
-        <div class="modal-header">
-          <a href="#" class="close">&times;</a>
-          <h3>About Goodloe Solitaire</h3>
-        </div>
-        <div class="modal-body">
-          <h4>How to play</h4>
-          <p>Continually improve your hand as you draw one or more cards. Put a streak together to really boost your score. Twos are crazy wild!</p>
-        <h4>Origins</h4>
-        <p>Mr. Stephen Goodloe had the great misfortune to find himself on a trip filled with the most honest-speaking people on Earth. He thought to himself:"This will not do!"and promptly tried to teach them poker. But, being honest, they had no money to their names.</p>
-        <p>Pondering this, he went to the top of a mountain for 30 days and 30 nights. When he came down, he had the perfect game: Goodloe Poker. Pass the hand, try to improve it, and make calls whether true or not.</p>
-        <p>Such is the commonly known history. But what is not so commonly known is that these honest folk had a hard time learning the poker hands and their relative strengths. To remedy this, Mr. Goodloe went deep into the caves for 10 days and 10 nights. When he came out, he taught these honest folk Goodloe Solitaire: just improve the hand.</p>
-        <p>And so it was that he taught these honest, happy people how to play with themselves and lie to others. All hail the Goodloe!</p>
-        <h4>Credits</h4>
-          <p>James Taylor and Thomas Park</p>
-          <p>With thanks to jQuery, Bootstrap, GitHub, node.js, and MongoDB</p>
-        </div>
-    </div>
-
-    <div id="modal-highscores" class="modal hide fade">
-        <div class="modal-header">
-          <a href="#" class="close">&times;</a>
-          <h3>High Scores</h3>
-        </div>
-        <div class="modal-body">
-          <table id="table-highscores" class="zebra-striped">
-          <tbody id="hs">
-          </tbody>
-         </table>
-        </div>
-    </div>
-    
-      <div id="scoreentry" class="modal hide fade">
-      <div class="modal-header">
-          <a href="#" class="close">&times;</a>
-          <h3>Enter Your Name</h3>
-        </div>
-        <div class="modal-body">
-          <p id="newhighscoretext">Enter your name for high scores.</p>
-               <input type="text" maxlength="20" name="namemodal" id="namemodal" autofocus="autofocus" placeholder="Guest" /> 
-               <input type="submit" name="submitname" value="Done" id="submitname" />
-          </div>
-    </div>
-
-  </body>
+    </body>
 </html>

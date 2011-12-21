@@ -14,6 +14,8 @@ body {
 
 .topbar {
 
+	font-size: 15px;
+
 	.fill {
 		.background-image(top, bottom, #351C0F, #1A0E07);
 	}
@@ -78,9 +80,9 @@ body {
 
 #scores {
 	font-family: 'Candal', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-	height: 100px;
 	text-align: center;
 	color: rgba(225, 225, 225, 0.7);
+	margin-bottom: 20px;
 }
 
 #currentscore {
@@ -88,8 +90,10 @@ body {
 }
 
 #handtext, #hail {
+	margin-bottom: 30px;
+	height: 20px;
 	font-family: 'Candal', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-	height: 50px;
+	font-size: 20px;
 	text-align: center;
 	color: rgba(225, 225, 225, 0.7);
 }
@@ -141,16 +145,12 @@ body {
 }
 
 #inarow-container {
+	height: 20px;
+	margin-bottom: 10px;
 	text-align: center;
-	padding-bottom: 5%;
 	font-family: 'Candal', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	font-size: 20px;
 	color: rgba(225, 225, 225, 0.7);
-}
-
-#handtext, #hail {
-	font-size: 20px;
-	height: 50px;
 }
 
 #currentchange {
@@ -164,7 +164,6 @@ body {
 
 #drawdeck div {
 	text-align: center;
-	margin-bottom: 7px;
 }
 
 #numcards {
@@ -173,9 +172,11 @@ body {
 	color: #D7BE21;
 	opacity: 0.9;
 	border: 2px solid #D7BE21;
+	margin-bottom: 10px;
 }
 
 #drawcards {
+	margin-top: 10px;
 	cursor: pointer;
 	width: 86px;
 	height: 120px;
@@ -186,6 +187,7 @@ body {
 #hand {
 	text-align: center;
 	height: 130px;
+	margin: 15px 0;
 	visibility: hidden;
 }
 
@@ -237,7 +239,6 @@ body {
 }
 
 /* HISTORY */
-
 
 table {
 	margin-bottom: 0;
@@ -307,8 +308,16 @@ table {
 
 /* MODALS */
 
-.modal h3, .modal h4 {
-	font-family: 'Amaranth', sans-serif;
+.modal {
+
+	h3, h4 {
+		font-family: 'Amaranth', sans-serif;
+	}
+
+	a.close {
+		opacity: 0.8;
+	}
+
 }
 
 #scoreentry {

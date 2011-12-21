@@ -3,24 +3,31 @@
 BUG: White artifacts under handtext in webkit.
 
 ## 2.0
-0. When deck is less than 5, constrain card selection to less than 5.
+
 1. Animation for new deck, discard card, draw card
 2. Make hail calls have more interesting effect.
-9. Add recent high scores in backend/frontend
+3. [Prettify](http://ejohn.org/blog/javascript-pretty-date/) dates in high score (eg, today, yesterday, 3 days ago, November 3, 2011)
+
+0. When deck is less than 5, constrain card selection to less than 5.
+
+9. Add recent/friends high scores
 10. Add personal high scores
-11. Give people a way to link back to their identity. Detect twitter name, add link (riskier) for high score, or login thru Facebook.
+
+11. Give people a way to link to their identity. Login thru Facebook.
+5. Add share with Facebook button when a person achieves a high score.
+4. Add Tweet button?
+
 13. Feature: custom link to individual game history
 14. Feature: custom link to individual game review (watch)
 15. Feature: custom link to individual game replay (play)
+
 5. Use toppage to [preload](http://stackoverflow.com/questions/1059793/pre-loading-external-files-css-javascript-for-other-pages) CSS, JS, PNG
-4. Add social media buttons (Facebook links, Facebook share, Tweet, +1)
-5. Add share with Facebook button when a person achieves a high score.
 5. Add ads
-16. [Minify CSS and JS for production](http://developer.yahoo.com/yui/compressor/)
+
 17. iOS app
 
 
-##2.5
+##3.0
 14. Feature: Multiple game modes:
 
 	1. Streaking
