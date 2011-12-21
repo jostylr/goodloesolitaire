@@ -46,22 +46,23 @@ var suitHtml = {
   s: "&#x2660;"
 };
 
-var oldHand = false;
 
-exports["generate short hand string"] = function (hand) {
+exports["generate short hand string"] = function (data) {
+  var hand = data.hand;
+  var oldhand = data.oldhand;
   var i; 
-  if (!oldHand) {
-    oldHand = hand;
+  if (!oldhand) {
+    oldhand = hand;
   }
   var ret = [];
   for (i = 0; i < 5; i+=1) {
-    if (hand[i] === oldHand[i]) {
-      ret.push('old', [hand[i][0], suitHtml[hand[i][1]]]);  
+    if (hand[i] === oldhand[i]) {
+      ret.push(['old', [hand[i][0], suitHtml[hand[i][1]]]]);  
     } else {
-      ret.push('new', [hand[i][0], suitHtml[hand[i][1]]]);
+      ret.push(['new', [hand[i][0], suitHtml[hand[i][1]]]]);
     }
   }
-  oldHand = hand; 
+  data.oldhand = hand; 
   return ret;
 };
 

@@ -12,19 +12,23 @@ var cardutil = require('../utilities/cards');
 module.exports = function (gcde, data) {
   gcd = gcde;
   gcd.on("new game requested"    , a["zero history count"]);
+  gcd.on("new game requested"    , a["negate oldhand"]);  
   gcd.on("draw cards requested"  , a["increment history count"]);
   gcd.on("score loaded"          , a["process row data"]);
 };
 
 a = {
   "zero history count" : function (data) {
-    data.historyCount = 0;
-  }, 
+    data.historycount = 1;
+  },
+  "negate oldhand" : function  (data) {
+    data.oldhand = false;  //used in cards.js
+  },
   "increment history count" : function (data) {
-    data.historyCount += 1;
+    data.historycount += 1;
   },
   "process row data" : function (data) {
-    data.shorthand = cardutil["generate short hand string"](data.hand);
+    data.shorthand = cardutil["generate short hand string"](data);
     data.shortcall = cardutil["generate short version of call"](data.call);
     gcd.emit("add history", data); 
   } 

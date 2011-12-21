@@ -17,7 +17,12 @@ module.exports = function (gcde, data) {
   
   gcd.on('new game requested'   , a["send new game"]);
   gcd.on('cards discarded'      , a["send draw cards"]);  
-  gcd.on('end game requested'   , a["send end game"]);
+  
+  gcd.on('no highscore'         , a["send end game"]);
+  gcd.on('name requested for high score', a["watch name to send end game"]);
+  gcd.on("name submitted"       , a["attach end to request"]);
+  
+  //gcd.on('end game requested'   , a["send end game"]);
   gcd.on('high scores requested', a["send view scores"]);
 
   gcd.on("ready"                , a["initialize values"]);  
@@ -26,6 +31,14 @@ module.exports = function (gcde, data) {
 
 a = {
   
+  "watch name to send end game" : function (data) {
+    gcd.once("name submitted", a["send end game"]);
+  },
+  
+  "attach end to request" : function (data) {
+    gcd.removeListener("no highscore", a["send end game"]);
+    gcd.on("end game requested", a["send end game"]);
+  },
   
   //server calls
   
@@ -66,7 +79,8 @@ a = {
         gcd.emit("end game denied", data, server);
         return false;
       }
-      gcd.emit("server ended game", data, server);
+      data.highscores = server.highscores;
+      gcd.emit("server ended game", data);
     });
   },
   

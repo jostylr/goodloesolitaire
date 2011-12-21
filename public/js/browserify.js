@@ -514,7 +514,12 @@ module.exports = function (gcde, data) {
   
   gcd.on('new game requested'   , a["send new game"]);
   gcd.on('cards discarded'      , a["send draw cards"]);  
-  gcd.on('end game requested'   , a["send end game"]);
+  
+  gcd.on('no highscore'         , a["send end game"]);
+  gcd.on('name requested for high score', a["watch name to send end game"]);
+  gcd.on("name submitted"       , a["attach end to request"]);
+  
+  //gcd.on('end game requested'   , a["send end game"]);
   gcd.on('high scores requested', a["send view scores"]);
 
   gcd.on("ready"                , a["initialize values"]);  
@@ -523,6 +528,14 @@ module.exports = function (gcde, data) {
 
 a = {
   
+  "watch name to send end game" : function (data) {
+    gcd.once("name submitted", a["send end game"]);
+  },
+  
+  "attach end to request" : function (data) {
+    gcd.removeListener("no highscore", a["send end game"]);
+    gcd.on("end game requested", a["send end game"]);
+  },
   
   //server calls
   
@@ -563,7 +576,8 @@ a = {
         gcd.emit("end game denied", data, server);
         return false;
       }
-      gcd.emit("server ended game", data, server);
+      data.highscores = server.highscores;
+      gcd.emit("server ended game", data);
     });
   },
   
@@ -685,19 +699,23 @@ var cardutil = require('../utilities/cards');
 module.exports = function (gcde, data) {
   gcd = gcde;
   gcd.on("new game requested"    , a["zero history count"]);
+  gcd.on("new game requested"    , a["negate oldhand"]);  
   gcd.on("draw cards requested"  , a["increment history count"]);
   gcd.on("score loaded"          , a["process row data"]);
 };
 
 a = {
   "zero history count" : function (data) {
-    data.historyCount = 0;
-  }, 
+    data.historycount = 1;
+  },
+  "negate oldhand" : function  (data) {
+    data.oldhand = false;  //used in cards.js
+  },
   "increment history count" : function (data) {
-    data.historyCount += 1;
+    data.historycount += 1;
   },
   "process row data" : function (data) {
-    data.shorthand = cardutil["generate short hand string"](data.hand);
+    data.shorthand = cardutil["generate short hand string"](data);
     data.shortcall = cardutil["generate short version of call"](data.call);
     gcd.emit("add history", data); 
   } 
@@ -759,22 +777,23 @@ var suitHtml = {
   s: "&#x2660;"
 };
 
-var oldHand = false;
 
-exports["generate short hand string"] = function (hand) {
+exports["generate short hand string"] = function (data) {
+  var hand = data.hand;
+  var oldhand = data.oldhand;
   var i; 
-  if (!oldHand) {
-    oldHand = hand;
+  if (!oldhand) {
+    oldhand = hand;
   }
   var ret = [];
   for (i = 0; i < 5; i+=1) {
-    if (hand[i] === oldHand[i]) {
-      ret.push('old', [hand[i][0], suitHtml[hand[i][1]]]);  
+    if (hand[i] === oldhand[i]) {
+      ret.push(['old', [hand[i][0], suitHtml[hand[i][1]]]]);  
     } else {
-      ret.push('new', [hand[i][0], suitHtml[hand[i][1]]]);
+      ret.push(['new', [hand[i][0], suitHtml[hand[i][1]]]]);
     }
   }
-  oldHand = hand; 
+  data.oldhand = hand; 
   return ret;
 };
 
@@ -883,6 +902,9 @@ module.exports = function (gcde, data) {
   gcd.on("server drew cards"        , a["check delta"]);  // (negative OR positive OR no) change in score
   gcd.on("server drew cards"        , a["check for streak"]); // streak OR nothing
   
+  gcd.on("end game requested"       , a["check score/name"]);
+  gcd.on("name submitted"             , a["remove score/name"]);
+  
   gcd.on("server sent high scores"  , a["look for new high scores"]);  // high scores checked
   gcd.on("server ended game"        , a["look for new high scores"]);  // high scores checked
   
@@ -898,8 +920,12 @@ a = {
       gcd.emit("name requested for high score", data);
       // submitScore();  //shows modal
     } else {
-      gcd.emit("send endgame");    
+      gcd.emit("no highscore at end of game");    
     }
+  },
+  
+  'remove score/name' : function (data) {
+    gcd.removeListener("end game requested", a['check score/name']);
   },
   
   
@@ -985,8 +1011,6 @@ module.exports = function (gcde, data) {
   gcd.on("server ended game"      , a["remove listen for name entry"]);
   gcd.on("server ended game"      , a["fade main"]);
   
-
-  gcd.on("end game requested" , a["emit check score/name"]);
   
   gcd.once("name registered"  , a["skip name"]);
   
@@ -1020,9 +1044,6 @@ a = {
   },
   
 
-  "emit check score/name" : function (data) {
-    gcd.emit("check score and name", data); //removed after usage
-  },
   "show about" : function () {
     $('#modal-about').modal({
       backdrop: true,
@@ -1050,12 +1071,12 @@ a = {
     $('html').unbind('keyup', a["hand key bindings"]);
   },
   "listen for name entry" : function () {
-    gcd.on("name entry shown"      , a["bind hand keys"]);
-    gcd.on("name submitted"       , a["unbind hand keys"]);
+    gcd.on("name entry shown"      , a["unbind hand keys"]);
+    gcd.on("name submitted"       , a["bind hand keys"]);
   },
   "remove listen for name entry" : function () {
-    gcd.removeListener("name entry shown", a["bind hand keys"]);
-    gcd.removeListener("name submitted"  , a["unbind hand keys"]);
+    gcd.removeListener("name entry shown", a["unbind hand keys"]);
+    gcd.removeListener("name submitted"  , a["bind hand keys"]);
   }
   
 };
@@ -1112,7 +1133,7 @@ var deltalabel;
 module.exports = function (gcde, data) {
   gcd = gcde;
     
-  gcd.on("clear history", a['empty history body']);
+  gcd.on("server started new game", a['empty history body']);
   
   gcd.on("add history", a['add row to history']);
   
@@ -1126,7 +1147,7 @@ a = {
   
   'add row to history' :  function (data) {
     $('#history table tbody').prepend(
-      "<tr><td>" + data.num + ".</td><td>" +
+      "<tr><td>" + data.historycount + ".</td><td>" +
       data.score + "</td><td><span " + deltalabel(data.delta) + "</span></td><td class='left'>" +
       a["assemble the hand's short call"](data.shorthand) +
       "</td><td>" + data.shortcall + "</td></tr>"
@@ -1140,9 +1161,9 @@ a = {
     for (i= 0; i <n; i += 1) {
       c = hand[i];
       if (c[0] === "new") {
-        shc += " <strong>"+c[1] +c[2]+"</strong> ";          
+        shc += " <strong>"+c[1][0] +c[1][1]+"</strong> ";          
       } else {
-        shc += " " + c[1] + c[2] + " ";                
+        shc += " " + c[1][0] + c[1][1] + " ";                
       }
     }
     return shc; 
@@ -1392,18 +1413,21 @@ module.exports = function (gcde, data) {
   gcd.on("draw cards"             , a["clear streak"]); //
   gcd.on("new game requested"     , a["clear streak"]);
   gcd.on("streak"                 , a["call streak"]); //
-  gcd.on("name entry shown"       , a["add score entry"]); //send endgame
+  gcd.on("name entry shown"       , a["get name"]); //send endgame
   gcd.on("end game requested"     , a["add listener to show high scores"]);
 //  gcd.on("high scores checked"    , a["display high scores"]);//
   gcd.on("server started new game" , a["pulse positive score"]);
   gcd.on("negative change in score", a["pulse negative score"]);
   gcd.on("positive change in score", a["pulse positive score"]);  
   gcd.on("no change in score"     , a["no score change"]);    
-  gcd.on("name entry hidden"      , a["emit submit name" ]);
+  //gcd.on("name entry hidden"      , a["emit submit name" ]);
   gcd.on("name entry shown"       , a["focus into name modal"]);
-  gcd.on("name submitted"         , a["get name value"]);
+ // gcd.on("name submitted"         , a["get name value"]);
   gcd.on("name entry shown"       , a["bind name entry keys"]);
   gcd.on("name submitted"         , a["unbind name entry keys"]);
+
+  gcd.on("name requested for high score", a["name entry requested"]);
+
 
   gcd.on("ready"                  , a['initialize name/score clicks, modals, high scores']);
   
@@ -1418,14 +1442,16 @@ a = {
   'call streak' : function  (data) {
     $('#inarow').html(data.streak+" in a row"+ (data.level ? " with a bonus of "+data.level+"!" : "!"));
   },
-  'add score entry' : function (data) {
+  'get name' : function (data) {
     $('#scoreentry').bind('hide', function self () {
       data.name = encodeURI($('#namemodal').val().replace(/[^ a-zA-Z0-9_]/g, ''));
       if (!data.name) {
         data.name = "___";
+      } else {
+        $("#name a").html(data.name);
       }
       $('#scoreentry').unbind('hide', self); //self cleanup
-      gcd.emit('send endgame');
+      gcd.emit('name submitted', data);
     });
   },
   "add listener to show high scores" : function (data) {
@@ -1460,17 +1486,20 @@ a = {
     $("#delta").html("&#x25BC;"+(-1*data.delta));
     $('#score, #delta').removeClass("scoreminus scoreplus");
     setTimeout(function () {$('#score, #delta').addClass("scoreminus");}, 5);
+    gcd.emit("score loaded", data);
   },
   "pulse positive score" : function (data) {
     $("#score").html(data.score);
     $("#delta").html("&#x25B2;"+data.delta);
     $('#score, #delta').removeClass("scoreminus scoreplus");
     setTimeout(function () {$('#score, #delta').addClass("scoreplus");}, 5);
+    gcd.emit("score loaded", data);
   },
   "no score change" : function (data) {
     $("#score").html(data.score);
     $("#delta").html("▬");
     $('#score, #delta').removeClass("scoreminus scoreplus");
+    gcd.emit("score loaded", data);
   },
   
   
@@ -1523,10 +1552,10 @@ install = function (data) {
     
   };
   
-  
+  /*
   a["emit submit name"] = function () {
       gcd.emit("name submitted", data);
-  };
+  };*/
 
   a["retrieve high scores for viewing"] = function () {
     gcd.once("high scores checked", a["display high scores"]);
@@ -1539,7 +1568,7 @@ install = function (data) {
       keyboard: true,
       show: true
     });
-    gcd.emit("name entry displayed", data);
+    gcd.emit("name entry shown", data);
   };
   
   a["hide name entry"] = function () {
@@ -1604,6 +1633,16 @@ var eventdebugger = function (evem) {
       }
     }
     _emit.apply(this, arguments);
+  };
+  evem.once = function(type, listener) {
+    var self = this;
+    var g = function g () {
+      self.removeListener(type, g);
+      listener.apply(this, arguments);
+    };
+    g.desc = listener.desc+" (once)";
+    self.on(type, g);
+    return this;
   };
 };
 

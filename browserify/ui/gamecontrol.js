@@ -26,8 +26,6 @@ module.exports = function (gcde, data) {
   gcd.on("server ended game"      , a["remove listen for name entry"]);
   gcd.on("server ended game"      , a["fade main"]);
   
-
-  gcd.on("end game requested" , a["emit check score/name"]);
   
   gcd.once("name registered"  , a["skip name"]);
   
@@ -61,9 +59,6 @@ a = {
   },
   
 
-  "emit check score/name" : function (data) {
-    gcd.emit("check score and name", data); //removed after usage
-  },
   "show about" : function () {
     $('#modal-about').modal({
       backdrop: true,
@@ -91,12 +86,12 @@ a = {
     $('html').unbind('keyup', a["hand key bindings"]);
   },
   "listen for name entry" : function () {
-    gcd.on("name entry shown"      , a["bind hand keys"]);
-    gcd.on("name submitted"       , a["unbind hand keys"]);
+    gcd.on("name entry shown"      , a["unbind hand keys"]);
+    gcd.on("name submitted"       , a["bind hand keys"]);
   },
   "remove listen for name entry" : function () {
-    gcd.removeListener("name entry shown", a["bind hand keys"]);
-    gcd.removeListener("name submitted"  , a["unbind hand keys"]);
+    gcd.removeListener("name entry shown", a["unbind hand keys"]);
+    gcd.removeListener("name submitted"  , a["bind hand keys"]);
   }
   
 };

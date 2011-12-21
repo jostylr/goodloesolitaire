@@ -14,6 +14,9 @@ module.exports = function (gcde, data) {
   gcd.on("server drew cards"        , a["check delta"]);  // (negative OR positive OR no) change in score
   gcd.on("server drew cards"        , a["check for streak"]); // streak OR nothing
   
+  gcd.on("end game requested"       , a["check score/name"]);
+  gcd.on("name submitted"             , a["remove score/name"]);
+  
   gcd.on("server sent high scores"  , a["look for new high scores"]);  // high scores checked
   gcd.on("server ended game"        , a["look for new high scores"]);  // high scores checked
   
@@ -29,8 +32,12 @@ a = {
       gcd.emit("name requested for high score", data);
       // submitScore();  //shows modal
     } else {
-      gcd.emit("send endgame");    
+      gcd.emit("no highscore at end of game");    
     }
+  },
+  
+  'remove score/name' : function (data) {
+    gcd.removeListener("end game requested", a['check score/name']);
   },
   
   

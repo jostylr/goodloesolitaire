@@ -35,6 +35,16 @@ var eventdebugger = function (evem) {
     }
     _emit.apply(this, arguments);
   };
+  evem.once = function(type, listener) {
+    var self = this;
+    var g = function g () {
+      self.removeListener(type, g);
+      listener.apply(this, arguments);
+    };
+    g.desc = listener.desc+" (once)";
+    self.on(type, g);
+    return this;
+  };
 };
 
 eventdebugger(gcd);

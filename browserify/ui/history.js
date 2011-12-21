@@ -11,7 +11,7 @@ var deltalabel;
 module.exports = function (gcde, data) {
   gcd = gcde;
     
-  gcd.on("clear history", a['empty history body']);
+  gcd.on("server started new game", a['empty history body']);
   
   gcd.on("add history", a['add row to history']);
   
@@ -25,7 +25,7 @@ a = {
   
   'add row to history' :  function (data) {
     $('#history table tbody').prepend(
-      "<tr><td>" + data.num + ".</td><td>" +
+      "<tr><td>" + data.historycount + ".</td><td>" +
       data.score + "</td><td><span " + deltalabel(data.delta) + "</span></td><td class='left'>" +
       a["assemble the hand's short call"](data.shorthand) +
       "</td><td>" + data.shortcall + "</td></tr>"
@@ -39,9 +39,9 @@ a = {
     for (i= 0; i <n; i += 1) {
       c = hand[i];
       if (c[0] === "new") {
-        shc += " <strong>"+c[1] +c[2]+"</strong> ";          
+        shc += " <strong>"+c[1][0] +c[1][1]+"</strong> ";          
       } else {
-        shc += " " + c[1] + c[2] + " ";                
+        shc += " " + c[1][0] + c[1][1] + " ";                
       }
     }
     return shc; 

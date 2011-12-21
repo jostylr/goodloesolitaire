@@ -14,18 +14,21 @@ module.exports = function (gcde, data) {
   gcd.on("draw cards"             , a["clear streak"]); //
   gcd.on("new game requested"     , a["clear streak"]);
   gcd.on("streak"                 , a["call streak"]); //
-  gcd.on("name entry shown"       , a["add score entry"]); //send endgame
+  gcd.on("name entry shown"       , a["get name"]); //send endgame
   gcd.on("end game requested"     , a["add listener to show high scores"]);
 //  gcd.on("high scores checked"    , a["display high scores"]);//
   gcd.on("server started new game" , a["pulse positive score"]);
   gcd.on("negative change in score", a["pulse negative score"]);
   gcd.on("positive change in score", a["pulse positive score"]);  
   gcd.on("no change in score"     , a["no score change"]);    
-  gcd.on("name entry hidden"      , a["emit submit name" ]);
+  //gcd.on("name entry hidden"      , a["emit submit name" ]);
   gcd.on("name entry shown"       , a["focus into name modal"]);
-  gcd.on("name submitted"         , a["get name value"]);
+ // gcd.on("name submitted"         , a["get name value"]);
   gcd.on("name entry shown"       , a["bind name entry keys"]);
   gcd.on("name submitted"         , a["unbind name entry keys"]);
+
+  gcd.on("name requested for high score", a["name entry requested"]);
+
 
   gcd.on("ready"                  , a['initialize name/score clicks, modals, high scores']);
   
@@ -40,14 +43,16 @@ a = {
   'call streak' : function  (data) {
     $('#inarow').html(data.streak+" in a row"+ (data.level ? " with a bonus of "+data.level+"!" : "!"));
   },
-  'add score entry' : function (data) {
+  'get name' : function (data) {
     $('#scoreentry').bind('hide', function self () {
       data.name = encodeURI($('#namemodal').val().replace(/[^ a-zA-Z0-9_]/g, ''));
       if (!data.name) {
         data.name = "___";
+      } else {
+        $("#name a").html(data.name);
       }
       $('#scoreentry').unbind('hide', self); //self cleanup
-      gcd.emit('send endgame');
+      gcd.emit('name submitted', data);
     });
   },
   "add listener to show high scores" : function (data) {
@@ -82,17 +87,20 @@ a = {
     $("#delta").html("&#x25BC;"+(-1*data.delta));
     $('#score, #delta').removeClass("scoreminus scoreplus");
     setTimeout(function () {$('#score, #delta').addClass("scoreminus");}, 5);
+    gcd.emit("score loaded", data);
   },
   "pulse positive score" : function (data) {
     $("#score").html(data.score);
     $("#delta").html("&#x25B2;"+data.delta);
     $('#score, #delta').removeClass("scoreminus scoreplus");
     setTimeout(function () {$('#score, #delta').addClass("scoreplus");}, 5);
+    gcd.emit("score loaded", data);
   },
   "no score change" : function (data) {
     $("#score").html(data.score);
     $("#delta").html("▬");
     $('#score, #delta').removeClass("scoreminus scoreplus");
+    gcd.emit("score loaded", data);
   },
   
   
@@ -145,10 +153,10 @@ install = function (data) {
     
   };
   
-  
+  /*
   a["emit submit name"] = function () {
       gcd.emit("name submitted", data);
-  };
+  };*/
 
   a["retrieve high scores for viewing"] = function () {
     gcd.once("high scores checked", a["display high scores"]);
@@ -161,7 +169,7 @@ install = function (data) {
       keyboard: true,
       show: true
     });
-    gcd.emit("name entry displayed", data);
+    gcd.emit("name entry shown", data);
   };
   
   a["hide name entry"] = function () {
