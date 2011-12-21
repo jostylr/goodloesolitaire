@@ -11,7 +11,7 @@ module.exports = function (gcde, data) {
   
   install(data); //for initializing click functions, mostly
   
-  gcd.on("draw cards"             , a["clear streak"]); //
+  gcd.on("draw cards requested"   , a["clear streak"]); //
   gcd.on("new game requested"     , a["clear streak"]);
   gcd.on("streak"                 , a["call streak"]); //
   gcd.on("name entry shown"       , a["get name"]); //send endgame
