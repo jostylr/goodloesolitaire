@@ -34,7 +34,7 @@ var logger = function (req, res, next) {
 };
 
 app.configure( function () {
-  app.use(express.logger({format:':req[Accept]  :res[Content-Type] :http-version :response-time :remote-addr :date :method :url :referrer :user-agent :status'}));
+  //app.use(express.logger({format:':req[Accept]  :res[Content-Type] :http-version :response-time :remote-addr :date :method :url :referrer :user-agent :status'}));
 	app.use(setHeaders);
 	app.use(express.bodyParser());
 	//app.use(logger);

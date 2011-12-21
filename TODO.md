@@ -6,7 +6,6 @@ BUG: White artifacts under handtext in webkit.
 
 1. Animation for new deck, discard card, draw card
 2. Make hail calls have more interesting effect.
-3. [Prettify](http://ejohn.org/blog/javascript-pretty-date/) dates in high score (eg, today, yesterday, 3 days ago, November 3, 2011)
 
 0. When deck is less than 5, constrain card selection to less than 5.
 
