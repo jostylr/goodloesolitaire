@@ -7,7 +7,6 @@ BUG: White artifacts under handtext in webkit.
 1. Animation for new deck, discard card, draw card
 2. Make hail calls have more interesting effect.
 
-0. When deck is less than 5, constrain card selection to less than 5.
 
 9. Add recent/friends high scores
 10. Add personal high scores

@@ -86,21 +86,6 @@ a = {
     $('#dc').fadeTo(400, 0.5); 
   },
   
-  "toggle draw class" : function (data) {
-    return function (event) {
-      var drawcount;
-      if (data.cardsleft < 5) {
-        drawcount = querycards[1];
-        if (drawcount >= data.cardsleft) {
-          gcd.emit("not enough cards left", data);
-          return false;
-        } 
-      }
-      var this$ = $(this);
-      this$.toggleClass('draw');
-    };
-  },
-  
   "use backing for discarded cards": function () {
    $(".draw").addClass('backing');   
   },
@@ -133,8 +118,22 @@ a = {
 
 
 install = function (data) {
+  a["toggle draw class"] = function (event) {
+    var drawcount;
+    if (data.cardsleft < 5) {
+      drawcount = querycards()[1];
+      if (drawcount >= data.cardsleft) {
+        gcd.emit("not enough cards left", data);
+        return false;
+      } 
+    }
+    var this$ = $(this);
+    this$.toggleClass('draw');
+  };
+  
+  
   a["initialize draw card click, hide hail, hand"] = function () {
-   $('#hand li').bind("click"     , a["toggle draw class"](data)); 
+   $('#hand li').bind("click"     , a["toggle draw class"]); 
    
    $('#hail >span').hide();
    
