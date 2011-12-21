@@ -13,6 +13,7 @@ BUG: White artifacts under handtext in webkit.
 9. Add recent/friends high scores
 10. Add personal high scores
 
+10. High score sequence should be collapsed. Instead of two modals, it should go straight to the high score modal when high score is achieved. Here we can give people the chance to login if they want to save their high scores, in addition to email/Facebooksend/tweet options.
 11. Give people a way to link to their identity. Login thru Facebook.
 5. Add share with Facebook button when a person achieves a high score.
 4. Add Tweet button?
