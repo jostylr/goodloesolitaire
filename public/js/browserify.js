@@ -1512,7 +1512,7 @@ computecardposition = function (data, card) {
 });
 
 require.define("/ui/scores.js", function (require, module, exports, __dirname, __filename) {
-    /*globals $, module, console, require*/
+    /*globals $, module, console, require, humaneDate*/
 
 var file = 'ui/scores: ';
 
@@ -1578,8 +1578,8 @@ a = {
     var htmltablebody = '';
     for (i = 0; i<n; i += 1) {
       row = data.highscores[n-1-i];
-      date = new Date (row.date);
-      date = date.getMonth()+1+'/'+date.getDate()+'/'+date.getFullYear();
+      date = humaneDate(new Date (row.date));
+//      date = date.getMonth()+1+'/'+date.getDate()+'/'+date.getFullYear();
       if (row.ownscore) {
         rowclass = 'class="newHighScore"';
       }
