@@ -1241,13 +1241,15 @@ var file = 'ui/history: ';
 
 var gcd;
 
-var a;
+var a, b;
 
 var deltalabel; 
 
 module.exports = function (gcde, data) {
   gcd = gcde;
     
+  gcd.install(a);
+  
   gcd.on("server started new game", a['empty history body']);
   
   gcd.on("add history", a['add row to history']);
@@ -1291,15 +1293,20 @@ for (fname in a) {
   a[fname].desc = file+fname;
 }
 
-deltalabel = function (delta) {
-  if (delta > 0) {
-    return "class='label success'>&#x25B2;"+delta;
-  } else if (delta <0 ) {
-    return "class='label important'>&#x25BC;"+(-1*delta);
-  } else {
-    return "class='label' >▬";
-  }
+b = {
+  
+  'generate delta label' : function (delta) {
+    if (delta > 0) {
+      return "class='label success'>&#x25B2;"+delta;
+    } else if (delta <0 ) {
+      return "class='label important'>&#x25BC;"+(-1*delta);
+    } else {
+      return "class='label' >▬";
+    }
+  },
+  
 };
+
 
 });
 
@@ -1425,16 +1432,20 @@ a = {
 
 install = function (data) {
   a["toggle draw class"] = function (event) {
+    var this$ = $(this);
     var drawcount;
-    if (data.cardsleft < 5) {
+    if (this$.hasClass('draw')) {
+      this$.removeClass('draw');
+    } else if (data.cardsleft < 5) {
       drawcount = querycards()[1];
       if (drawcount >= data.cardsleft) {
         gcd.emit("not enough cards left", data);
-        return false;
-      } 
+      } else {
+        this$.addClass('draw');
+      }
+    } else {
+      this$.addClass('draw');      
     }
-    var this$ = $(this);
-    this$.toggleClass('draw');
   };
   
   

@@ -119,16 +119,20 @@ a = {
 
 install = function (data) {
   a["toggle draw class"] = function (event) {
+    var this$ = $(this);
     var drawcount;
-    if (data.cardsleft < 5) {
+    if (this$.hasClass('draw')) {
+      this$.removeClass('draw');
+    } else if (data.cardsleft < 5) {
       drawcount = querycards()[1];
       if (drawcount >= data.cardsleft) {
         gcd.emit("not enough cards left", data);
-        return false;
-      } 
+      } else {
+        this$.addClass('draw');
+      }
+    } else {
+      this$.addClass('draw');      
     }
-    var this$ = $(this);
-    this$.toggleClass('draw');
   };
   
   
