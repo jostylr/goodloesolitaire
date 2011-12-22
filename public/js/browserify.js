@@ -1241,15 +1241,13 @@ var file = 'ui/history: ';
 
 var gcd;
 
-var a, b;
+var a;
 
 var deltalabel; 
 
 module.exports = function (gcde, data) {
   gcd = gcde;
     
-  gcd.install(a);
-  
   gcd.on("server started new game", a['empty history body']);
   
   gcd.on("add history", a['add row to history']);
@@ -1293,20 +1291,15 @@ for (fname in a) {
   a[fname].desc = file+fname;
 }
 
-b = {
-  
-  'generate delta label' : function (delta) {
-    if (delta > 0) {
-      return "class='label success'>&#x25B2;"+delta;
-    } else if (delta <0 ) {
-      return "class='label important'>&#x25BC;"+(-1*delta);
-    } else {
-      return "class='label' >▬";
-    }
-  },
-  
+deltalabel = function (delta) {
+  if (delta > 0) {
+    return "class='label success'>&#x25B2;"+delta;
+  } else if (delta <0 ) {
+    return "class='label important'>&#x25BC;"+(-1*delta);
+  } else {
+    return "class='label' >▬";
+  }
 };
-
 
 });
 
