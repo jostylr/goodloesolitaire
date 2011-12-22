@@ -81,7 +81,7 @@ a = {
         gcd.emit("end game denied", data, server);
         return false;
       }
-      data.highscores = server.highscores;
+      data.highscores = server.highscores.sort(function (a,b) {return b.score - a.score;});
       gcd.emit("server ended game", data);
     });
   },

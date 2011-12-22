@@ -28,7 +28,7 @@ module.exports = function (gcde, data) {
 a = {
   
   'check score/name' : function (data) {
-    if (!data.name && data.score >= data.highscores[0].score) {
+    if (!data.name && data.score >= data.highscores[data.highscores.length-1].score) {
       gcd.emit("name requested for high score", data);
       // submitScore();  //shows modal
     } else {
@@ -63,7 +63,7 @@ a = {
     n = highscores.length;
     tempOldHighScores = {};
     for (i = 0; i<n; i += 1) {
-      row = highscores[n-1-i];
+      row = highscores[i];
       if (data.gid === row._id) {
         row.ownscore = true;
       } else if (data.oldHighScores && !(data.oldHighScores.hasOwnProperty(row._id)) ) {

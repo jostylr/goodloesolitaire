@@ -691,7 +691,7 @@ a = {
         gcd.emit("end game denied", data, server);
         return false;
       }
-      data.highscores = server.highscores;
+      data.highscores = server.highscores.sort(function (a,b) {return b.score - a.score;});
       gcd.emit("server ended game", data);
     });
   },
@@ -1031,7 +1031,7 @@ module.exports = function (gcde, data) {
 a = {
   
   'check score/name' : function (data) {
-    if (!data.name && data.score >= data.highscores[0].score) {
+    if (!data.name && data.score >= data.highscores[data.highscores.length-1].score) {
       gcd.emit("name requested for high score", data);
       // submitScore();  //shows modal
     } else {
@@ -1066,7 +1066,7 @@ a = {
     n = highscores.length;
     tempOldHighScores = {};
     for (i = 0; i<n; i += 1) {
-      row = highscores[n-1-i];
+      row = highscores[i];
       if (data.gid === row._id) {
         row.ownscore = true;
       } else if (data.oldHighScores && !(data.oldHighScores.hasOwnProperty(row._id)) ) {
@@ -1580,7 +1580,7 @@ a = {
     n = data.highscores.length;
     var htmltablebody = '';
     for (i = 0; i<n; i += 1) {
-      row = data.highscores[n-1-i];
+      row = data.highscores[i];
       date = humaneDate(new Date (row.date));
 //      date = date.getMonth()+1+'/'+date.getDate()+'/'+date.getFullYear();
       if (row.ownscore) {

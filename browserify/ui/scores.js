@@ -63,7 +63,7 @@ a = {
     n = data.highscores.length;
     var htmltablebody = '';
     for (i = 0; i<n; i += 1) {
-      row = data.highscores[n-1-i];
+      row = data.highscores[i];
       date = humaneDate(new Date (row.date));
 //      date = date.getMonth()+1+'/'+date.getDate()+'/'+date.getFullYear();
       if (row.ownscore) {
