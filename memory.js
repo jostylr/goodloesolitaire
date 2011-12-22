@@ -27,7 +27,7 @@ exports.initializehs = function (sciniths) {
 		//load highscores collection
 	  db.collection('highscores', function (err, collection){
 			dbhigh = collection;
-			dbhigh.find({}, {sort: ["score", "desc"], limit:10}).toArray(function (err, docs) {
+			dbhigh.find().sort({score: -1}).limit(10).toArray(function (err, docs) {
 				if (err) {
 					console.log(err);
 					sciniths({});
