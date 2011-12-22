@@ -44,7 +44,7 @@ table{margin-bottom:0;}
 .modal h3,.modal h4{font-family:'Amaranth',sans-serif;}
 .modal a.close{opacity:0.8;}
 #scoreentry{width:360px;margin-left:-180px;}#scoreentry input[type="text"]{width:200px;}
-#modal-highscores{width:360px;margin-left:-180px;}#modal-highscores .newHighScore td{background-color:#FFFE8B;}
+#modal-highscores .newHighScore td{background-color:#FFFE8B;}
 #modal-highscores #table-highscores{font-size:18px;}#modal-highscores #table-highscores td{border-right:0px;border-left:0px;}
 #modal-highscores #table-highscores td:first-child{text-align:left;}
 #modal-highscores #table-highscores td:nth-child(3){text-align:right;}
