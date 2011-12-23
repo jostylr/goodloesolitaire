@@ -4,9 +4,11 @@ var events = require('events');
 
 var gcd = new events.EventEmitter(); 
 
-var data = {};
 
-require('./debugging')(gcd);
+require('./utilities/debugging')(gcd);
+require('./utilities/inventory')(gcd, true);
+
+var data = gcd.data;
 
 //$ = function (arg) {arg();};
 
@@ -24,6 +26,7 @@ require('./ui/history'        )(gcd, data);
 require('./ui/hand'           )(gcd, data);
 require('./ui/scores'         )(gcd, data);
 
+require('./events.js')(gcd);
 
 $(function() { 
   gcd.emit("ready", data);

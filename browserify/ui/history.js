@@ -4,34 +4,18 @@ var file = 'ui/history: ';
 
 var gcd;
 
-var a;
+var a, b;
 
-var deltalabel; 
 
-module.exports = function (gcde, data) {
+module.exports = function (gcde) {
   gcd = gcde;
     
-  gcd.on("server started new game", a['empty history body']);
-  
-  gcd.on("add history", a['add row to history']);
-  
+  gcd.install(a, file, b);
   
 };
 
-a = {
-  'empty history body' :  function () {
-    $('#history table tbody').empty();
-  },
-  
-  'add row to history' :  function (data) {
-    $('#history table tbody').prepend(
-      "<tr><td>" + data.historycount + ".</td><td>" +
-      data.score + "</td><td><span " + deltalabel(data.delta) + "</span></td><td class='left'>" +
-      a["assemble the hand's short call"](data.shorthand) +
-      "</td><td>" + data.shortcall + "</td></tr>"
-      );    
-  }, 
-  
+
+b = {
   "assemble the hand's short call" :  function (hand) {
     var i, n, c, shc; 
     n = hand.length; 
@@ -45,21 +29,39 @@ a = {
       }
     }
     return shc; 
+  },
+  
+  'generate delta label' : function (delta) {
+    if (delta > 0) {
+      return "class='label success'>&#x25B2;"+delta;
+    } else if (delta <0 ) {
+      return "class='label important'>&#x25BC;"+(-1*delta);
+    } else {
+      return "class='label' >▬";
+    }
   }
+  
 };
 
-var fname; 
 
-for (fname in a) {
-  a[fname].desc = file+fname;
-}
-
-deltalabel = function (delta) {
-  if (delta > 0) {
-    return "class='label success'>&#x25B2;"+delta;
-  } else if (delta <0 ) {
-    return "class='label important'>&#x25BC;"+(-1*delta);
-  } else {
-    return "class='label' >▬";
-  }
+a = {
+  'empty history body' :  function () {
+    $('#history table tbody').empty();
+  },
+  
+  
+  'add row to history' :  [ ["historycount", "score", "shortcall",
+                              {$$transform: [b['generate delta label'], "delta"]},
+                              {$$transform: [b["assemble the hand's short call"],  "shorthand"]}],  
+    function (historycount, score, shortcall, deltalabel, shorthand) {
+      $('#history table tbody').prepend(
+        "<tr><td>" + historycount + ".</td><td>" +
+        score + "</td><td><span " + deltalabel + "</span></td><td class='left'>" +
+        shorthand + "</td><td>" + shortcall + "</td></tr>"
+        );    
+    }] 
+  
 };
+
+
+

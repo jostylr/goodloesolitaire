@@ -494,7 +494,7 @@ EventEmitter.prototype.listeners = function(type) {
 
 });
 
-require.define("/debugging.js", function (require, module, exports, __dirname, __filename) {
+require.define("/utilities/debugging.js", function (require, module, exports, __dirname, __filename) {
     /*global $, console, submitScore, require, eventlogger, hashevents */
 
 
@@ -604,6 +604,129 @@ module.exports = function (evem) {
     self.on(type, g);
     return this;
   };
+};
+});
+
+require.define("/utilities/inventory.js", function (require, module, exports, __dirname, __filename) {
+    /*globals $, module, console, require*/
+
+var file = 'utilities/inventory';
+
+var install, process, makechanges, wrapper, wrapper_debug;
+
+module.exports = function (evem, debug) {
+  evem.install = install;
+  evem.a = {};
+  evem.debug = debug;
+  evem.data = {};
+  evem.log = {
+    "process" : function (desc, args) {
+      console.log("args to "+desc+": "+JSON.stringify(args));
+    },
+    "makechanges" : function (desc, changes) {
+      console.log("changes from "+desc+": "+JSON.stringify(changes));
+    }
+  };
+};
+
+install = function (a, file) {
+  var evem = this;
+  var eva = this.a;
+  var f, g;
+  
+  var fname, entry, args; 
+
+  for (fname in a) {
+    if (eva.hasOwnProperty(fname)) {
+      console.log("duplicate name: "+fname+"from "+ file+", old: "+eva.fname.desc);
+    }
+    entry = a[fname];
+    if ($.isArray(a[fname])) {
+      //[args, function]
+      args = entry[0];
+      f = entry[1];
+    } else {
+      args = false;
+      f = entry;
+    }
+    if (evem.debug) {
+      g = wrapper_debug(f, args, evem);    
+    } else {
+      g = wrapper(f, args, evem);      
+    }
+    eva[fname] = g;
+    g.desc = file+fname;      
+  }
+  
+  
+};
+
+wrapper = function (f, args, evem) {
+  return function () {
+    var changes,doneargs;
+    if (!args) {
+      changes = f.call(evem);
+    } else {
+      doneargs = process(evem, args);
+      changes = f.apply(evem, doneargs);
+    }
+    makechanges(evem, changes);
+  };
+};
+
+wrapper_debug = function (f, args, evem) {
+  return function me () {
+    var changes, doneargs;
+    if (!args) {
+      changes = f.call(evem);
+    } else {
+      doneargs = process(evem, args);
+      evem.log.process(me.desc, doneargs);
+      changes = f.apply(evem, doneargs);
+    }
+    if (changes) {
+      evem.log.makechanges(me.desc, changes);
+    }
+    makechanges(evem, changes);
+  };
+};
+
+
+process = function (evem, args) {
+  var i, n, current;
+  var values = [];
+  var data = evem.data;
+  n = args.length;
+  for (i = 0; i < n; i += 1) {
+    current = args[i];
+    if (typeof current === "string") {
+      //data name
+      if (data.hasOwnProperty(current)) {
+        values.push(data[current]);
+      } else {
+        values.push(undefined);
+      }
+    } else {
+      //assuming data object
+      if (current.hasOwnProperty("$$transform")) {
+       if (current.$$transform.length === 2) { //simple case
+         values.push(current.$$transform[0](data[current.$$transform[1]]));
+       }/* else { //later if needed
+         //values.push(current.$$transform[0].apply(evem.data, ))
+       }*/
+      }
+    }
+  }
+  return values; 
+};
+
+makechanges = function (evem, changes) {
+  //command structure
+  var type;
+/*  for (type in changes) {
+    
+  }*/
+  return false; 
 };
 });
 
@@ -1241,34 +1364,18 @@ var file = 'ui/history: ';
 
 var gcd;
 
-var a;
+var a, b;
 
-var deltalabel; 
 
-module.exports = function (gcde, data) {
+module.exports = function (gcde) {
   gcd = gcde;
     
-  gcd.on("server started new game", a['empty history body']);
-  
-  gcd.on("add history", a['add row to history']);
-  
+  gcd.install(a, file, b);
   
 };
 
-a = {
-  'empty history body' :  function () {
-    $('#history table tbody').empty();
-  },
-  
-  'add row to history' :  function (data) {
-    $('#history table tbody').prepend(
-      "<tr><td>" + data.historycount + ".</td><td>" +
-      data.score + "</td><td><span " + deltalabel(data.delta) + "</span></td><td class='left'>" +
-      a["assemble the hand's short call"](data.shorthand) +
-      "</td><td>" + data.shortcall + "</td></tr>"
-      );    
-  }, 
-  
+
+b = {
   "assemble the hand's short call" :  function (hand) {
     var i, n, c, shc; 
     n = hand.length; 
@@ -1282,24 +1389,42 @@ a = {
       }
     }
     return shc; 
+  },
+  
+  'generate delta label' : function (delta) {
+    if (delta > 0) {
+      return "class='label success'>&#x25B2;"+delta;
+    } else if (delta <0 ) {
+      return "class='label important'>&#x25BC;"+(-1*delta);
+    } else {
+      return "class='label' >▬";
+    }
   }
+  
 };
 
-var fname; 
 
-for (fname in a) {
-  a[fname].desc = file+fname;
-}
-
-deltalabel = function (delta) {
-  if (delta > 0) {
-    return "class='label success'>&#x25B2;"+delta;
-  } else if (delta <0 ) {
-    return "class='label important'>&#x25BC;"+(-1*delta);
-  } else {
-    return "class='label' >▬";
-  }
+a = {
+  'empty history body' :  function () {
+    $('#history table tbody').empty();
+  },
+  
+  
+  'add row to history' :  [ ["historycount", "score", "shortcall",
+                              {$$transform: [b['generate delta label'], "delta"]},
+                              {$$transform: [b["assemble the hand's short call"],  "shorthand"]}],  
+    function (historycount, score, shortcall, deltalabel, shorthand) {
+      $('#history table tbody').prepend(
+        "<tr><td>" + historycount + ".</td><td>" +
+        score + "</td><td><span " + deltalabel + "</span></td><td class='left'>" +
+        shorthand + "</td><td>" + shortcall + "</td></tr>"
+        );    
+    }] 
+  
 };
+
+
+
 
 });
 
@@ -1714,6 +1839,22 @@ install = function (data) {
 
 });
 
+require.define("/events.js", function (require, module, exports, __dirname, __filename) {
+    /*globals $, module, console, require*/
+
+module.exports = function (gcd) {
+  var a = gcd.a;
+  
+  gcd.on("new game requested", a['empty history body']); //
+
+  gcd.on("add history", a['add row to history']); //
+  
+  
+};
+
+
+});
+
 require.define("/entry.js", function (require, module, exports, __dirname, __filename) {
     /*global $, console, submitScore, require*/
 
@@ -1721,9 +1862,11 @@ var events = require('events');
 
 var gcd = new events.EventEmitter(); 
 
-var data = {};
 
-require('./debugging')(gcd);
+require('./utilities/debugging')(gcd);
+require('./utilities/inventory')(gcd, true);
+
+var data = gcd.data;
 
 //$ = function (arg) {arg();};
 
@@ -1741,6 +1884,7 @@ require('./ui/history'        )(gcd, data);
 require('./ui/hand'           )(gcd, data);
 require('./ui/scores'         )(gcd, data);
 
+require('./events.js')(gcd);
 
 $(function() { 
   gcd.emit("ready", data);
