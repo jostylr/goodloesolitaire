@@ -2,66 +2,54 @@
 
 var file = 'logic/hand: ';
 
-var gcd;
-
 var a;
 
-module.exports = function (gcde, data) {
-  gcd = gcde;
+module.exports = function (gcd) {
+
+  gcd.install(file, a);
   
-  gcd.on("new game requested"      , a["reset hand state"]);
-
-  gcd.on("server started new game", a["make call"]);
-  gcd.on("server started new game", a["note new hand"]);
-
-  gcd.on("hail call checked"      , a["note old hand"]);
-
-  gcd.on("cards discarded"        , a["check for a hail call"]);
-  
-  gcd.on("no cards left to draw" , a["end the game"]);
 };
 
 a = {
-  'reset hand state' : function (data) {
-    data.state = 'newhand';
+  'reset hand state' : function () {
+    return { $set: { state : 'newhand' } };
   },
-  'make call' : function  (data) {
-    
+  "end the game" : function () {
+    return { $$emit : "end game requested" };
   },
-  "end the game" : function (data) {
-    gcd.emit("end game requested", data);
+  "note new hand" : function () {
+    return { $set: { newhand : true } };
   },
-  "note new hand" : function (data) {
-    data.newhand = true;
+  "note old hand" : function () {
+    return { $set : { newhand : false } };
   },
-  "note old hand" : function (data) {
-    data.newhand = false;
-  },
-  "check for a hail call" : function  (data) {
-    var newhand = data.newhand;
-    var count = data.drawcount;
-    if (count === 4) {
-      if (newhand) {
-        gcd.emit("miagan", data);
-      } else {
-        gcd.emit('hail mia', data);
+  "check for a hail call" : [ [ "newhand", "drawcount" ], 
+    function  (newhand, count) {
+      var build = { $emit : [ ] };
+      var em = build.$$emit;
+      if (count === 4) {
+        if (newhand) {
+          em.push("miagan");
+        } else {
+          em.push('hail mia');
+        }
+      } else if (count === 5) {
+        if (newhand) {
+          em.push("mulligan");
+        } else {
+          em.push('hail mary');
+        }      
       }
-    } else if (count === 5) {
-      if (newhand) {
-        gcd.emit("mulligan", data);
-      } else {
-        gcd.emit('hail mary', data);
-      }      
+      em.push("hail call checked");
     }
-    gcd.emit("hail call checked", data);
-  }
+  ],
+  "check for cards left" : [ [ "cardsleft" ], 
+    function (cardsleft) {
+      if (cardsleft <= 0) {
+        return { $$emit : "no cards left to draw" };
+      }
+    }
+  ]
+  
   
 };
-
-var fname; 
-
-for (fname in a) {
-  a[fname].desc = file+fname;
-}
-
-

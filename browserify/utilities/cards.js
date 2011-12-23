@@ -47,23 +47,20 @@ var suitHtml = {
 };
 
 
-exports["generate short hand string"] = function (data) {
-  var hand = data.hand;
-  var oldhand = data.oldhand;
+exports["generate short hand string"] = function (hand, oldhand) {
   var i; 
   if (!oldhand) {
     oldhand = hand;
   }
-  var ret = [];
+  var shortcards = [];
   for (i = 0; i < 5; i+=1) {
     if (hand[i] === oldhand[i]) {
-      ret.push(['old', [hand[i][0], suitHtml[hand[i][1]]]]);  
+      shortcards.push(['old', [hand[i][0], suitHtml[hand[i][1]]]]);  
     } else {
-      ret.push(['new', [hand[i][0], suitHtml[hand[i][1]]]]);
+      shortcards.push(['new', [hand[i][0], suitHtml[hand[i][1]]]]);
     }
   }
-  data.oldhand = hand; 
-  return ret;
+  return [shortcards, hand];
 };
 
 exports["generate short version of call"] = function (call){

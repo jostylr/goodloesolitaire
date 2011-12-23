@@ -4,100 +4,104 @@ var file = 'logic/gamecontrol: ';
 
 var servercalls = require('../utilities/server');
 
-var gcd;
+var ret, gcd;
 
-var a, install;
+var a;
 
 var process;
 
-module.exports = function (gcde, data) {
-  gcd = gcde;
+module.exports = function (gcde) {
+  gcd = gcde; 
   
-  install(data);
+  ret = gcd.ret;
   
-  gcd.on('new game requested'   , a["send new game"]);
-  gcd.on('cards discarded'      , a["send draw cards"]);  
+  gcd.install(file, a);
   
-  gcd.on('no highscore at end of game'  , a["send end game"]);
-  gcd.on('name requested for high score', a["watch name to send end game"]);
-  gcd.on("name submitted"       , a["attach end to request"]);
-  
-  //gcd.on('end game requested'   , a["send end game"]);
-  gcd.on('high scores requested', a["send view scores"]);
-
-  gcd.on("ready"                , a["initialize values"]);  
   
 };
 
 a = {
-  
-  "watch name to send end game" : function (data) {
-    gcd.once("name submitted", a["send end game"]);
+  "initialize values" : function () {
+    return {$set : {
+      uid : 0, //set by server
+      gid : 0, //set by server
+      type : 'basic', //toggle options
+      name : false
+    }};
   },
   
-  "attach end to request" : function (data) {
-    gcd.removeListener("no highscore at end of game", a["send end game"]);
-    gcd.on("end game requested", a["send end game"]);
+  
+  "watch name to send end game" : function () {
+    return {$$once: [["name submitted", "send end game"]]};
+  },
+  
+  "attach end to request" : function () {
+    return {$$removeListener : [["no highscore at end of game", "send end game"]], 
+            $$on : [["end game requested", "send end game"]]
+    };
   },
   
   //server calls
   
-  "send new game": function (data) {
-    servercalls.get('shuffle/'+data.uid+'/'+data.type, function (server) {
-      if (server.error) {
-        gcd.emit("new game denied", data, server);
-        return false;
-      }
-      process(data, server);
-      gcd.emit("server started new game", data);
-    });
-  },
-  
-  "send draw cards" : function (data) {
-    servercalls.get('drawcards/'+data.uid+'/'+data.gid+'/'+data.draws, function (server){
-      if (server.error) {
-        gcd.emit("failed to draw cards", data, server);
-        return false;
-      }
-      process(data, server);
-      gcd.emit("server drew cards", data);
-      if (data.cardsleft <= 0) {
-        gcd.emit("no cards left to draw", data);
-      }
-      
-    });  
-  },
-  
-  
-  "send end game" : function (data) {
-    var name;
-    if (data.hasOwnProperty("name") && data.name) {
-      name = data.name;
-    } else {
-      name = "___";
+  "send new game": [["uid", "type"],
+    function me (uid, type) {
+      servercalls.get('shuffle/'+uid+'/'+type, function (server) {
+        var build;
+        if (server.error) {
+          ret({$$emit: [["new game denied", server]]}, me.desc);
+          return false;
+        }
+        build = process(type, server);
+        build.$$emit = "server started new game";
+        ret(build, me.desc);
+      });
     }
-    servercalls.get('endgame/'+data.uid+"/"+data.gid+"/"+name, function (server){
-      if (server.error) {
-        gcd.emit("end game denied", data, server);
-        return false;
-      }
-      data.highscores = server.highscores.sort(function (a,b) {return b.score - a.score;});
-      gcd.emit("server ended game", data);
-    });
-  },
+  ],
+  
+  "send draw cards" : [["uid", "gid", "draws", "type", "cardsleft"],
+    function me (uid, gid, draws, type) {
+      servercalls.get('drawcards/'+uid+'/'+gid+'/'+draws, function (server){
+        var build;
+        if (server.error) {
+          ret({$$emit: [["failed to draw cards", server]]}, me.desc);
+          return false;
+        }
+        build = process(type, server);
+        build.$$emit = "server drew cards";      
+        ret(build, me.desc);
+      });  
+  }],
   
   
-  "send view scores" : function (data) {
+  "send end game" : [ ["uid", "gid", {$$get : "name", $$default :"____"} ],
+    function me (uid, gid, name) {
+      servercalls.get('endgame/'+uid+"/"+gid+"/"+name, function (server){
+        var build;
+        if (server.error) {
+          ret({$$emit: [["end game denied", server]]}, me.desc);
+          return false;
+        }
+        ret({$set : { highscores: server.highscores.sort(function (a,b) {return b.score - a.score;})  },
+            $$emit : "server ended game"
+        });
+      });
+    }
+  ],
+  
+  
+  "send view scores" : function me () {
     servercalls.get('viewscores', function (server) {
       if (server.error) {
-        gcd.emit("view scores denied", data, server);
+        ret({$$emit: [["view scores denied", server]]}, me.desc);
         return false;
       }
-      data.highscores = server.highscores; 
-      gcd.emit("server sent high scores", data);
+    ret({$set : {highscores: server.highscores},
+          $$emit : "server sent high scores"
+        });
     });
-  },
+  }
 
+/*
   'send game review' : function (gid) {
       servercalls.get('retrievegame/'+gid,  function (data){        
         console.log(JSON.stringify(data));
@@ -115,33 +119,20 @@ a = {
         console.log(JSON.stringify(data));
       });      
     }
+  */
   
 };
 
-install = function (data) {
-  a["initialize values"] = function (data) {
-    data.uid = '0'; //set by server
-    data.gid = '0'; //set by server
-    data.type = 'basic'; //toggle options
-    data.name = false;    
-  };
-  
-  var fname; 
-
-  for (fname in a) {
-    a[fname].desc = file+fname;
-  }  
-};
-
-
-process = function (data, server) {
+process = function (type, server) {
+  var build = {$set : {}};
+  var data = build.$set;
   if (server.hasOwnProperty("gid")) {
-    data.gid  = server.gid;
+     data.gid = server.gid;
   }
   data.hand = server.hand;
   data.call = server.call;
   data.cardsleft  = server.cardsleft;
-  switch (data.type) {
+  switch (type) {
     case "basic" :
       data.streak = server.gamedata.streak;
       data.score = server.gamedata.score;
@@ -151,6 +142,7 @@ process = function (data, server) {
     default : 
     break;
   }
+  return build;
 };
 
     

@@ -2,16 +2,11 @@
 
 var file = 'ui/history: ';
 
-var gcd;
-
 var a, b;
 
 
-module.exports = function (gcde) {
-  gcd = gcde;
-    
-  gcd.install(a, file, b);
-  
+module.exports = function (gcd) {
+  gcd.install(file, a);  
 };
 
 

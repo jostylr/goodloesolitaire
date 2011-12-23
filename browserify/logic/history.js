@@ -9,33 +9,30 @@ var a;
 var cardutil = require('../utilities/cards');
 
 
-module.exports = function (gcde, data) {
-  gcd = gcde;
-  gcd.on("new game requested"    , a["zero history count"]);
-  gcd.on("new game requested"    , a["negate oldhand"]);  
-  gcd.on("draw cards requested"  , a["increment history count"]);
-  gcd.on("score loaded"          , a["process row data"]);
+module.exports = function (gcd) {
+  gcd.install(file, a);  
 };
 
 a = {
-  "zero history count" : function (data) {
-    data.historycount = 1;
+  "zero history count" : function () {
+    return {$set : { historycount : 1 } };
   },
-  "negate oldhand" : function  (data) {
-    data.oldhand = false;  //used in cards.js
+  "negate oldhand" : function  () {
+    return {$set : { oldhand : false } }; // used in cards.js
   },
-  "increment history count" : function (data) {
-    data.historycount += 1;
+  "increment history count" : function () {
+    return {$inc : { historycount : 1} };
   },
-  "process row data" : function (data) {
-    data.shorthand = cardutil["generate short hand string"](data);
-    data.shortcall = cardutil["generate short version of call"](data.call);
-    gcd.emit("add history", data); 
-  } 
+  "process row data" : [["hand", "oldhand", "call"],
+    function (hand, oldhand, call) {
+      var handdata = cardutil["generate short hand string"](hand, oldhand);
+      return {$set : {
+          oldhand: handdata[1],
+          shorthand: handdata[0], 
+          shortcall: cardutil["generate short version of call"](call)
+        }, 
+        $$emit: ["add history"]
+      };
+    }
+  ] 
 };
-
-var fname; 
-
-for (fname in a) {
-  a[fname].desc = file+fname;
-}

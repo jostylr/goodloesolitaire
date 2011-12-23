@@ -11,7 +11,7 @@ module.exports = function (evem) {
           return Object.toString.call(xs) === '[object Array]';
       }
   ;
-  var _emit = evem.emit;
+  //var _emit = evem.emit;
   evem.emit = function(type, data) {
     
     // If there is no 'error' event listener then throw.
@@ -29,6 +29,7 @@ module.exports = function (evem) {
     }
     
     if (type === "newListener") {
+      console.log("NL: ", data, arguments[2].desc);
       if (hashevents.hasOwnProperty(data)) {
         hashevents[data].push(arguments[2].desc);
       } else {

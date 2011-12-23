@@ -508,7 +508,7 @@ module.exports = function (evem) {
           return Object.toString.call(xs) === '[object Array]';
       }
   ;
-  var _emit = evem.emit;
+  //var _emit = evem.emit;
   evem.emit = function(type, data) {
     
     // If there is no 'error' event listener then throw.
@@ -526,6 +526,7 @@ module.exports = function (evem) {
     }
     
     if (type === "newListener") {
+      console.log("NL: ", data, arguments[2].desc);
       if (hashevents.hasOwnProperty(data)) {
         hashevents[data].push(arguments[2].desc);
       } else {
@@ -627,9 +628,19 @@ module.exports = function (evem, debug) {
       console.log("changes from "+desc+": "+JSON.stringify(changes));
     }
   };
+  if (evem.debug) {
+    evem.ret = function (changes, desc) {
+      evem.log.makechanges(desc || "no description", changes);
+      makechanges(evem, changes);
+    }; 
+  } else {
+    evem.ret = function (changes) {
+      makechanges(evem, changes);
+    };    
+  }
 };
 
-install = function (a, file) {
+install = function (file, a) {
   var evem = this;
   var eva = this.a;
   var f, g;
@@ -655,7 +666,8 @@ install = function (a, file) {
       g = wrapper(f, args, evem);      
     }
     eva[fname] = g;
-    g.desc = file+fname;      
+    g.desc = file+fname;
+    f.desc = file+fname;       
   }
   
   
@@ -686,14 +698,14 @@ wrapper_debug = function (f, args, evem) {
     }
     if (changes) {
       evem.log.makechanges(me.desc, changes);
+      makechanges(evem, changes);
     }
-    makechanges(evem, changes);
   };
 };
 
 
 process = function (evem, args) {
-  var i, n, current;
+  var i, n, current, value, key;
   var values = [];
   var data = evem.data;
   n = args.length;
@@ -708,24 +720,78 @@ process = function (evem, args) {
       }
     } else {
       //assuming data object
+      if (current.hasOwnProperty("$$default")) {
+        value = current.$$default;
+      } else {
+        value = undefined;
+      }
       if (current.hasOwnProperty("$$transform")) {
        if (current.$$transform.length === 2) { //simple case
-         values.push(current.$$transform[0](data[current.$$transform[1]]));
-       }/* else { //later if needed
-         //values.push(current.$$transform[0].apply(evem.data, ))
-       }*/
+         key = current.$$transform[1];
+         if (data.hasOwnProperty(key)) {
+           value = current.$$transform[0](data[key]);
+         }
+       }
       }
+      if (current.hasOwnProperty("$$get")) {
+        key = current.$$get;
+        if (data.hasOwnProperty(key)) {
+          value = data.key;
+        }
+      }
+      values.push(value);
     }
   }
   return values; 
 };
 
 makechanges = function (evem, changes) {
+  var data = evem.data;
+  var a = evem.a;
+  var key, i, n, evnt, type;
   //command structure
-  var type;
-/*  for (type in changes) {
-    
-  }*/
+  if (changes.hasOwnProperty("$set")) {
+    for (key in changes.$set) {
+      data[key] = changes.$set[key];
+    }
+  }
+  if (changes.hasOwnProperty("$unset")) {
+    for (key in changes.$unset) {
+      delete data[key];
+    }
+  }
+  if (changes.hasOwnProperty("$inc")) {
+    for (key in changes.$key) {
+      data[key] += changes.$inc[key];
+    }
+  }
+  if (changes.hasOwnProperty("$$emit")) {
+    if (typeof changes.$$emit === "string" ) {
+      evem.emit(changes.$$emit);              
+    } else { //presumably array
+      n = changes.$$emit.length;
+      for (i = 0; i < n; i += 1) {
+        evnt = changes.$$emit[i];
+        if (typeof evnt === "string" ){
+          evem.emit(evnt);        
+        } else {
+          evem.emit.apply(evem, evnt);
+        }
+      }      
+    }
+  }
+  for (type in ["$$once", "$$on", "$$removeListener"]) {
+    if (changes.hasOwnProperty(type)) {
+      n = changes[type].length;
+      for (i = 0; i < n; i += 1) {
+        evnt = changes[type][i];
+        evem.once(evnt[0], a[evnt[1]]);
+      }
+    }    
+  }  
+  
+  
+  
   return false; 
 };
 });
@@ -737,100 +803,104 @@ var file = 'logic/gamecontrol: ';
 
 var servercalls = require('../utilities/server');
 
-var gcd;
+var ret, gcd;
 
-var a, install;
+var a;
 
 var process;
 
-module.exports = function (gcde, data) {
-  gcd = gcde;
+module.exports = function (gcde) {
+  gcd = gcde; 
   
-  install(data);
+  ret = gcd.ret;
   
-  gcd.on('new game requested'   , a["send new game"]);
-  gcd.on('cards discarded'      , a["send draw cards"]);  
+  gcd.install(file, a);
   
-  gcd.on('no highscore at end of game'  , a["send end game"]);
-  gcd.on('name requested for high score', a["watch name to send end game"]);
-  gcd.on("name submitted"       , a["attach end to request"]);
-  
-  //gcd.on('end game requested'   , a["send end game"]);
-  gcd.on('high scores requested', a["send view scores"]);
-
-  gcd.on("ready"                , a["initialize values"]);  
   
 };
 
 a = {
-  
-  "watch name to send end game" : function (data) {
-    gcd.once("name submitted", a["send end game"]);
+  "initialize values" : function () {
+    return {$set : {
+      uid : 0, //set by server
+      gid : 0, //set by server
+      type : 'basic', //toggle options
+      name : false
+    }};
   },
   
-  "attach end to request" : function (data) {
-    gcd.removeListener("no highscore at end of game", a["send end game"]);
-    gcd.on("end game requested", a["send end game"]);
+  
+  "watch name to send end game" : function () {
+    return {$$once: [["name submitted", "send end game"]]};
+  },
+  
+  "attach end to request" : function () {
+    return {$$removeListener : [["no highscore at end of game", "send end game"]], 
+            $$on : [["end game requested", "send end game"]]
+    };
   },
   
   //server calls
   
-  "send new game": function (data) {
-    servercalls.get('shuffle/'+data.uid+'/'+data.type, function (server) {
-      if (server.error) {
-        gcd.emit("new game denied", data, server);
-        return false;
-      }
-      process(data, server);
-      gcd.emit("server started new game", data);
-    });
-  },
-  
-  "send draw cards" : function (data) {
-    servercalls.get('drawcards/'+data.uid+'/'+data.gid+'/'+data.draws, function (server){
-      if (server.error) {
-        gcd.emit("failed to draw cards", data, server);
-        return false;
-      }
-      process(data, server);
-      gcd.emit("server drew cards", data);
-      if (data.cardsleft <= 0) {
-        gcd.emit("no cards left to draw", data);
-      }
-      
-    });  
-  },
-  
-  
-  "send end game" : function (data) {
-    var name;
-    if (data.hasOwnProperty("name") && data.name) {
-      name = data.name;
-    } else {
-      name = "___";
+  "send new game": [["uid", "type"],
+    function me (uid, type) {
+      servercalls.get('shuffle/'+uid+'/'+type, function (server) {
+        var build;
+        if (server.error) {
+          ret({$$emit: [["new game denied", server]]}, me.desc);
+          return false;
+        }
+        build = process(type, server);
+        build.$$emit = "server started new game";
+        ret(build, me.desc);
+      });
     }
-    servercalls.get('endgame/'+data.uid+"/"+data.gid+"/"+name, function (server){
-      if (server.error) {
-        gcd.emit("end game denied", data, server);
-        return false;
-      }
-      data.highscores = server.highscores.sort(function (a,b) {return b.score - a.score;});
-      gcd.emit("server ended game", data);
-    });
-  },
+  ],
+  
+  "send draw cards" : [["uid", "gid", "draws", "type", "cardsleft"],
+    function me (uid, gid, draws, type) {
+      servercalls.get('drawcards/'+uid+'/'+gid+'/'+draws, function (server){
+        var build;
+        if (server.error) {
+          ret({$$emit: [["failed to draw cards", server]]}, me.desc);
+          return false;
+        }
+        build = process(type, server);
+        build.$$emit = "server drew cards";      
+        ret(build, me.desc);
+      });  
+  }],
   
   
-  "send view scores" : function (data) {
+  "send end game" : [ ["uid", "gid", {$$get : "name", $$default :"____"} ],
+    function me (uid, gid, name) {
+      servercalls.get('endgame/'+uid+"/"+gid+"/"+name, function (server){
+        var build;
+        if (server.error) {
+          ret({$$emit: [["end game denied", server]]}, me.desc);
+          return false;
+        }
+        ret({$set : { highscores: server.highscores.sort(function (a,b) {return b.score - a.score;})  },
+            $$emit : "server ended game"
+        });
+      });
+    }
+  ],
+  
+  
+  "send view scores" : function me () {
     servercalls.get('viewscores', function (server) {
       if (server.error) {
-        gcd.emit("view scores denied", data, server);
+        ret({$$emit: [["view scores denied", server]]}, me.desc);
         return false;
       }
-      data.highscores = server.highscores; 
-      gcd.emit("server sent high scores", data);
+    ret({$set : {highscores: server.highscores},
+          $$emit : "server sent high scores"
+        });
     });
-  },
+  }
 
+/*
   'send game review' : function (gid) {
       servercalls.get('retrievegame/'+gid,  function (data){        
         console.log(JSON.stringify(data));
@@ -848,33 +918,20 @@ a = {
         console.log(JSON.stringify(data));
       });      
     }
+  */
   
 };
 
-install = function (data) {
-  a["initialize values"] = function (data) {
-    data.uid = '0'; //set by server
-    data.gid = '0'; //set by server
-    data.type = 'basic'; //toggle options
-    data.name = false;    
-  };
-  
-  var fname; 
-
-  for (fname in a) {
-    a[fname].desc = file+fname;
-  }  
-};
-
-
-process = function (data, server) {
+process = function (type, server) {
+  var build = {$set : {}};
+  var data = build.$set;
   if (server.hasOwnProperty("gid")) {
-    data.gid  = server.gid;
+     data.gid = server.gid;
   }
   data.hand = server.hand;
   data.call = server.call;
   data.cardsleft  = server.cardsleft;
-  switch (data.type) {
+  switch (type) {
     case "basic" :
       data.streak = server.gamedata.streak;
       data.score = server.gamedata.score;
@@ -884,6 +941,7 @@ process = function (data, server) {
     default : 
     break;
   }
+  return build;
 };
 
     
@@ -934,36 +992,34 @@ var a;
 var cardutil = require('../utilities/cards');
 
 
-module.exports = function (gcde, data) {
-  gcd = gcde;
-  gcd.on("new game requested"    , a["zero history count"]);
-  gcd.on("new game requested"    , a["negate oldhand"]);  
-  gcd.on("draw cards requested"  , a["increment history count"]);
-  gcd.on("score loaded"          , a["process row data"]);
+module.exports = function (gcd) {
+  gcd.install(file, a);  
 };
 
 a = {
-  "zero history count" : function (data) {
-    data.historycount = 1;
+  "zero history count" : function () {
+    return {$set : { historycount : 1 } };
   },
-  "negate oldhand" : function  (data) {
-    data.oldhand = false;  //used in cards.js
+  "negate oldhand" : function  () {
+    return {$set : { oldhand : false } }; // used in cards.js
   },
-  "increment history count" : function (data) {
-    data.historycount += 1;
+  "increment history count" : function () {
+    return {$inc : { historycount : 1} };
   },
-  "process row data" : function (data) {
-    data.shorthand = cardutil["generate short hand string"](data);
-    data.shortcall = cardutil["generate short version of call"](data.call);
-    gcd.emit("add history", data); 
-  } 
+  "process row data" : [["hand", "oldhand", "call"],
+    function (hand, oldhand, call) {
+      var handdata = cardutil["generate short hand string"](hand, oldhand);
+      return {$set : {
+          oldhand: handdata[1],
+          shorthand: handdata[0], 
+          shortcall: cardutil["generate short version of call"](call)
+        }, 
+        $$emit: ["add history"]
+      };
+    }
+  ] 
 };
 
-var fname; 
-
-for (fname in a) {
-  a[fname].desc = file+fname;
-}
 });
 
 require.define("/utilities/cards.js", function (require, module, exports, __dirname, __filename) {
@@ -1016,23 +1072,20 @@ var suitHtml = {
 };
 
 
-exports["generate short hand string"] = function (data) {
-  var hand = data.hand;
-  var oldhand = data.oldhand;
+exports["generate short hand string"] = function (hand, oldhand) {
   var i; 
   if (!oldhand) {
     oldhand = hand;
   }
-  var ret = [];
+  var shortcards = [];
   for (i = 0; i < 5; i+=1) {
     if (hand[i] === oldhand[i]) {
-      ret.push(['old', [hand[i][0], suitHtml[hand[i][1]]]]);  
+      shortcards.push(['old', [hand[i][0], suitHtml[hand[i][1]]]]);  
     } else {
-      ret.push(['new', [hand[i][0], suitHtml[hand[i][1]]]]);
+      shortcards.push(['new', [hand[i][0], suitHtml[hand[i][1]]]]);
     }
   }
-  data.oldhand = hand; 
-  return ret;
+  return [shortcards, hand];
 };
 
 exports["generate short version of call"] = function (call){
@@ -1057,165 +1110,137 @@ require.define("/logic/hand.js", function (require, module, exports, __dirname, 
 
 var file = 'logic/hand: ';
 
-var gcd;
-
 var a;
 
-module.exports = function (gcde, data) {
-  gcd = gcde;
+module.exports = function (gcd) {
+
+  gcd.install(file, a);
   
-  gcd.on("new game requested"      , a["reset hand state"]);
-
-  gcd.on("server started new game", a["make call"]);
-  gcd.on("server started new game", a["note new hand"]);
-
-  gcd.on("hail call checked"      , a["note old hand"]);
-
-  gcd.on("cards discarded"        , a["check for a hail call"]);
-  
-  gcd.on("no cards left to draw" , a["end the game"]);
 };
 
 a = {
-  'reset hand state' : function (data) {
-    data.state = 'newhand';
+  'reset hand state' : function () {
+    return { $set: { state : 'newhand' } };
   },
-  'make call' : function  (data) {
-    
+  "end the game" : function () {
+    return { $$emit : "end game requested" };
   },
-  "end the game" : function (data) {
-    gcd.emit("end game requested", data);
+  "note new hand" : function () {
+    return { $set: { newhand : true } };
   },
-  "note new hand" : function (data) {
-    data.newhand = true;
+  "note old hand" : function () {
+    return { $set : { newhand : false } };
   },
-  "note old hand" : function (data) {
-    data.newhand = false;
-  },
-  "check for a hail call" : function  (data) {
-    var newhand = data.newhand;
-    var count = data.drawcount;
-    if (count === 4) {
-      if (newhand) {
-        gcd.emit("miagan", data);
-      } else {
-        gcd.emit('hail mia', data);
+  "check for a hail call" : [ [ "newhand", "drawcount" ], 
+    function  (newhand, count) {
+      var build = { $emit : [ ] };
+      var em = build.$$emit;
+      if (count === 4) {
+        if (newhand) {
+          em.push("miagan");
+        } else {
+          em.push('hail mia');
+        }
+      } else if (count === 5) {
+        if (newhand) {
+          em.push("mulligan");
+        } else {
+          em.push('hail mary');
+        }      
       }
-    } else if (count === 5) {
-      if (newhand) {
-        gcd.emit("mulligan", data);
-      } else {
-        gcd.emit('hail mary', data);
-      }      
+      em.push("hail call checked");
     }
-    gcd.emit("hail call checked", data);
-  }
+  ],
+  "check for cards left" : [ [ "cardsleft" ], 
+    function (cardsleft) {
+      if (cardsleft <= 0) {
+        return { $$emit : "no cards left to draw" };
+      }
+    }
+  ]
+  
   
 };
-
-var fname; 
-
-for (fname in a) {
-  a[fname].desc = file+fname;
-}
-
-
 
 });
 
 require.define("/logic/scores.js", function (require, module, exports, __dirname, __filename) {
     /*globals $, module, console, require*/
 
-var file = 'logic/score: ';
+var file = 'logic/scores: ';
 
-var gcd;
+var a;
 
-var a, install;
-
-module.exports = function (gcde, data) {
-  gcd = gcde;
+module.exports = function (gcd) {
   
-  install(data);
-
-  gcd.on("server drew cards"        , a["check delta"]);  // (negative OR positive OR no) change in score
-  gcd.on("server drew cards"        , a["check for streak"]); // streak OR nothing
-  
-  gcd.on("end game requested"       , a["check score/name"]);
-  gcd.on("name submitted"             , a["remove score/name"]);
-  
-  gcd.on("server sent high scores"  , a["look for new high scores"]);  // high scores checked
-  gcd.on("server ended game"        , a["look for new high scores"]);  // high scores checked
-  
-  gcd.on("ready"                    , a["initialize score data"]);
-    
+  gcd.install(file, a);    
   
 };
 
 a = {
-  
-  'check score/name' : function (data) {
-    if (!data.name && data.score >= data.highscores[data.highscores.length-1].score) {
-      gcd.emit("name requested for high score", data);
-      // submitScore();  //shows modal
-    } else {
-      gcd.emit("no highscore at end of game", data);    
-    }
+  "initialize score data" : function () {
+     return {$set: {
+       score: 0,
+       highscores : [],
+       "old high scores" : false
+     }};
   },
   
-  'remove score/name' : function (data) {
-    gcd.removeListener("end game requested", a['check score/name']);
-  },
-  
-  
-  "check delta" : function  (data) {
-    var delta = data.delta;
-    if (delta < 0) {
-      gcd.emit("negative change in score", data);
-    } else if (delta > 0) {
-      gcd.emit("positive change in score", data);
-    } else {
-      gcd.emit("no change in score", data);
-    }
-  },
-  "check for streak" : function  (data) {
-    if ((data.streak >2) && (data.delta >0)) {
-      gcd.emit("streak", data);
-    }
-  },
-  
-  "look for new high scores" : function  (data) {
-    var i, n, row, date, tempOldHighScores, rowClass, highscores;
-    highscores = data.highscores; 
-    n = highscores.length;
-    tempOldHighScores = {};
-    for (i = 0; i<n; i += 1) {
-      row = highscores[i];
-      if (data.gid === row._id) {
-        row.ownscore = true;
-      } else if (data.oldHighScores && !(data.oldHighScores.hasOwnProperty(row._id)) ) {
-        //new high scores from others added
-        row.externalnewscore = true;
+  'check score/name' : [ ["name", "score", "highscores"],
+    function (name, score, highscores) {
+      if (!name && score >= highscores[highscores.length-1].score) {
+        return { $$emit: "name requested for high score" };
+      } else {
+        return { $$emit : "no highscore at end of game" };    
       }
-      tempOldHighScores[row._id] = true;
-    }    
-    data.oldHighScores = tempOldHighScores;
-    gcd.emit("high scores checked", data);
-  }
+    }
+  ],
   
-};
-
-install = function (data) {
-   a["initialize score data"] = function (data) {
-    data.score = 0;
-    data.highscores = [];
-    data["old high scores"] = false;
-  };
+  'remove score/name' : function () {
+    return {$$removeListener : [ [ "end game requested", 'check score/name' ] ]};
+  },
   
   
-  var fname; 
-  for (fname in a) {
-    a[fname].desc = file+fname;
-  }
+  "check delta" : [["delta"], 
+    function  (delta) {
+      if (delta < 0) {
+        return {$$emit : "negative change in score"};
+      } else if (delta > 0) {
+        return {$$emit : "positive change in score"};
+      } else {
+        return {$$emit : "no change in score"};
+      }
+    }
+  ],
+  
+  "check for streak" : [ [ "streak", "delta" ], 
+    function  (streak, delta) {
+      if ((streak >2) && (delta >0)) {
+        return {$$emit : "streak"};
+      }
+    }
+  ],
+  
+  "look for new high scores" : [ [ "highscores", "oldHighScores", "gid" ],
+    function  (highscores, oldHighScores, gid) {
+      var i, n, row, date, tempOldHighScores, rowClass;
+      n = highscores.length;
+      tempOldHighScores = {};
+      for (i = 0; i<n; i += 1) {
+        row = highscores[i];
+        if (gid === row._id) {
+          row.ownscore = true;
+        } else if (oldHighScores && !(oldHighScores.hasOwnProperty(row._id)) ) {
+          //new high scores from others added
+          row.externalnewscore = true;
+        }
+        tempOldHighScores[row._id] = true;
+      }    
+      return { $set: {oldHighScores: tempOldHighScores},
+          $$emit : "high scores checked"
+      };
+    }
+  ]
   
 };
 });
@@ -1362,16 +1387,11 @@ require.define("/ui/history.js", function (require, module, exports, __dirname, 
 
 var file = 'ui/history: ';
 
-var gcd;
-
 var a, b;
 
 
-module.exports = function (gcde) {
-  gcd = gcde;
-    
-  gcd.install(a, file, b);
-  
+module.exports = function (gcd) {
+  gcd.install(file, a);  
 };
 
 
@@ -1845,18 +1865,67 @@ require.define("/events.js", function (require, module, exports, __dirname, __fi
 module.exports = function (gcd) {
   var a = gcd.a;
   
-  gcd.on("new game requested", a['empty history body']); //
+  gcd.on("ready"                          , a["initialize values"]);  // logic/gamecontrol:
+  gcd.on("ready"                          , a["initialize score data"]); // logic/scores:
+                                          
+                                          
+  gcd.on("new game requested"             , a["zero history count"]); // logic/history:
+  gcd.on("new game requested"             , a["negate oldhand"]);   // logic/history:
+  gcd.on("new game requested"             , a['empty history body']); // ui/history:
+  gcd.on('new game requested'             , a["send new game"]);  // logic/gamecontrol:
+  gcd.on("new game requested"             , a["reset hand state"]); // logic/hand: 
+  
+  gcd.on("server started new game"        , a["note new hand"]); // logic/hand: 
+  
+                                          
+  gcd.on("draw cards requested"           , a["increment history count"]); // logic/history:
+  gcd.on("server drew cards"              , a["check for cards left" ]); // logic/hand:  // IF cards <=0, "no cards left to draw"
+  gcd.on("hail call checked"              , a["note old hand"]); // logic/hand: 
+  
+  gcd.on('cards discarded'                , a["send draw cards"]);  // logic/gamecontrol:
+  gcd.on("cards discarded"                , a["check for a hail call"]); // logic/hand: 
 
-  gcd.on("add history", a['add row to history']); //
+
+
+  gcd.on("server drew cards"              , a["check delta"]);  //  logic/scores: (negative OR positive OR no) change in score
+  gcd.on("server drew cards"              , a["check for streak"]); // logic/scores: streak OR nothing
+                             
+  gcd.on("no cards left to draw"          , a["end the game"]); // logic/hand: 
+                                          
+                                          
+  gcd.on("score loaded"                   , a["process row data"]);  // logic/scores: "add history"
+  gcd.on("add history"                    , a['add row to history']); // ui/history: 
+  
+  gcd.on("end game requested"             , a["check score/name"]);  // logic/gamecontrol:
+  gcd.on("server ended game"              , a["look for new high scores"]); // logic/scores:  high scores checked
+
+  gcd.on('name requested for high score'  , a["watch name to send end game"]); // logic/scores:
+
+  gcd.on("name submitted"                 , a["attach end to request"]); // logic/gamecontrol:
+  gcd.on("name submitted"                 , a["remove score/name"]); // logic/scores:
+  
+  gcd.on('no highscore at end of game'    , a["send end game"]); // logic/scores:
+
+  gcd.on('high scores requested'          , a["send view scores"]); // logic/gamecontrol:
+  
+  gcd.on("server sent high scores"        , a["look for new high scores"]);  // logic/scores: "high scores checked"
   
   
 };
 
 
+
+
+
+
+
+
+
+
 });
 
 require.define("/entry.js", function (require, module, exports, __dirname, __filename) {
-    /*global $, console, submitScore, require*/
+    /*global $, console, submitScore, require, process*/
 
 var events = require('events');
 
@@ -1865,6 +1934,15 @@ var gcd = new events.EventEmitter();
 
 require('./utilities/debugging')(gcd);
 require('./utilities/inventory')(gcd, true);
+
+gcd.emit = (function (gcd) {
+  var _emit = gcd.emit;
+  var self = gcd;
+  return function () {
+    var args = arguments;
+    process.nextTick(function () {_emit.apply(self, args);});
+  };
+}(gcd));
 
 var data = gcd.data;
 

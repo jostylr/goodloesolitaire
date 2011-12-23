@@ -17,9 +17,19 @@ module.exports = function (evem, debug) {
       console.log("changes from "+desc+": "+JSON.stringify(changes));
     }
   };
+  if (evem.debug) {
+    evem.ret = function (changes, desc) {
+      evem.log.makechanges(desc || "no description", changes);
+      makechanges(evem, changes);
+    }; 
+  } else {
+    evem.ret = function (changes) {
+      makechanges(evem, changes);
+    };    
+  }
 };
 
-install = function (a, file) {
+install = function (file, a) {
   var evem = this;
   var eva = this.a;
   var f, g;
@@ -45,7 +55,8 @@ install = function (a, file) {
       g = wrapper(f, args, evem);      
     }
     eva[fname] = g;
-    g.desc = file+fname;      
+    g.desc = file+fname;
+    f.desc = file+fname;       
   }
   
   
@@ -76,14 +87,14 @@ wrapper_debug = function (f, args, evem) {
     }
     if (changes) {
       evem.log.makechanges(me.desc, changes);
+      makechanges(evem, changes);
     }
-    makechanges(evem, changes);
   };
 };
 
 
 process = function (evem, args) {
-  var i, n, current;
+  var i, n, current, value, key;
   var values = [];
   var data = evem.data;
   n = args.length;
@@ -98,23 +109,77 @@ process = function (evem, args) {
       }
     } else {
       //assuming data object
+      if (current.hasOwnProperty("$$default")) {
+        value = current.$$default;
+      } else {
+        value = undefined;
+      }
       if (current.hasOwnProperty("$$transform")) {
        if (current.$$transform.length === 2) { //simple case
-         values.push(current.$$transform[0](data[current.$$transform[1]]));
-       }/* else { //later if needed
-         //values.push(current.$$transform[0].apply(evem.data, ))
-       }*/
+         key = current.$$transform[1];
+         if (data.hasOwnProperty(key)) {
+           value = current.$$transform[0](data[key]);
+         }
+       }
       }
+      if (current.hasOwnProperty("$$get")) {
+        key = current.$$get;
+        if (data.hasOwnProperty(key)) {
+          value = data.key;
+        }
+      }
+      values.push(value);
     }
   }
   return values; 
 };
 
 makechanges = function (evem, changes) {
+  var data = evem.data;
+  var a = evem.a;
+  var key, i, n, evnt, type;
   //command structure
-  var type;
-/*  for (type in changes) {
-    
-  }*/
+  if (changes.hasOwnProperty("$set")) {
+    for (key in changes.$set) {
+      data[key] = changes.$set[key];
+    }
+  }
+  if (changes.hasOwnProperty("$unset")) {
+    for (key in changes.$unset) {
+      delete data[key];
+    }
+  }
+  if (changes.hasOwnProperty("$inc")) {
+    for (key in changes.$key) {
+      data[key] += changes.$inc[key];
+    }
+  }
+  if (changes.hasOwnProperty("$$emit")) {
+    if (typeof changes.$$emit === "string" ) {
+      evem.emit(changes.$$emit);              
+    } else { //presumably array
+      n = changes.$$emit.length;
+      for (i = 0; i < n; i += 1) {
+        evnt = changes.$$emit[i];
+        if (typeof evnt === "string" ){
+          evem.emit(evnt);        
+        } else {
+          evem.emit.apply(evem, evnt);
+        }
+      }      
+    }
+  }
+  for (type in ["$$once", "$$on", "$$removeListener"]) {
+    if (changes.hasOwnProperty(type)) {
+      n = changes[type].length;
+      for (i = 0; i < n; i += 1) {
+        evnt = changes[type][i];
+        evem.once(evnt[0], a[evnt[1]]);
+      }
+    }    
+  }  
+  
+  
+  
   return false; 
 };

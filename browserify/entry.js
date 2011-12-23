@@ -1,4 +1,4 @@
-/*global $, console, submitScore, require*/
+/*global $, console, submitScore, require, process*/
 
 var events = require('events');
 
@@ -7,6 +7,15 @@ var gcd = new events.EventEmitter();
 
 require('./utilities/debugging')(gcd);
 require('./utilities/inventory')(gcd, true);
+
+gcd.emit = (function (gcd) {
+  var _emit = gcd.emit;
+  var self = gcd;
+  return function () {
+    var args = arguments;
+    process.nextTick(function () {_emit.apply(self, args);});
+  };
+}(gcd));
 
 var data = gcd.data;
 
