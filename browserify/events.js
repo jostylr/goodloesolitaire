@@ -21,12 +21,12 @@ module.exports = function (gcd) {
   gcd.on("hail call checked"              , a["note old hand"]); // logic/hand: 
   
   gcd.on('cards discarded'                , a["send draw cards"]);  // logic/gamecontrol: "server drew cards" OR "failed to draw cards"
-  gcd.on("cards discarded"                , a["check for a hail call"]); // logic/hand: 
+  gcd.on("cards discarded"                , a["check for a hail call"]); // logic/hand: "hail call checked" AND MAYBE "miagan", "mulligan", "hail mia", "hail mary"
 
 
 
-  gcd.on("server drew cards"              , a["check delta"]);  //  logic/scores: (negative OR positive OR no) change in score
-  gcd.on("server drew cards"              , a["check for streak"]); // logic/scores: streak OR nothing
+  gcd.on("server drew cards"              , a["check delta"]);  //  logic/scores: "(negative OR positive OR no) change in score"
+  gcd.on("server drew cards"              , a["check for streak"]); // logic/scores: "streak" OR ""
                              
   gcd.on("no cards left to draw"          , a["end the game"]); // logic/hand: 
                                           
@@ -34,19 +34,20 @@ module.exports = function (gcd) {
   gcd.on("score loaded"                   , a["process row data"]);  // logic/scores: "add history"
   gcd.on("add history"                    , a['add row to history']); // ui/history: 
   
-  gcd.on("end game requested"             , a["check score/name"]);  // logic/gamecontrol: "server ended game" OR "end game denied"
+  gcd.on("end game requested"             , a["check score/name"]);  // logic/scores: "name requested for high score" OR "no highscore at end of game"
+  // above removed by 'remove score/name'
   //ON "end game requested", a["send end game"] // logic/gamecontrol: added by "attach end to request"
   
-  gcd.on("server ended game"              , a["look for new high scores"]); // logic/scores:  high scores checked
+  gcd.on("server ended game"              , a["look for new high scores"]); // logic/scores:  "high scores checked"
 
   gcd.on('name requested for high score'  , a["watch name to send end game"]); // logic/scores: once
 
   gcd.on("name submitted"                 , a["attach end to request"]); // logic/gamecontrol: removeListerner, on
-  gcd.on("name submitted"                 , a["remove score/name"]); // logic/scores:
+  gcd.on("name submitted"                 , a["remove score/name"]); // logic/scores: removeListener
   // ONCE "name submitted", a["send end game"]  // logic/gamecontrol: added by "watch name to send end game"
   
   
-  gcd.on('no highscore at end of game'    , a["send end game"]); // logic/scores:
+  gcd.on('no highscore at end of game'    , a["send end game"]); // logic/gamecontrol: "server ended game" OR "end game denied"
   //above removed by "attach end to request" 
 
   gcd.on('high scores requested'          , a["send view scores"]); // logic/gamecontrol: "server sent high scores" OR "view scores denied"
@@ -55,3 +56,4 @@ module.exports = function (gcd) {
   
   
 };
+  
