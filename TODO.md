@@ -1,5 +1,6 @@
 # To do
 
+BUG: New high scores are not added.
 BUG: In high score modal, tr has "undefined" attribute.
 BUG: White artifacts under handtext in webkit.
 
