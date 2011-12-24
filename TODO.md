@@ -1,7 +1,5 @@
 # To do
 
-BUG: New high scores are not added. Seems fixed. Confirm. 
-BUG: In high score modal, tr has "undefined" attribute. Fixed, working on id that has disappeared
 BUG: White artifacts under handtext in webkit. Does not appear in index_local.html
 
 ## 2.0
