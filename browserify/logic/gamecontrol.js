@@ -25,8 +25,7 @@ a = {
     return {$set : {
       uid : 0, //set by server
       gid : 0, //set by server
-      type : 'basic', //toggle options
-      name : false
+      type : 'basic' //toggle options
     }};
   },
   

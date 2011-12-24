@@ -117,7 +117,7 @@ a = {
     data.name = '';
   }, */
   
-  "bind name entry keys" : function () {
+  "bind name entry keys" : function () {  
     $('html').bind('keyup', a["keys for name entry"]);
   },
   
@@ -145,8 +145,8 @@ a = {
   };*/
 
   "retrieve high scores for viewing" : function () {
-    return {$$once : { "high scores checked" : "display high scores" }, 
-      $$emit : "high scores requested" };
+    ret({$$once : { "high scores checked" : "display high scores" }, 
+      $$emit : "high scores requested" });
   },
   
   "name entry requested" : function () {
@@ -155,7 +155,7 @@ a = {
       keyboard: true,
       show: true
     });
-    return {$$emit : "name entry shown"};
+    ret({$$emit : "name entry shown"});
   },
   
   "hide name entry" : function () {
@@ -163,7 +163,7 @@ a = {
   },
   
   "emit name entry hidden" : function () {
-    return { $$emit : "name entry hidden" };
+    ret({ $$emit : "name entry hidden" });
   },
   
   "keys for name entry" : function  (evnt) {

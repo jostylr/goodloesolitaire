@@ -741,7 +741,7 @@ prepargs = function (evem, args) {
       if (current.hasOwnProperty("$$get")) {
         key = current.$$get;
         if (data.hasOwnProperty(key)) {
-          value = data.key;
+          value = data[key];
         }
       }
       if (current.hasOwnProperty("$$retrieve")) {
@@ -866,8 +866,7 @@ a = {
     return {$set : {
       uid : 0, //set by server
       gid : 0, //set by server
-      type : 'basic', //toggle options
-      name : false
+      type : 'basic' //toggle options
     }};
   },
   
@@ -1175,7 +1174,7 @@ a = {
   },
   "check for a hail call" : [ [ "newhand", "drawcount" ], 
     function  (newhand, count) {
-      var build = { $emit : [ ] };
+      var build = { $$emit : [ ] };
       var em = build.$$emit;
       if (count === 4) {
         if (newhand) {
@@ -1799,7 +1798,7 @@ a = {
     data.name = '';
   }, */
   
-  "bind name entry keys" : function () {
+  "bind name entry keys" : function () {  
     $('html').bind('keyup', a["keys for name entry"]);
   },
   
@@ -1827,8 +1826,8 @@ a = {
   };*/
 
   "retrieve high scores for viewing" : function () {
-    return {$$once : { "high scores checked" : "display high scores" }, 
-      $$emit : "high scores requested" };
+    ret({$$once : { "high scores checked" : "display high scores" }, 
+      $$emit : "high scores requested" });
   },
   
   "name entry requested" : function () {
@@ -1837,7 +1836,7 @@ a = {
       keyboard: true,
       show: true
     });
-    return {$$emit : "name entry shown"};
+    ret({$$emit : "name entry shown"});
   },
   
   "hide name entry" : function () {
@@ -1845,7 +1844,7 @@ a = {
   },
   
   "emit name entry hidden" : function () {
-    return { $$emit : "name entry hidden" };
+    ret({ $$emit : "name entry hidden" });
   },
   
   "keys for name entry" : function  (evnt) {

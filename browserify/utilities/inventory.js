@@ -130,7 +130,7 @@ prepargs = function (evem, args) {
       if (current.hasOwnProperty("$$get")) {
         key = current.$$get;
         if (data.hasOwnProperty(key)) {
-          value = data.key;
+          value = data[key];
         }
       }
       if (current.hasOwnProperty("$$retrieve")) {
