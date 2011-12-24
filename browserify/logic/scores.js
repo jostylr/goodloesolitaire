@@ -30,7 +30,7 @@ a = {
   ],
   
   'remove score/name' : function () {
-    return {$$removeListener : [ [ "end game requested", 'check score/name' ] ]};
+    return {$$removeListener : { "end game requested" : 'check score/name' }};
   },
   
   

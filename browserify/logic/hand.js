@@ -25,7 +25,7 @@ a = {
   },
   "check for a hail call" : [ [ "newhand", "drawcount" ], 
     function  (newhand, count) {
-      var build = { $emit : [ ] };
+      var build = { $$emit : [ ] };
       var em = build.$$emit;
       if (count === 4) {
         if (newhand) {

@@ -5,13 +5,14 @@ var file = 'ui/hand: ';
 var cardutil = require('../utilities/cards');
 var deck = cardutil.deck;
 
-var a, b, ret, store;
+var a, b, ret, store, retrieve;
 
 var querycards, handcall, hail, computecardposition;
 
 module.exports = function (gcd) {
   ret = gcd.ret;
   store = gcd.store;
+  retrieve = gcd.retrieve; 
   
   gcd.install(file, a);
     
@@ -123,6 +124,7 @@ a = {
 
   "toggle draw cards" : [ [ "cardsleft", {$$retrieve : "clickedcard"}],
     function (cardsleft, card$) {
+      card$ = retrieve(card$.slice(9)); // uses gcd.retrieve to get object, but wanted above for doc
       var drawcount;
       if (card$.hasClass('draw')) {
         card$.removeClass('draw');

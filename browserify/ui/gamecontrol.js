@@ -71,8 +71,8 @@ a = {
   },
   "fade main" : function  me () {
     $(".main").fadeTo(600, fadelevel, function () {
-      ret( { $emit : "main is faded" } );
-    }, me.desc);
+      ret( { $emit : "main is faded" }, me.desc );
+    });
   },
   
 

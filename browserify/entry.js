@@ -8,6 +8,7 @@ var events = require('events');
 require('./utilities/debugging')(gcd);
 require('./utilities/inventory')(gcd, true);
 
+/*
 gcd.emit = (function (gcd) {
   var _emit = gcd.emit;
   var self = gcd;
@@ -16,6 +17,7 @@ gcd.emit = (function (gcd) {
     process.nextTick(function () {_emit.apply(self, args);});
   };
 }(gcd));
+*/
 
 var data = gcd.data;
 

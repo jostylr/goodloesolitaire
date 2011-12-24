@@ -10,6 +10,9 @@ module.exports = function (evem, debug) {
   evem.debug = debug;
   evem.data = {};
   evem.store = {};  //for non-JSON able stuff, record it by using $$store : "..."
+  evem.retrieve = function (name) {
+    return evem.store[name];
+  };
   evem.log = {
     "prepargs" : function (desc, args) {
       console.log("args to "+desc+": "+JSON.stringify(args));
@@ -133,7 +136,7 @@ prepargs = function (evem, args) {
       if (current.hasOwnProperty("$$retrieve")) {
         key = current.$$retrieve;
         if (store.hasOwnProperty(key)) {
-          value = store.key;
+          value = "retrieve:" +  key;
         }
       }
       values.push(value);
@@ -181,12 +184,12 @@ makechanges = function (evem, changes) {
     }
   }
   if (changes.hasOwnProperty("$$emitnow")) {
-    if (typeof changes.$$emit === "string" ) {
-      evem.emit(changes.$$emit);              
+    if (typeof changes.$$emitnow === "string" ) {
+      evem.emit(changes.$$emitnow);              
     } else { //presumably array
-      n = changes.$$emit.length;
+      n = changes.$$emitnow.length;
       for (i = 0; i < n; i += 1) {
-        evnt = changes.$$emit[i];
+        evnt = changes.$$emitnow[i];
         if (typeof evnt === "string" ){
           evem.emit(evnt);
         } else {
