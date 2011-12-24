@@ -19,6 +19,7 @@ exports.viewscores = function (res) {
 };
 
 exports.update = function (score, gid, name, store) {
+  highscores.sort(function (a,b) {return a.score - b.score;});
 	if (highscores.length > 9) {highscores.shift();} 
 	highscores.unshift({_id:gid, score:score, name:name, date:Date.now()});
 	highscores.sort(function (a,b) {return a.score - b.score;});
