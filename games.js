@@ -117,7 +117,7 @@ exports.drawcards = function (res, draws, id, gid, scores) {
 };
 
 exports.endgame = function (res, id, gid, scores, name) {
-	var game;
+	var game, hs;
 	game = games[gid];
   if (game.status === 'end') {
 		res.json({'error': "Game already ended"});
@@ -125,8 +125,10 @@ exports.endgame = function (res, id, gid, scores, name) {
 	}
 	memory.endgame(gid);
 	game.status = 'end';
-	console.log(scores);
-	if (game.data.score >= scores.highscores[0].score) {
+	//console.log(scores);
+	hs = scores.highscores;
+	//ordering is a bit hazy
+	if ( (hs.length < 10) || (game.data.score >= hs[0].score) || (game.data.score >= hs[hs.length-1].score) ) {
 		//new highscore logic
 		scores.update(game.data.score, gid, name.replace(/[^ a-zA-Z0-9_]/g, ''), memory.savehighscore);
 		res.json({type: "highscore", game: game, highscores: scores.highscores});
