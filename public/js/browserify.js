@@ -807,17 +807,20 @@ makechanges = function (evem, changes) {
     }
   }
   
-  for (type in ["$$once", "$$on", "$$removeListener"]) {
+  for (type in {"$$once" : 1, "$$on" : 1, "$$removeListener" : 1 }) {
     if (changes.hasOwnProperty(type)) {
       pe = type.slice(2);
-      for (key in changes[type]) {
+      for (key in changes[type]) {        
         current = changes[type][key];
-        if (current === "string") {
+        console.log(pe, key, current, a[current]);
+        
+        if (typeof current === "string") {
+          console.log(pe, key, current);
           evem[pe](key, a[current]);
         } else { //array
           n = current.length;
           for (i = 0; i < n; i += 1) {
-            evem[pe](key, a[current]);
+            evem[pe](key, a[current[i]]);
           }
         }
       }
