@@ -780,7 +780,7 @@ makechanges = function (evem, changes) {
     }
   }
   if (changes.hasOwnProperty("$inc")) {
-    for (key in changes.$key) {
+    for (key in changes.$inc) {
       data[key] += changes.$inc[key];
     }
   }
