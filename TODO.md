@@ -3,7 +3,6 @@
 BUG: White artifacts under handtext in webkit. Does not appear in index_local.html
 
 ## 2.0
-0. Make prettified dates lowercase.
 
 1. Animation for new deck, discard card, draw card
 2. Make hail calls have more interesting effect.

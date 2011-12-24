@@ -1725,11 +1725,11 @@ a = {
     function (highscores) {
       var row, rowclass, n, i, date;
       n = highscores.length;
-      highscores.sort(function (a,b) {return a.score -b.score;});
+      highscores.sort(function (a,b) {return b.score -a.score;});
       var htmltablebody = '';
       for (i = 0; i<n; i += 1) {
         row = highscores[i];
-        date = humaneDate(new Date (row.date));
+        date = humaneDate(new Date (row.date)).toLowerCase();
   //      date = date.getMonth()+1+'/'+date.getDate()+'/'+date.getFullYear();
         rowclass = '';
         if (row.ownscore) {
