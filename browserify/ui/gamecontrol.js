@@ -2,73 +2,21 @@
 
 var file = 'ui/gamecontrol: ';
 
-var gcd;
-
-var a, install;
+var a, b;
 
 var fadelevel = 0.4;
 
+var ret; 
 
-module.exports = function (gcde, data) {
-  gcd = gcde;
+module.exports = function (gcd) {
   
-  install(data);
-  
-  gcd.on("new game requested" , a["remove main fade"]);
-  
-  gcd.on("server started new game", a["install endgame"]);
-  gcd.on("server started new game", a["bind hand keys"]);
-  gcd.on("server started new game", a["listen for name entry"]);
-  gcd.on("server started new game", a["remove main fade"]);
-  
-  gcd.on("server ended game"      , a["install startgame"]);
-  gcd.on("server ended game"      , a["unbind hand keys"]);
-  gcd.on("server ended game"      , a["remove listen for name entry"]);
-  gcd.on("server ended game"      , a["fade main"]);
-  
-  
-  gcd.once("name registered"  , a["skip name"]);
-  
-  
-  gcd.on("ready"              , a["initialize game clicks, hide stuff"]);
+  ret = gcd.ret;
+  gcd.install(file, a);
   
 
 };
 
-
-a = {
-  "install endgame" : function () {
-    $("#togglegame").html('<a id="endgame">End Game</a>');        
-  },
-  "install startgame": function () {
-    $("#togglegame").html('<a id="newgame">Start Game</a>');      
-  },
-  "skip name" : function (data) {
-    gcd.removeListener("end game", a["emit check"]);
-    gcd.on("end game", function (data) {
-      gcd.emit("send end game", data);
-    }); 
-  },
-  "remove main fade" : function  (data) {
-    $(".main").fadeTo(200, 1);
-  },
-  "fade main" : function  (data) {
-    $(".main").fadeTo(600, fadelevel, function () {
-      gcd.emit("main is faded", data);
-    });
-  },
-  
-
-  "show about" : function () {
-    $('#modal-about').modal({
-      backdrop: true,
-      keyboard: true,
-      show: true
-    });
-  },
-
-  //key clicks
-  "hand key bindings": function (evnt) {
+b = { "hand key bindings": function (evnt) {
          var key = evnt.keyCode; 
          switch (key) {
           case 49: $('#hand li:nth-child(1)').click(); break;//1 card as visible
@@ -79,56 +27,99 @@ a = {
           case 13: $('#drawcards').click(); return false; //enter drawcards
          }
   },
+  
+  "emit new game requested" : function () {
+    ret({ $$emit : "new game requested" });
+  },
+   
+  "emit draw cards requested" : function () {
+    ret({ $$emit : "draw cards requested" });
+  },
+  
+  "emit end game requested" : function  () {
+    ret({ $$emit : "end game requested" });     
+  },
+  
+  "emit retrieve game requested" : function (event) {
+    ret({ $set : {"requested gid" : $(event.target).parents("tr").attr("id") },
+      $$emit : 'old game requested'
+    });
+  },
+  
+  
+  "show about" : function () {
+    $('#modal-about').modal({
+      backdrop: true,
+      keyboard: true,
+      show: true
+    });
+  }
+
+  
+};
+
+
+a = {
+  "install endgame" : function () {
+    $("#togglegame").html('<a id="endgame">End Game</a>');        
+  },
+  "install startgame": function () {
+    $("#togglegame").html('<a id="newgame">Start Game</a>');      
+  },
+  "remove main fade" : function  () {
+    $(".main").fadeTo(200, 1);
+  },
+  "fade main" : function  () {
+    $(".main").fadeTo(600, fadelevel, function () {
+      ret( { $emit : "main is faded" } );
+    });
+  },
+  
+
+  //key clicks
   "bind hand keys" : function () {
-    $('html').bind('keyup', a["hand key bindings"]);
+    $('html').bind('keyup', b["hand key bindings"]);
   },
   "unbind hand keys" : function () {
-    $('html').unbind('keyup', a["hand key bindings"]);
+    $('html').unbind('keyup', b["hand key bindings"]);
   },
   "listen for name entry" : function () {
-    gcd.on("name entry shown"      , a["unbind hand keys"]);
-    gcd.on("name submitted"       , a["bind hand keys"]);
+    ret({ $$on: {
+      "name entry shown" : "unbind hand keys",
+      "name submitted" : "bind hand keys"
+    }});
   },
   "remove listen for name entry" : function () {
-    gcd.removeListener("name entry shown", a["unbind hand keys"]);
-    gcd.removeListener("name submitted"  , a["bind hand keys"]);
+    ret({ $$removeListener: {
+      "name entry shown" : "unbind hand keys",
+      "name submitted" : "bind hand keys"
+    }});
+  },
+  
+  "initialize game clicks, hide stuff" : function () {
+    $("#newgame").live('click', b["emit new game requested"]);
+    $("#drawcards").click(b["emit draw cards requested"]);
+    $("#endgame").live('click', b["emit end game requested"]);
+    $("#endgame").hide(); 
+    $(".main").fadeTo(100, fadelevel);
+    $("#hs").click(b["emit retrieve game requested"]);
+    $("#about").click(b["show about"]);
+  
+    
   }
   
 };
 
-install = function (data) {
-   a["initialize game clicks, hide stuff"] = function () {
-    $("#newgame").live('click', a["emit new game"]);
-    $("#drawcards").click(a["emit draw cards"]);
-    $("#endgame").live('click', a["emit end game"]);
-    $("#endgame").hide(); 
-    $(".main").fadeTo(100, fadelevel);
-    $("#hs").click(a["emit retrieve game"]);
-    $("#about").click(a["show about"]);
-  
-    
-  };
-  
-  a["emit new game"] = function () {
-    gcd.emit("new game requested", data);
-  };
-   
-  a["emit draw cards"] = function () {
-    gcd.emit("draw cards requested", data);
-  };
-  
-  a["emit end game"] = function  () {
-    gcd.emit("end game requested", data);      
-  };
-  
-  a["emit retrieve game"] = function (event) {
-    data.requestedgid = $(event.target).parents("tr").attr("id");
-    gcd.emit('old game requested', data);
-  };
-  
-  var fname; 
-  for (fname in a) {
-    a[fname].desc = file+fname;
-  }
-  
-};
+
+
+/*
+//gcd.once("name registered"                , a["skip name"]); // ui/gamecontrol: 
+//Remove "end game", "emit check"; ON "end game" send end game
+
+  "skip name" : function (data) {
+    gcd.removeListener("end game", a["emit check"]);
+    gcd.on("end game", a["send end game"] function (data) {
+      gcd.emit("send end game", data);
+    }); 
+  },
+  */

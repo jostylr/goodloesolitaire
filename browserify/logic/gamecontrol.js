@@ -32,18 +32,18 @@ a = {
   
   
   "watch name to send end game" : function () {
-    return {$$once: [["name submitted", "send end game"]]};
+    return { $$once: { "name submitted" : "send end game" } };
   },
   
   "attach end to request" : function () {
-    return {$$removeListener : [["no highscore at end of game", "send end game"]], 
-            $$on : [["end game requested", "send end game"]]
+    return { $$removeListener : { "no highscore at end of game" : "send end game" }, 
+             $$on : { "end game requested" : "send end game" }
     };
   },
   
   //server calls
   
-  "send new game": [["uid", "type"],
+  "send new game": [[ "uid", "type" ],
     function me (uid, type) {
       servercalls.get('shuffle/'+uid+'/'+type, function (server) {
         var build;

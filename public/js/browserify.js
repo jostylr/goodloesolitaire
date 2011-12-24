@@ -609,11 +609,11 @@ module.exports = function (evem) {
 });
 
 require.define("/utilities/inventory.js", function (require, module, exports, __dirname, __filename) {
-    /*globals $, module, console, require*/
+    /*globals $, module, console, require, process*/
 
 var file = 'utilities/inventory';
 
-var install, process, makechanges, wrapper, wrapper_debug;
+var install, prepargs, makechanges, wrapper, wrapper_debug, delayedemit;
 
 module.exports = function (evem, debug) {
   evem.install = install;
@@ -621,7 +621,7 @@ module.exports = function (evem, debug) {
   evem.debug = debug;
   evem.data = {};
   evem.log = {
-    "process" : function (desc, args) {
+    "prepargs" : function (desc, args) {
       console.log("args to "+desc+": "+JSON.stringify(args));
     },
     "makechanges" : function (desc, changes) {
@@ -679,7 +679,7 @@ wrapper = function (f, args, evem) {
     if (!args) {
       changes = f.call(evem);
     } else {
-      doneargs = process(evem, args);
+      doneargs = prepargs(evem, args);
       changes = f.apply(evem, doneargs);
     }
     makechanges(evem, changes);
@@ -692,8 +692,8 @@ wrapper_debug = function (f, args, evem) {
     if (!args) {
       changes = f.call(evem);
     } else {
-      doneargs = process(evem, args);
-      evem.log.process(me.desc, doneargs);
+      doneargs = prepargs(evem, args);
+      evem.log.prepargs(me.desc, doneargs);
       changes = f.apply(evem, doneargs);
     }
     if (changes) {
@@ -704,7 +704,7 @@ wrapper_debug = function (f, args, evem) {
 };
 
 
-process = function (evem, args) {
+prepargs = function (evem, args) {
   var i, n, current, value, key;
   var values = [];
   var data = evem.data;
@@ -745,10 +745,18 @@ process = function (evem, args) {
   return values; 
 };
 
+delayedemit = function (evem, evnt) {
+  if (typeof evnt === "string") {
+    process.nextTick(function () {evem.emit(evnt);});
+  } else {
+    process.nextTick(function () {evem.emit.apply(evem, evnt);});    
+  }
+};
+
 makechanges = function (evem, changes) {
   var data = evem.data;
   var a = evem.a;
-  var key, i, n, evnt, type;
+  var key, i, n, evnt, type, current, pe;
   //command structure
   if (changes.hasOwnProperty("$set")) {
     for (key in changes.$set) {
@@ -767,21 +775,44 @@ makechanges = function (evem, changes) {
   }
   if (changes.hasOwnProperty("$$emit")) {
     if (typeof changes.$$emit === "string" ) {
+      delayedemit(evem, changes.$$emit); 
+    } else { //presumably array
+      n = changes.$$emit.length;
+      for (i = 0; i < n; i += 1) {
+        delayedemit(evem, changes.$$emit[i]);
+      }      
+    }
+  }
+  if (changes.hasOwnProperty("$$emitnow")) {
+    if (typeof changes.$$emit === "string" ) {
       evem.emit(changes.$$emit);              
     } else { //presumably array
       n = changes.$$emit.length;
       for (i = 0; i < n; i += 1) {
         evnt = changes.$$emit[i];
         if (typeof evnt === "string" ){
-          evem.emit(evnt);        
+          evem.emit(evnt);
         } else {
           evem.emit.apply(evem, evnt);
         }
       }      
     }
   }
+  
   for (type in ["$$once", "$$on", "$$removeListener"]) {
     if (changes.hasOwnProperty(type)) {
+      pe = type.slice(2);
+      for (key in changes[type]) {
+        current = changes[type][key];
+        if (current === "string") {
+          evem[pe](key, a[current]);
+        } else { //array
+          n = current.length;
+          for (i = 0; i < n; i += 1) {
+            evem[pe](key, a[current]);
+          }
+        }
+      }
       n = changes[type].length;
       for (i = 0; i < n; i += 1) {
         evnt = changes[type][i];
@@ -831,18 +862,18 @@ a = {
   
   
   "watch name to send end game" : function () {
-    return {$$once: [["name submitted", "send end game"]]};
+    return { $$once: { "name submitted" : "send end game" } };
   },
   
   "attach end to request" : function () {
-    return {$$removeListener : [["no highscore at end of game", "send end game"]], 
-            $$on : [["end game requested", "send end game"]]
+    return { $$removeListener : { "no highscore at end of game" : "send end game" }, 
+             $$on : { "end game requested" : "send end game" }
     };
   },
   
   //server calls
   
-  "send new game": [["uid", "type"],
+  "send new game": [[ "uid", "type" ],
     function me (uid, type) {
       servercalls.get('shuffle/'+uid+'/'+type, function (server) {
         var build;
@@ -1250,73 +1281,21 @@ require.define("/ui/gamecontrol.js", function (require, module, exports, __dirna
 
 var file = 'ui/gamecontrol: ';
 
-var gcd;
-
-var a, install;
+var a, b;
 
 var fadelevel = 0.4;
 
+var ret; 
 
-module.exports = function (gcde, data) {
-  gcd = gcde;
+module.exports = function (gcd) {
   
-  install(data);
-  
-  gcd.on("new game requested" , a["remove main fade"]);
-  
-  gcd.on("server started new game", a["install endgame"]);
-  gcd.on("server started new game", a["bind hand keys"]);
-  gcd.on("server started new game", a["listen for name entry"]);
-  gcd.on("server started new game", a["remove main fade"]);
-  
-  gcd.on("server ended game"      , a["install startgame"]);
-  gcd.on("server ended game"      , a["unbind hand keys"]);
-  gcd.on("server ended game"      , a["remove listen for name entry"]);
-  gcd.on("server ended game"      , a["fade main"]);
-  
-  
-  gcd.once("name registered"  , a["skip name"]);
-  
-  
-  gcd.on("ready"              , a["initialize game clicks, hide stuff"]);
+  ret = gcd.ret;
+  gcd.install(file, a);
   
 
 };
 
-
-a = {
-  "install endgame" : function () {
-    $("#togglegame").html('<a id="endgame">End Game</a>');        
-  },
-  "install startgame": function () {
-    $("#togglegame").html('<a id="newgame">Start Game</a>');      
-  },
-  "skip name" : function (data) {
-    gcd.removeListener("end game", a["emit check"]);
-    gcd.on("end game", function (data) {
-      gcd.emit("send end game", data);
-    }); 
-  },
-  "remove main fade" : function  (data) {
-    $(".main").fadeTo(200, 1);
-  },
-  "fade main" : function  (data) {
-    $(".main").fadeTo(600, fadelevel, function () {
-      gcd.emit("main is faded", data);
-    });
-  },
-  
-
-  "show about" : function () {
-    $('#modal-about').modal({
-      backdrop: true,
-      keyboard: true,
-      show: true
-    });
-  },
-
-  //key clicks
-  "hand key bindings": function (evnt) {
+b = { "hand key bindings": function (evnt) {
          var key = evnt.keyCode; 
          switch (key) {
           case 49: $('#hand li:nth-child(1)').click(); break;//1 card as visible
@@ -1327,59 +1306,103 @@ a = {
           case 13: $('#drawcards').click(); return false; //enter drawcards
          }
   },
+  
+  "emit new game requested" : function () {
+    ret({ $$emit : "new game requested" });
+  },
+   
+  "emit draw cards requested" : function () {
+    ret({ $$emit : "draw cards requested" });
+  },
+  
+  "emit end game requested" : function  () {
+    ret({ $$emit : "end game requested" });     
+  },
+  
+  "emit retrieve game requested" : function (event) {
+    ret({ $set : {"requested gid" : $(event.target).parents("tr").attr("id") },
+      $$emit : 'old game requested'
+    });
+  },
+  
+  
+  "show about" : function () {
+    $('#modal-about').modal({
+      backdrop: true,
+      keyboard: true,
+      show: true
+    });
+  }
+
+  
+};
+
+
+a = {
+  "install endgame" : function () {
+    $("#togglegame").html('<a id="endgame">End Game</a>');        
+  },
+  "install startgame": function () {
+    $("#togglegame").html('<a id="newgame">Start Game</a>');      
+  },
+  "remove main fade" : function  () {
+    $(".main").fadeTo(200, 1);
+  },
+  "fade main" : function  () {
+    $(".main").fadeTo(600, fadelevel, function () {
+      ret( { $emit : "main is faded" } );
+    });
+  },
+  
+
+  //key clicks
   "bind hand keys" : function () {
-    $('html').bind('keyup', a["hand key bindings"]);
+    $('html').bind('keyup', b["hand key bindings"]);
   },
   "unbind hand keys" : function () {
-    $('html').unbind('keyup', a["hand key bindings"]);
+    $('html').unbind('keyup', b["hand key bindings"]);
   },
   "listen for name entry" : function () {
-    gcd.on("name entry shown"      , a["unbind hand keys"]);
-    gcd.on("name submitted"       , a["bind hand keys"]);
+    ret({ $$on: {
+      "name entry shown" : "unbind hand keys",
+      "name submitted" : "bind hand keys"
+    }});
   },
   "remove listen for name entry" : function () {
-    gcd.removeListener("name entry shown", a["unbind hand keys"]);
-    gcd.removeListener("name submitted"  , a["bind hand keys"]);
+    ret({ $$removeListener: {
+      "name entry shown" : "unbind hand keys",
+      "name submitted" : "bind hand keys"
+    }});
+  },
+  
+  "initialize game clicks, hide stuff" : function () {
+    $("#newgame").live('click', b["emit new game requested"]);
+    $("#drawcards").click(b["emit draw cards requested"]);
+    $("#endgame").live('click', b["emit end game requested"]);
+    $("#endgame").hide(); 
+    $(".main").fadeTo(100, fadelevel);
+    $("#hs").click(b["emit retrieve game requested"]);
+    $("#about").click(b["show about"]);
+  
+    
   }
   
 };
 
-install = function (data) {
-   a["initialize game clicks, hide stuff"] = function () {
-    $("#newgame").live('click', a["emit new game"]);
-    $("#drawcards").click(a["emit draw cards"]);
-    $("#endgame").live('click', a["emit end game"]);
-    $("#endgame").hide(); 
-    $(".main").fadeTo(100, fadelevel);
-    $("#hs").click(a["emit retrieve game"]);
-    $("#about").click(a["show about"]);
-  
-    
-  };
-  
-  a["emit new game"] = function () {
-    gcd.emit("new game requested", data);
-  };
-   
-  a["emit draw cards"] = function () {
-    gcd.emit("draw cards requested", data);
-  };
-  
-  a["emit end game"] = function  () {
-    gcd.emit("end game requested", data);      
-  };
-  
-  a["emit retrieve game"] = function (event) {
-    data.requestedgid = $(event.target).parents("tr").attr("id");
-    gcd.emit('old game requested', data);
-  };
-  
-  var fname; 
-  for (fname in a) {
-    a[fname].desc = file+fname;
-  }
-  
-};
+
+
+/*
+//gcd.once("name registered"                , a["skip name"]); // ui/gamecontrol: 
+//Remove "end game", "emit check"; ON "end game" send end game
+
+  "skip name" : function (data) {
+    gcd.removeListener("end game", a["emit check"]);
+    gcd.on("end game", a["send end game"] function (data) {
+      gcd.emit("send end game", data);
+    }); 
+  },
+  */
+
 });
 
 require.define("/ui/history.js", function (require, module, exports, __dirname, __filename) {
@@ -1867,60 +1890,80 @@ module.exports = function (gcd) {
   
   gcd.on("ready"                          , a["initialize values"]);  // logic/gamecontrol:
   gcd.on("ready"                          , a["initialize score data"]); // logic/scores:
+  gcd.on("ready"                          , a["initialize game clicks, hide stuff"]); // ui/gamecontrol: 
                                           
                                           
   gcd.on("new game requested"             , a["zero history count"]); // logic/history:
   gcd.on("new game requested"             , a["negate oldhand"]);   // logic/history:
   gcd.on("new game requested"             , a['empty history body']); // ui/history:
-  gcd.on('new game requested'             , a["send new game"]);  // logic/gamecontrol:
+  gcd.on('new game requested'             , a["send new game"]);  // logic/gamecontrol: "server started new game" OR "new game denied"
   gcd.on("new game requested"             , a["reset hand state"]); // logic/hand: 
+  gcd.on("new game requested"             , a["remove main fade"]); // ui/gamecontrol: 
   
   gcd.on("server started new game"        , a["note new hand"]); // logic/hand: 
+  gcd.on("server started new game"        , a["install endgame"]); // ui/gamecontrol: 
+  gcd.on("server started new game"        , a["bind hand keys"]); // ui/gamecontrol: 
+  gcd.on("server started new game"        , a["listen for name entry"]); // ui/gamecontrol: ON "name entry shown", ON "name submitted"
+  gcd.on("server started new game"        , a["remove main fade"]); // ui/gamecontrol: 
   
                                           
   gcd.on("draw cards requested"           , a["increment history count"]); // logic/history:
   gcd.on("server drew cards"              , a["check for cards left" ]); // logic/hand:  // IF cards <=0, "no cards left to draw"
   gcd.on("hail call checked"              , a["note old hand"]); // logic/hand: 
   
-  gcd.on('cards discarded'                , a["send draw cards"]);  // logic/gamecontrol:
-  gcd.on("cards discarded"                , a["check for a hail call"]); // logic/hand: 
+  gcd.on('cards discarded'                , a["send draw cards"]);  // logic/gamecontrol: "server drew cards" OR "failed to draw cards"
+  gcd.on("cards discarded"                , a["check for a hail call"]); // logic/hand: "hail call checked" AND MAYBE "miagan", "mulligan", "hail mia", "hail mary"
 
 
 
-  gcd.on("server drew cards"              , a["check delta"]);  //  logic/scores: (negative OR positive OR no) change in score
-  gcd.on("server drew cards"              , a["check for streak"]); // logic/scores: streak OR nothing
+  gcd.on("server drew cards"              , a["check delta"]);  //  logic/scores: "(negative OR positive OR no) change in score"
+  gcd.on("server drew cards"              , a["check for streak"]); // logic/scores: "streak" OR ""
                              
   gcd.on("no cards left to draw"          , a["end the game"]); // logic/hand: 
                                           
                                           
   gcd.on("score loaded"                   , a["process row data"]);  // logic/scores: "add history"
-  gcd.on("add history"                    , a['add row to history']); // ui/history: 
+  gcd.on("add history"                    , a['add row to history']); // ui/history: ""
   
-  gcd.on("end game requested"             , a["check score/name"]);  // logic/gamecontrol:
-  gcd.on("server ended game"              , a["look for new high scores"]); // logic/scores:  high scores checked
-
-  gcd.on('name requested for high score'  , a["watch name to send end game"]); // logic/scores:
-
-  gcd.on("name submitted"                 , a["attach end to request"]); // logic/gamecontrol:
-  gcd.on("name submitted"                 , a["remove score/name"]); // logic/scores:
+  gcd.on("end game requested"             , a["check score/name"]);  // logic/scores: "name requested for high score" OR "no highscore at end of game"
+  // above removed by 'remove score/name'
+  //ON "end game requested", a["send end game"] // logic/gamecontrol: added by "attach end to request"
   
-  gcd.on('no highscore at end of game'    , a["send end game"]); // logic/scores:
+  gcd.on("server ended game"              , a["look for new high scores"]); // logic/scores:  "high scores checked"
+  gcd.on("server ended game"              , a["install startgame"]); // ui/gamecontrol: 
+  gcd.on("server ended game"              , a["unbind hand keys"]); // ui/gamecontrol: 
+  gcd.on("server ended game"              , a["remove listen for name entry"]); // ui/gamecontrol: REMOVE "name entry shown", REMOVE "name submitted"
+  gcd.on("server ended game"              , a["fade main"]); // ui/gamecontrol: "main is faded"
 
-  gcd.on('high scores requested'          , a["send view scores"]); // logic/gamecontrol:
+
+  gcd.on('name requested for high score'  , a["watch name to send end game"]); // logic/scores: once
+
+  // gcd.on("name entry shown"      , a["unbind hand keys"]); // ui/gamecontrol: added by "listen for name entry"
+  // gcd.removeListener("name entry shown", a["unbind hand keys"]); // ui/gamecontrol: removed by "remove listen for name entry"
+  
+
+  gcd.on("name submitted"                 , a["attach end to request"]); // logic/gamecontrol: removeListerner, on
+  gcd.on("name submitted"                 , a["remove score/name"]); // logic/scores: removeListener
+  // ONCE "name submitted", a["send end game"]  // logic/gamecontrol: added by "watch name to send end game"
+  // gcd.on("name submitted"       , a["bind hand keys"]); // ui/gamecontrol: added by "listen for name entry"
+  // gcd.removeListener("name submitted"  , a["bind hand keys"]);  // ui/gamecontrol: removed by "remove listen for name entry"
+  
+  
+  gcd.on('no highscore at end of game'    , a["send end game"]); // logic/gamecontrol: "server ended game" OR "end game denied"
+  //above removed by "attach end to request" 
+
+  gcd.on('high scores requested'          , a["send view scores"]); // logic/gamecontrol: "server sent high scores" OR "view scores denied"
   
   gcd.on("server sent high scores"        , a["look for new high scores"]);  // logic/scores: "high scores checked"
   
   
 };
+  
 
-
-
-
-
-
-
-
-
+  
+  
+  
+  
 
 });
 

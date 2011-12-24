@@ -1,8 +1,8 @@
-/*globals $, module, console, require*/
+/*globals $, module, console, require, process*/
 
 var file = 'utilities/inventory';
 
-var install, process, makechanges, wrapper, wrapper_debug;
+var install, prepargs, makechanges, wrapper, wrapper_debug, delayedemit;
 
 module.exports = function (evem, debug) {
   evem.install = install;
@@ -10,7 +10,7 @@ module.exports = function (evem, debug) {
   evem.debug = debug;
   evem.data = {};
   evem.log = {
-    "process" : function (desc, args) {
+    "prepargs" : function (desc, args) {
       console.log("args to "+desc+": "+JSON.stringify(args));
     },
     "makechanges" : function (desc, changes) {
@@ -68,7 +68,7 @@ wrapper = function (f, args, evem) {
     if (!args) {
       changes = f.call(evem);
     } else {
-      doneargs = process(evem, args);
+      doneargs = prepargs(evem, args);
       changes = f.apply(evem, doneargs);
     }
     makechanges(evem, changes);
@@ -81,8 +81,8 @@ wrapper_debug = function (f, args, evem) {
     if (!args) {
       changes = f.call(evem);
     } else {
-      doneargs = process(evem, args);
-      evem.log.process(me.desc, doneargs);
+      doneargs = prepargs(evem, args);
+      evem.log.prepargs(me.desc, doneargs);
       changes = f.apply(evem, doneargs);
     }
     if (changes) {
@@ -93,7 +93,7 @@ wrapper_debug = function (f, args, evem) {
 };
 
 
-process = function (evem, args) {
+prepargs = function (evem, args) {
   var i, n, current, value, key;
   var values = [];
   var data = evem.data;
@@ -134,10 +134,18 @@ process = function (evem, args) {
   return values; 
 };
 
+delayedemit = function (evem, evnt) {
+  if (typeof evnt === "string") {
+    process.nextTick(function () {evem.emit(evnt);});
+  } else {
+    process.nextTick(function () {evem.emit.apply(evem, evnt);});    
+  }
+};
+
 makechanges = function (evem, changes) {
   var data = evem.data;
   var a = evem.a;
-  var key, i, n, evnt, type;
+  var key, i, n, evnt, type, current, pe;
   //command structure
   if (changes.hasOwnProperty("$set")) {
     for (key in changes.$set) {
@@ -156,21 +164,44 @@ makechanges = function (evem, changes) {
   }
   if (changes.hasOwnProperty("$$emit")) {
     if (typeof changes.$$emit === "string" ) {
+      delayedemit(evem, changes.$$emit); 
+    } else { //presumably array
+      n = changes.$$emit.length;
+      for (i = 0; i < n; i += 1) {
+        delayedemit(evem, changes.$$emit[i]);
+      }      
+    }
+  }
+  if (changes.hasOwnProperty("$$emitnow")) {
+    if (typeof changes.$$emit === "string" ) {
       evem.emit(changes.$$emit);              
     } else { //presumably array
       n = changes.$$emit.length;
       for (i = 0; i < n; i += 1) {
         evnt = changes.$$emit[i];
         if (typeof evnt === "string" ){
-          evem.emit(evnt);        
+          evem.emit(evnt);
         } else {
           evem.emit.apply(evem, evnt);
         }
       }      
     }
   }
+  
   for (type in ["$$once", "$$on", "$$removeListener"]) {
     if (changes.hasOwnProperty(type)) {
+      pe = type.slice(2);
+      for (key in changes[type]) {
+        current = changes[type][key];
+        if (current === "string") {
+          evem[pe](key, a[current]);
+        } else { //array
+          n = current.length;
+          for (i = 0; i < n; i += 1) {
+            evem[pe](key, a[current]);
+          }
+        }
+      }
       n = changes[type].length;
       for (i = 0; i < n; i += 1) {
         evnt = changes[type][i];
