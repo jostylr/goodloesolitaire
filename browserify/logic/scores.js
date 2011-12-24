@@ -21,7 +21,8 @@ a = {
   
   'check score/name' : [ ["name", "score", "highscores"],
     function (name, score, highscores) {
-      if (!name && score >= highscores[highscores.length-1].score) {
+      
+      if (!name && (score >= (highscores[highscores.length-1].score) || ( score >= highscores[0].score) ) ) {
         return { $$emit: "name requested for high score" };
       } else {
         return { $$emit : "no highscore at end of game" };    

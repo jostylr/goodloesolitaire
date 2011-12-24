@@ -1229,7 +1229,8 @@ a = {
   
   'check score/name' : [ ["name", "score", "highscores"],
     function (name, score, highscores) {
-      if (!name && score >= highscores[highscores.length-1].score) {
+      
+      if (!name && (score >= (highscores[highscores.length-1].score) || ( score >= highscores[0].score) ) ) {
         return { $$emit: "name requested for high score" };
       } else {
         return { $$emit : "no highscore at end of game" };    
@@ -1724,11 +1725,13 @@ a = {
     function (highscores) {
       var row, rowclass, n, i, date;
       n = highscores.length;
+      highscores.sort(function (a,b) {return a.score -b.score;});
       var htmltablebody = '';
       for (i = 0; i<n; i += 1) {
         row = highscores[i];
         date = humaneDate(new Date (row.date));
   //      date = date.getMonth()+1+'/'+date.getDate()+'/'+date.getFullYear();
+        rowclass = '';
         if (row.ownscore) {
           rowclass = 'class="newHighScore"';
         }
