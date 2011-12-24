@@ -72,7 +72,7 @@ a = {
   }],
   
   
-  "send end game" : [ ["uid", "gid", {$$get : "name", $$default :"____"} ],
+  "send end game" : [ ["uid", "gid", {$$get : "name", $$default :"___"} ],
     function me (uid, gid, name) {
       servercalls.get('endgame/'+uid+"/"+gid+"/"+name, function (server){
         var build;
