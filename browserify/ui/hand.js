@@ -5,82 +5,89 @@ var file = 'ui/hand: ';
 var cardutil = require('../utilities/cards');
 var deck = cardutil.deck;
 
-var gcd;
-
-var a, install;
+var a, b, ret, store;
 
 var querycards, handcall, hail, computecardposition;
 
-module.exports = function (gcde, data) {
-  gcd = gcde;
+module.exports = function (gcd) {
+  ret = gcd.ret;
+  store = gcd.store;
   
-  install(data);
+  gcd.install(file, a);
     
-  gcd.on("draw cards requested"   , a["assemble drawn cards"]);
-  gcd.on("cards discarded"        , a["use backing for discarded cards"]);
-  
-  gcd.on("server started new game", a["load hand"]);
-  gcd.on("server started new game", a["update number of cards left"]);
-
-  gcd.on("server drew cards"      , a["load hand"]);
-  gcd.on("server drew cards"      , a["update number of cards left"]);
-
-  
-  gcd.on("hand loaded"            , a["restore cards"]);
-  gcd.on("hand loaded"            , a["make full hand call"]);
-  
-  
-  gcd.on("no cards left to draw"  , a["remove deck"]);
-
-
-  gcd.on("miagan"                 , a["display miagan"]);
-  gcd.on("hail mia"               , a["display hail mia"]);
-  gcd.on("mulligan"               , a["display mulligan"]);
-  gcd.on("hail mary"              , a["display hail mary"]);
-  
-
-  gcd.on("ready", a["initialize draw card click, hide hail, hand"]);
   
 };
 
-a = {
-  "load hand" : function (data) {
-    var hand = data.hand;
-    $('#hand li').each(function () {
-      var cardnum = this.id[4]-1;
-      var pos = computecardposition(data, hand[cardnum]);
-      $(this).css("background-position", "-"+pos[0]+"px -"+pos[1]+"px");
-    });
-    gcd.emit("hand loaded", data);
-  },
+b = {
+  "translate card click" : function (event) {
+    store.clickedcard = $(this);
+    ret({ $$emitnow: 'card clicked', $$store : "clickedcard" }, file+"translate card click" );
+  }
   
-  "assemble drawn cards" : function (data) {
-    var carddata = querycards(data);
-    if (carddata[1] === 0) {
-      gcd.emit("no discarded cards", data);
-      return false;
+};
+
+handcall = function (call) {
+  var ranks = cardutil.handcall(call)[1];
+  switch (call[0]) {
+    case "5":  return "Five "+ranks[0]; 
+    case "sf": return ranks[0]+" High Straight Flush"; 
+    case "4":  return "Four "+ranks[0]+" and a "+ranks[1]+" kicker"; 
+    case "fh": return "Full House: "+ranks[0]+" over "+ranks[1]; 
+    case "f":  return ranks[0]+" Low Flush"; 
+    case "s":  return ranks[0]+" High Straight"; 
+    case "3":  return "Three "+ranks[0]+" and  "+ranks[1]+", "+ranks[2]+" kickers"; 
+    case "2p": return "Two pair: "+ranks[0]+", "+ranks[1]+" and a "+ranks[2]+" kicker"; 
+    case "2":  return "Pair of "+ranks[0]+" with "+ranks[1]+", "+ranks[2]+", "+ranks[3]+" kickers"; 
+    case "1":  return  ranks[0]+" high  and "+ranks[1]+", "+ranks[2]+", "+ranks[3]+", "+ranks[4]+" kickers"; 
+    default :  return "";
+  }
+};
+
+
+a = {
+  "load hand" : [ [ "hand" ],
+    function (hand) {
+      $('#hand li').each(function () {
+        var cardnum = this.id[4]-1;
+        var pos = computecardposition(hand[cardnum]);
+        $(this).css("background-position", "-"+pos[0]+"px -"+pos[1]+"px");
+      });
+      return { $$emit : "hand loaded" };
     }
-    data.drawcount = carddata[1];
-    data.draws = carddata[0];
-    gcd.emit("cards discarded", data);
+  ],
+  
+  "assemble drawn cards" : function () {
+    var carddata = querycards();
+    if (carddata[1] === 0) {
+      return { $$emit : "no discarded cards" };
+    }
+    return { $set : { 
+        drawcount : carddata[1],
+        draws : carddata[0]
+      },
+      $$emit : "cards discarded"
+    };
   },
   
   "restore cards" : function () {
     $("#hand li").removeClass('draw').removeClass('backing');
   },
   
-  "make full hand call" : function (data) {
-    console.log(handcall(data.call));
-    $("#handtext").html(handcall(data.call));
-  },
+  "make full hand call" : [ [{ $$transform : [ handcall,  "call" ] }],
+    function (call) {
+      $("#handtext").html(call);
+    }
+  ],
   
   "show deck" : function () {
     $('#dc').fadeTo(400, 1);
   },
   
-  "update number of cards left" : function  (data) {
-    $("#numcards").html(data.cardsleft);
-  },
+  "update number of cards left" : [ [ "cardsleft" ], 
+    function  (cardsleft) {
+      $("#numcards").html(cardsleft);
+    }
+  ],
   
   "remove deck" : function () {
     $('#dc').fadeTo(400, 0.5); 
@@ -106,50 +113,43 @@ a = {
   
   //initial hand display
   "hide hand" : function () {
-    $("#hand").css("visibility", "hidden"); 
-    gcd.once("hand loaded", a["show hand"]);
+    $("#hand").css("visibility", "hidden");
+    ret({$$on : {"hand loaded" : "show hand" } }, file+"hide hand");
   },
   
   "show hand" : function () {
     $("#hand").css("visibility", "visible"); 
-  }
-  
-};
+  },
 
-
-install = function (data) {
-  a["toggle draw class"] = function (event) {
-    var this$ = $(this);
-    var drawcount;
-    if (this$.hasClass('draw')) {
-      this$.removeClass('draw');
-    } else if (data.cardsleft < 5) {
-      drawcount = querycards()[1];
-      if (drawcount >= data.cardsleft) {
-        gcd.emit("not enough cards left", data);
+  "toggle draw cards" : [ [ "cardsleft", {$$retrieve : "clickedcard"}],
+    function (cardsleft, card$) {
+      var drawcount;
+      if (card$.hasClass('draw')) {
+        card$.removeClass('draw');
+      } else if (cardsleft < 5) {
+        drawcount = querycards()[1];
+        if (drawcount >= cardsleft) {
+          return {$$emit : "not enough cards left"};
+        } else {
+          card$.addClass('draw');
+        }
       } else {
-        this$.addClass('draw');
-      }
-    } else {
-      this$.addClass('draw');      
+        card$.addClass('draw');      
+      }      
     }
-  };
+  ],
   
   
-  a["initialize draw card click, hide hail, hand"] = function () {
-   $('#hand li').bind("click"     , a["toggle draw class"]); 
+  "initialize draw card click, hide hail, hand" : function () {
+   $('#hand li').bind("click"     , b["translate card click"]); 
    
    $('#hail >span').hide();
    
    a["hide hand"](); 
-  };
-  
-  var fname; 
-  for (fname in a) {
-    a[fname].desc = file+fname;
-  }  
-};
+  }
 
+  
+};
 
 querycards = function () {
   var draws = '';
@@ -165,36 +165,20 @@ querycards = function () {
   return [draws, drawcount];
 };
 
-handcall = function (call) {
-  var ranks = cardutil.handcall(call)[1];
-  switch (call[0]) {
-    case "5":  return "Five "+ranks[0]; 
-    case "sf": return ranks[0]+" High Straight Flush"; 
-    case "4":  return "Four "+ranks[0]+" and a "+ranks[1]+" kicker"; 
-    case "fh": return "Full House: "+ranks[0]+" over "+ranks[1]; 
-    case "f":  return ranks[0]+" Low Flush"; 
-    case "s":  return ranks[0]+" High Straight"; 
-    case "3":  return "Three "+ranks[0]+" and  "+ranks[1]+", "+ranks[2]+" kickers"; 
-    case "2p": return "Two pair: "+ranks[0]+", "+ranks[1]+" and a "+ranks[2]+" kicker"; 
-    case "2":  return "Pair of "+ranks[0]+" with "+ranks[1]+", "+ranks[2]+", "+ranks[3]+" kickers"; 
-    case "1":  return  ranks[0]+" high  and "+ranks[1]+", "+ranks[2]+", "+ranks[3]+", "+ranks[4]+" kickers"; 
-    default :  return "";
-  }
-};
 
 hail = function (domid) {
   $(domid).fadeIn(600).fadeOut(600);  
 };
 
 
-computecardposition = function (data, card) {
+computecardposition = function (card) {
   var i;
   for (i = 0; i<52; i+=1) {
     if (card === deck[i]) {
       return [(i % 8)*86, Math.floor(i/8)*120];
     }
   }
-  gcd.emit("card not found", data, card);
+  ret( { $$emit : "card not found" } );
   return [0, 0];
 };
 

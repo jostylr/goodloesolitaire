@@ -83,7 +83,7 @@ a = {
         }
         ret({$set : { highscores: server.highscores.sort(function (a,b) {return b.score - a.score;})  },
             $$emit : "server ended game"
-        });
+        }, me.desc);
       });
     }
   ],
@@ -97,7 +97,7 @@ a = {
       }
     ret({$set : {highscores: server.highscores},
           $$emit : "server sent high scores"
-        });
+        }, me.desc);
     });
   }
 

@@ -2,7 +2,7 @@
 
 var events = require('events');
 
-var gcd = new events.EventEmitter(); 
+ gcd = new events.EventEmitter(); 
 
 
 require('./utilities/debugging')(gcd);

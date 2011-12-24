@@ -9,6 +9,7 @@ module.exports = function (evem, debug) {
   evem.a = {};
   evem.debug = debug;
   evem.data = {};
+  evem.store = {};  //for non-JSON able stuff, record it by using $$store : "..."
   evem.log = {
     "prepargs" : function (desc, args) {
       console.log("args to "+desc+": "+JSON.stringify(args));
@@ -97,6 +98,7 @@ prepargs = function (evem, args) {
   var i, n, current, value, key;
   var values = [];
   var data = evem.data;
+  var store = evem.store;
   n = args.length;
   for (i = 0; i < n; i += 1) {
     current = args[i];
@@ -114,7 +116,7 @@ prepargs = function (evem, args) {
       } else {
         value = undefined;
       }
-      if (current.hasOwnProperty("$$transform")) {
+      if (current.hasOwnProperty("$$transform")) { //fix transform. do key:value with value possibly an array of actions to take after event.
        if (current.$$transform.length === 2) { //simple case
          key = current.$$transform[1];
          if (data.hasOwnProperty(key)) {
@@ -126,6 +128,12 @@ prepargs = function (evem, args) {
         key = current.$$get;
         if (data.hasOwnProperty(key)) {
           value = data.key;
+        }
+      }
+      if (current.hasOwnProperty("$$retrieve")) {
+        key = current.$$retrieve;
+        if (store.hasOwnProperty(key)) {
+          value = store.key;
         }
       }
       values.push(value);

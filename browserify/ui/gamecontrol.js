@@ -28,22 +28,22 @@ b = { "hand key bindings": function (evnt) {
          }
   },
   
-  "emit new game requested" : function () {
-    ret({ $$emit : "new game requested" });
+  "emit new game requested" : function me () {
+    ret({ $$emit : "new game requested" }, file+"emit new game requested");
   },
    
-  "emit draw cards requested" : function () {
-    ret({ $$emit : "draw cards requested" });
+  "emit draw cards requested" : function me () {
+    ret({ $$emit : "draw cards requested" }, file+"emit draw cards requested");
   },
   
-  "emit end game requested" : function  () {
-    ret({ $$emit : "end game requested" });     
+  "emit end game requested" : function me  () {
+    ret({ $$emit : "end game requested" }, file+"emit end game requested");     
   },
   
-  "emit retrieve game requested" : function (event) {
+  "emit retrieve game requested" : function me (event) {
     ret({ $set : {"requested gid" : $(event.target).parents("tr").attr("id") },
       $$emit : 'old game requested'
-    });
+    }, file+"emit retrieve game requested");
   },
   
   
@@ -69,10 +69,10 @@ a = {
   "remove main fade" : function  () {
     $(".main").fadeTo(200, 1);
   },
-  "fade main" : function  () {
+  "fade main" : function  me () {
     $(".main").fadeTo(600, fadelevel, function () {
       ret( { $emit : "main is faded" } );
-    });
+    }, me.desc);
   },
   
 
@@ -83,17 +83,17 @@ a = {
   "unbind hand keys" : function () {
     $('html').unbind('keyup', b["hand key bindings"]);
   },
-  "listen for name entry" : function () {
+  "listen for name entry" : function me () {
     ret({ $$on: {
       "name entry shown" : "unbind hand keys",
       "name submitted" : "bind hand keys"
-    }});
+    }}, me.desc);
   },
-  "remove listen for name entry" : function () {
+  "remove listen for name entry" : function me () {
     ret({ $$removeListener: {
       "name entry shown" : "unbind hand keys",
       "name submitted" : "bind hand keys"
-    }});
+    }}, me.desc);
   },
   
   "initialize game clicks, hide stuff" : function () {
