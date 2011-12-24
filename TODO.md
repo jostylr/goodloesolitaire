@@ -1,13 +1,15 @@
 # To do
 
-BUG: When "not enough cards" reached, can't unselect cards.
+BUG: New high scores are not added.
+BUG: In high score modal, tr has "undefined" attribute.
 BUG: White artifacts under handtext in webkit.
 
 ## 2.0
+0. Make prettified dates lowercase.
 
 1. Animation for new deck, discard card, draw card
 2. Make hail calls have more interesting effect.
-
+3. Put "hail mia", "3 in a row" game messages in consolidated message div.
 
 9. Add recent/friends high scores
 10. Add personal high scores
