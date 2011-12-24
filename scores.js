@@ -3,9 +3,9 @@
 
 //load high scores
 var highscores =  [
-{gid:"3", score:"400", name:"James", date:Date.UTC(2011, 11, 25)},
-{gid:"1", score:"800", name:"A", date:Date.UTC(2011, 10, 25)},
-{gid:"2", score:"1000", name:"B", date:Date.UTC(2011, 11, 23)}
+{_id:"3", score:"400", name:"James", date:Date.UTC(2011, 11, 25)},
+{_id:"1", score:"800", name:"A", date:Date.UTC(2011, 10, 25)},
+{_id:"2", score:"1000", name:"B", date:Date.UTC(2011, 11, 23)}
 ];
 
 
@@ -20,7 +20,7 @@ exports.viewscores = function (res) {
 
 exports.update = function (score, gid, name, store) {
 	if (highscores.length > 9) {highscores.shift();} 
-	highscores.unshift({gid:gid, score:score, name:name, date:Date.now()});
+	highscores.unshift({_id:gid, score:score, name:name, date:Date.now()});
 	highscores.sort(function (a,b) {return a.score - b.score;});
 	console.log(highscores);
 	store(score, gid, name);
