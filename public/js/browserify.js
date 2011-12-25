@@ -1185,6 +1185,7 @@ a = {
         }      
       }
       em.push("hail call checked");
+      return(build);
     }
   ],
   "check for cards left" : [ [ "cardsleft" ], 
