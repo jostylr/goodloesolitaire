@@ -10,14 +10,9 @@ var a;
 
 var process;
 
-module.exports = function (gcde) {
-  gcd = gcde; 
-  
+module.exports = function (gcd) {
   ret = gcd.ret;
-  
-  gcd.install(file, a);
-  
-  
+  gcd.install(file, a);  
 };
 
 a = {
