@@ -39,7 +39,7 @@ handcall = function (call) {
     case "3":  return "Three "+ranks[0]+" and  "+ranks[1]+", "+ranks[2]+" kickers"; 
     case "2p": return "Two pair: "+ranks[0]+", "+ranks[1]+" and a "+ranks[2]+" kicker"; 
     case "2":  return "Pair of "+ranks[0]+" with "+ranks[1]+", "+ranks[2]+", "+ranks[3]+" kickers"; 
-    case "1":  return  ranks[0]+" high  and "+ranks[1]+", "+ranks[2]+", "+ranks[3]+", "+ranks[4]+" kickers"; 
+    case "1":  return  ranks[0]+" high and "+ranks[1]+", "+ranks[2]+", "+ranks[3]+", "+ranks[4]+" kickers"; 
     default :  return "";
   }
 };
@@ -76,7 +76,7 @@ a = {
   
   "make full hand call" : [ [{ $$transform : [ handcall,  "call" ] }],
     function (call) {
-      $("#handtext").html("&nbsp;").text(call);
+      $("#handtext").text(call);
     }
   ],
   
