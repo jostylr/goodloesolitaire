@@ -76,7 +76,7 @@ a = {
   
   "make full hand call" : [ [{ $$transform : [ handcall,  "call" ] }],
     function (call) {
-      $("#handtext").text(call);
+      $("#handtext span").text("&nbsp").text(call);
     }
   ],
   
