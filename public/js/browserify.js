@@ -494,120 +494,6 @@ EventEmitter.prototype.listeners = function(type) {
 
 });
 
-require.define("/utilities/debugging.js", function (require, module, exports, __dirname, __filename) {
-    /*global $, console, submitScore, require, eventlogger, hashevents */
-
-
-eventlogger = [];
-hashevents = {};
-
-module.exports = function (evem) {
-  var isArray = typeof Array.isArray === 'function'
-      ? Array.isArray
-      : function (xs) {
-          return Object.toString.call(xs) === '[object Array]';
-      }
-  ;
-  //var _emit = evem.emit;
-  evem.emit = function(type, data) {
-    
-    // If there is no 'error' event listener then throw.
-    if (type === 'error') {
-      if (!this._events || !this._events.error ||
-          (isArray(this._events.error) && !this._events.error.length))
-      {
-        if (arguments[1] instanceof Error) {
-          throw arguments[1]; // Unhandled 'error' event
-        } else {
-          throw new Error("Uncaught, unspecified 'error' event.");
-        }
-        return false;
-      }
-    }
-    
-    if (type === "newListener") {
-      console.log("NL: ", data, arguments[2].desc);
-      if (hashevents.hasOwnProperty(data)) {
-        hashevents[data].push(arguments[2].desc);
-      } else {
-        hashevents[data] = [arguments[2].desc];
-      }
-    } else {
-      console.log(eventlogger.length+". "+type);
-      var list = evem.listeners(type);
-      //console.log("list"+list)
-      var i, n; 
-      n = list.length; 
-      var listenlist = [];
-      for (i = 0; i < n; i += 1) {
-        if (list[i].hasOwnProperty("desc")) {
-          listenlist.push([list[i].desc, list[i]]);
-        } else {
-          listenlist.push([null, list[i]]);
-        }
-      }
-      eventlogger.push([type, ((data) ? JSON.parse(JSON.stringify(data)) : {} ), listenlist]);
-    }
-    
-    if (!this._events) {
-       return false;
-     }
-    var handler = this._events[type];
-    if (!handler) return false;
-
-    if (typeof handler == 'function') {
-      if (type !== "newListener") {
-        console.log(type+": "+( handler.hasOwnProperty("desc") ? handler.desc : "no description")); 
-      }
-      switch (arguments.length) {
-        // fast cases
-        case 1:
-          handler.call(this);
-          break;
-        case 2:
-          handler.call(this, arguments[1]);
-          break;
-        case 3:
-          handler.call(this, arguments[1], arguments[2]);
-          break;
-        // slower
-        default:
-          var args = Array.prototype.slice.call(arguments, 1);
-          handler.apply(this, args);
-      }
-      return true;
-
-    } else if (isArray(handler)) {
-      var args = Array.prototype.slice.call(arguments, 1);
-
-      var listeners = handler.slice();
-      var i, l; 
-      for (i = 0, l = listeners.length; i < l; i++) {
-        if (type !== "newListener") {
-          console.log(type+": "+( listeners[i].hasOwnProperty("desc") ? listeners[i].desc : "no description")); 
-        }
-        listeners[i].apply(this, args);
-      }
-      return true;
-
-    } else {
-      return false;
-    }
-  };
-  
-  evem.once = function(type, listener) {
-    var self = this;
-    var g = function g () {
-      self.removeListener(type, g);
-      listener.apply(this, arguments);
-    };
-    g.desc = listener.desc+" (once)";
-    self.on(type, g);
-    return this;
-  };
-};
-});
-
 require.define("/utilities/inventory.js", function (require, module, exports, __dirname, __filename) {
     /*globals $, module, console, require, process*/
 
@@ -625,11 +511,32 @@ module.exports = function (evem, debug) {
     return evem.store[name];
   };
   evem.log = {
+    "emit" : function (evnt) {
+      console.log("EMIT: " + evnt);
+      
+    },
+    "emitnow" : function (evnt) {
+      console.log("EMITNOW: " + evnt);
+    },
+    "on" : function (evnt, action) {
+      console.log("ON: " + evnt + ": " + action);
+    },
+    "once" : function (evnt, action) {
+      console.log("ONCE: " + evnt + ": " + action);
+    },
+    "removeListener" :function (evnt, action) {
+      console.log("REMOVELISTENER:" + evnt + ": " + action);
+    },
+    "action" : function (f, args) {
+      console.log("ACTION " + (f.desc || "__"));
+    },
     "prepargs" : function (desc, args) {
-      console.log("args to "+desc+": "+JSON.stringify(args));
+      console.log("ARGS " + //desc + ": " 
+          JSON.stringify(args));
     },
     "makechanges" : function (desc, changes) {
-      console.log("changes from "+desc+": "+JSON.stringify(changes));
+      console.log("RETURN " + //desc+": " + 
+          JSON.stringify(changes));
     }
   };
   if (evem.debug) {
@@ -693,6 +600,7 @@ wrapper = function (f, args, evem) {
 wrapper_debug = function (f, args, evem) {
   return function me () {
     var changes, doneargs;
+    evem.log.action(f, args);
     if (!args) {
       changes = f.call(evem);
     } else {
@@ -787,24 +695,29 @@ makechanges = function (evem, changes) {
   if (changes.hasOwnProperty("$$emit")) {
     if (typeof changes.$$emit === "string" ) {
       delayedemit(evem, changes.$$emit); 
+      evem.log.emit(changes.$$emit);
     } else { //presumably array
       n = changes.$$emit.length;
       for (i = 0; i < n; i += 1) {
         delayedemit(evem, changes.$$emit[i]);
+        evem.log.emit(changes.$$emit[i]);
       }      
     }
   }
   if (changes.hasOwnProperty("$$emitnow")) {
     if (typeof changes.$$emitnow === "string" ) {
       evem.emit(changes.$$emitnow);              
+      evem.log.emitnow(changes.$$emit);
     } else { //presumably array
       n = changes.$$emitnow.length;
       for (i = 0; i < n; i += 1) {
         evnt = changes.$$emitnow[i];
         if (typeof evnt === "string" ){
           evem.emit(evnt);
+          evem.log.emitnow(evnt);
         } else {
           evem.emit.apply(evem, evnt);
+          evem.log.emitnow(evnt);
         }
       }      
     }
@@ -817,18 +730,20 @@ makechanges = function (evem, changes) {
         current = changes[type][key];
         if (typeof current === "string") {
           evem[pe](key, a[current]);
+          evem.log[pe](key, current);
         } else { //array
           n = current.length;
           for (i = 0; i < n; i += 1) {
             evem[pe](key, a[current[i]]);
+            evem.log[pe](key, current[i]);
           }
         }
       }
-      n = changes[type].length;
+   /*   n = changes[type].length;
       for (i = 0; i < n; i += 1) {
         evnt = changes[type][i];
         evem.once(evnt[0], a[evnt[1]]);
-      }
+      }*/
     }    
   }  
   
@@ -1557,7 +1472,7 @@ a = {
   
   "make full hand call" : [ [{ $$transform : [ handcall,  "call" ] }],
     function (call) {
-      $("#handtext").text(call);
+      $("#handtext").html("&nbsp;").text(call);
     }
   ],
   
@@ -2010,10 +1925,10 @@ require.define("/entry.js", function (require, module, exports, __dirname, __fil
 
 var events = require('events');
 
- gcd = new events.EventEmitter(); 
+var gcd = new events.EventEmitter(); 
 
 
-require('./utilities/debugging')(gcd);
+//require('./utilities/debugging')(gcd);
 require('./utilities/inventory')(gcd, true);
 
 /*
@@ -2035,20 +1950,20 @@ console.log("running");
 
 
 
-require('./logic/gamecontrol'  )(gcd, data);
-require('./logic/history'      )(gcd, data);
-require('./logic/hand'         )(gcd, data);
-require('./logic/scores'       )(gcd, data);
+require('./logic/gamecontrol'  )(gcd);
+require('./logic/history'      )(gcd);
+require('./logic/hand'         )(gcd);
+require('./logic/scores'       )(gcd);
 
-require('./ui/gamecontrol'    )(gcd, data);
-require('./ui/history'        )(gcd, data);
-require('./ui/hand'           )(gcd, data);
-require('./ui/scores'         )(gcd, data);
+require('./ui/gamecontrol'    )(gcd);
+require('./ui/history'        )(gcd);
+require('./ui/hand'           )(gcd);
+require('./ui/scores'         )(gcd);
 
 require('./events.js')(gcd);
 
 $(function() { 
-  gcd.emit("ready", data);
+  gcd.emit("ready");
 });
 
 

@@ -14,11 +14,32 @@ module.exports = function (evem, debug) {
     return evem.store[name];
   };
   evem.log = {
+    "emit" : function (evnt) {
+      console.log("EMIT: " + evnt);
+      
+    },
+    "emitnow" : function (evnt) {
+      console.log("EMITNOW: " + evnt);
+    },
+    "on" : function (evnt, action) {
+      console.log("ON: " + evnt + ": " + action);
+    },
+    "once" : function (evnt, action) {
+      console.log("ONCE: " + evnt + ": " + action);
+    },
+    "removeListener" :function (evnt, action) {
+      console.log("REMOVELISTENER:" + evnt + ": " + action);
+    },
+    "action" : function (f, args) {
+      console.log("ACTION " + (f.desc || "__"));
+    },
     "prepargs" : function (desc, args) {
-      console.log("args to "+desc+": "+JSON.stringify(args));
+      console.log("ARGS " + //desc + ": " 
+          JSON.stringify(args));
     },
     "makechanges" : function (desc, changes) {
-      console.log("changes from "+desc+": "+JSON.stringify(changes));
+      console.log("RETURN " + //desc+": " + 
+          JSON.stringify(changes));
     }
   };
   if (evem.debug) {
@@ -82,6 +103,7 @@ wrapper = function (f, args, evem) {
 wrapper_debug = function (f, args, evem) {
   return function me () {
     var changes, doneargs;
+    evem.log.action(f, args);
     if (!args) {
       changes = f.call(evem);
     } else {
@@ -176,24 +198,29 @@ makechanges = function (evem, changes) {
   if (changes.hasOwnProperty("$$emit")) {
     if (typeof changes.$$emit === "string" ) {
       delayedemit(evem, changes.$$emit); 
+      evem.log.emit(changes.$$emit);
     } else { //presumably array
       n = changes.$$emit.length;
       for (i = 0; i < n; i += 1) {
         delayedemit(evem, changes.$$emit[i]);
+        evem.log.emit(changes.$$emit[i]);
       }      
     }
   }
   if (changes.hasOwnProperty("$$emitnow")) {
     if (typeof changes.$$emitnow === "string" ) {
       evem.emit(changes.$$emitnow);              
+      evem.log.emitnow(changes.$$emit);
     } else { //presumably array
       n = changes.$$emitnow.length;
       for (i = 0; i < n; i += 1) {
         evnt = changes.$$emitnow[i];
         if (typeof evnt === "string" ){
           evem.emit(evnt);
+          evem.log.emitnow(evnt);
         } else {
           evem.emit.apply(evem, evnt);
+          evem.log.emitnow(evnt);
         }
       }      
     }
@@ -206,18 +233,20 @@ makechanges = function (evem, changes) {
         current = changes[type][key];
         if (typeof current === "string") {
           evem[pe](key, a[current]);
+          evem.log[pe](key, current);
         } else { //array
           n = current.length;
           for (i = 0; i < n; i += 1) {
             evem[pe](key, a[current[i]]);
+            evem.log[pe](key, current[i]);
           }
         }
       }
-      n = changes[type].length;
+   /*   n = changes[type].length;
       for (i = 0; i < n; i += 1) {
         evnt = changes[type][i];
         evem.once(evnt[0], a[evnt[1]]);
-      }
+      }*/
     }    
   }  
   

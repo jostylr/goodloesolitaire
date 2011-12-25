@@ -2,10 +2,10 @@
 
 var events = require('events');
 
- gcd = new events.EventEmitter(); 
+var gcd = new events.EventEmitter(); 
 
 
-require('./utilities/debugging')(gcd);
+//require('./utilities/debugging')(gcd);
 require('./utilities/inventory')(gcd, true);
 
 /*
@@ -27,20 +27,20 @@ console.log("running");
 
 
 
-require('./logic/gamecontrol'  )(gcd, data);
-require('./logic/history'      )(gcd, data);
-require('./logic/hand'         )(gcd, data);
-require('./logic/scores'       )(gcd, data);
+require('./logic/gamecontrol'  )(gcd);
+require('./logic/history'      )(gcd);
+require('./logic/hand'         )(gcd);
+require('./logic/scores'       )(gcd);
 
-require('./ui/gamecontrol'    )(gcd, data);
-require('./ui/history'        )(gcd, data);
-require('./ui/hand'           )(gcd, data);
-require('./ui/scores'         )(gcd, data);
+require('./ui/gamecontrol'    )(gcd);
+require('./ui/history'        )(gcd);
+require('./ui/hand'           )(gcd);
+require('./ui/scores'         )(gcd);
 
 require('./events.js')(gcd);
 
 $(function() { 
-  gcd.emit("ready", data);
+  gcd.emit("ready");
 });
 
 
