@@ -1472,7 +1472,7 @@ a = {
   
   "make full hand call" : [ [{ $$transform : [ handcall,  "call" ] }],
     function (call) {
-      $("#handtext").html(call);
+      $("#handtext").text(call);
     }
   ],
   
