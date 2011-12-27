@@ -6,7 +6,7 @@ var gcd = new events.EventEmitter();
 
 
 //require('./utilities/debugging')(gcd);
-require('./utilities/inventory')(gcd, true);
+require('./eventingfunctions/inventory')(gcd, true);
 
 /*
 gcd.emit = (function (gcd) {

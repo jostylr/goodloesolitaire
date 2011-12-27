@@ -494,7 +494,7 @@ EventEmitter.prototype.listeners = function(type) {
 
 });
 
-require.define("/utilities/inventory.js", function (require, module, exports, __dirname, __filename) {
+require.define("/eventingfunctions/inventory.js", function (require, module, exports, __dirname, __filename) {
     /*globals $, module, console, require, process*/
 
 var file = 'utilities/inventory';
@@ -1929,7 +1929,7 @@ var gcd = new events.EventEmitter();
 
 
 //require('./utilities/debugging')(gcd);
-require('./utilities/inventory')(gcd, true);
+require('./eventingfunctions/inventory')(gcd, true);
 
 /*
 gcd.emit = (function (gcd) {
