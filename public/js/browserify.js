@@ -497,11 +497,14 @@ EventEmitter.prototype.listeners = function(type) {
 require.define("/eventingfunctions/inventory.js", function (require, module, exports, __dirname, __filename) {
     /*globals $, module, console, require, process*/
 
+var logs = require('./lib/logging.js');
+
 var file = 'utilities/inventory';
 
 var install, prepargs, makechanges, wrapper, wrapper_debug, delayedemit;
 
-module.exports = function (evem, debug) {
+module.exports = function (evem, debug, logf) {
+  logs = logf || logs.con;
   evem.install = install;
   evem.a = {};
   evem.debug = debug;
@@ -510,35 +513,7 @@ module.exports = function (evem, debug) {
   evem.retrieve = function (name) {
     return evem.store[name];
   };
-  evem.log = {
-    "emit" : function (evnt) {
-      console.log("EMIT: " + evnt);
-      
-    },
-    "emitnow" : function (evnt) {
-      console.log("EMITNOW: " + evnt);
-    },
-    "on" : function (evnt, action) {
-      console.log("ON: " + evnt + ": " + action);
-    },
-    "once" : function (evnt, action) {
-      console.log("ONCE: " + evnt + ": " + action);
-    },
-    "removeListener" :function (evnt, action) {
-      console.log("REMOVELISTENER:" + evnt + ": " + action);
-    },
-    "action" : function (f, args) {
-      console.log("ACTION " + (f.desc || "__"));
-    },
-    "prepargs" : function (desc, args) {
-      console.log("ARGS " + //desc + ": " 
-          JSON.stringify(args));
-    },
-    "makechanges" : function (desc, changes) {
-      console.log("RETURN " + //desc+": " + 
-          JSON.stringify(changes));
-    }
-  };
+  evem.log = logs.con; 
   if (evem.debug) {
     evem.ret = function (changes, desc) {
       evem.log.makechanges(desc || "no description", changes);
@@ -750,6 +725,42 @@ makechanges = function (evem, changes) {
   
   
   return false; 
+};
+});
+
+require.define("/eventingfunctions/lib/logging.js", function (require, module, exports, __dirname, __filename) {
+    /*globals $, module, exports, console, require, process*/
+
+exports.logs = {
+  "con" : {
+    "emit" : function (evnt) {
+      console.log("EMIT: " + evnt);
+      
+    },
+    "emitnow" : function (evnt) {
+      console.log("EMITNOW: " + evnt);
+    },
+    "on" : function (evnt, action) {
+      console.log("ON: " + evnt + ": " + action);
+    },
+    "once" : function (evnt, action) {
+      console.log("ONCE: " + evnt + ": " + action);
+    },
+    "removeListener" :function (evnt, action) {
+      console.log("REMOVELISTENER:" + evnt + ": " + action);
+    },
+    "action" : function (f, args) {
+      console.log("ACTION " + (f.desc || "__"));
+    },
+    "prepargs" : function (desc, args) {
+      console.log("ARGS " + //desc + ": " 
+          JSON.stringify(args));
+    },
+    "makechanges" : function (desc, changes) {
+      console.log("RETURN " + //desc+": " + 
+          JSON.stringify(changes));
+    }
+  }
 };
 });
 
