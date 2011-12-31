@@ -1,4 +1,4 @@
-/*global $, console, submitScore, require, process*/
+/*global $, console, submitScore, require, process, gcd*/
 
 var events = require('events');
 
@@ -6,7 +6,7 @@ gcd = new events.EventEmitter();
 
 
 //require('./utilities/debugging')(gcd);
-require('eventingfunctions/inventory')(gcd, true);
+require('eventingfunctions')(gcd, true);
 
 /*
 gcd.emit = (function (gcd) {
