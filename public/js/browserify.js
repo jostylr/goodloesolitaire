@@ -168,9 +168,30 @@ var Object_keys = Object.keys || function (obj) {
 
 if (typeof process === 'undefined') process = {};
 
-if (!process.nextTick) process.nextTick = function (fn) {
-    setTimeout(fn, 0);
-};
+if (!process.nextTick) process.nextTick = (function () {
+    var queue = [];
+    var canPost = window.postMessage && window.addEventListener
+    
+    if (canPost) {
+        window.addEventListener('message', function (ev) {
+            if (ev.source === window && ev.data === 'browserify-tick') {
+                ev.stopPropagation();
+                if (queue.length > 0) {
+                    var fn = queue.shift();
+                    fn();
+                }
+            }
+        }, true);
+    }
+    
+    return function (fn) {
+        if (canPost) {
+            queue.push(fn);
+            window.postMessage('browserify-tick', '*');
+        }
+        else setTimeout(fn, 0);
+    };
+})();
 
 if (!process.title) process.title = 'browser';
 
@@ -494,7 +515,11 @@ EventEmitter.prototype.listeners = function(type) {
 
 });
 
-require.define("/eventingfunctions/inventory.js", function (require, module, exports, __dirname, __filename) {
+require.define("/node_modules/eventingfunctions/package.json", function (require, module, exports, __dirname, __filename) {
+    module.exports = {"main":"inventory.js"}
+});
+
+require.define("/node_modules/eventingfunctions/inventory.js", function (require, module, exports, __dirname, __filename) {
     /*globals $, module, console, require, process*/
 
 var logs = require('./lib/logging.js');
@@ -753,7 +778,7 @@ makechanges = function (evem, changes) {
 };
 });
 
-require.define("/eventingfunctions/lib/logging.js", function (require, module, exports, __dirname, __filename) {
+require.define("/node_modules/eventingfunctions/lib/logging.js", function (require, module, exports, __dirname, __filename) {
     /*globals $, module, exports, console, require, process*/
 
 module.exports.con = {
@@ -787,7 +812,7 @@ module.exports.con = {
 };
 });
 
-require.define("/eventingfunctions/node_modules/query-engine/lib/query-engine.js", function (require, module, exports, __dirname, __filename) {
+require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/query-engine.js", function (require, module, exports, __dirname, __filename) {
     (function() {
   var Collection, Hash, extendNatives, get, key, set, toArray, value, _ref;
   var __indexOf = Array.prototype.indexOf || function(item) {
@@ -2382,7 +2407,7 @@ gcd = new events.EventEmitter();
 
 
 //require('./utilities/debugging')(gcd);
-require('./eventingfunctions/inventory')(gcd, true);
+require('eventingfunctions/inventory')(gcd, true);
 
 /*
 gcd.emit = (function (gcd) {
