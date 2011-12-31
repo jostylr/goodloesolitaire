@@ -1,3 +1,0 @@
-[submodule "browserify/eventingfunctions"]
-	path = browserify/eventingfunctions
-	url = git://github.com/jostylr/eventingfunctions.git
