@@ -191,17 +191,17 @@ var send = exports.send = function(req, res, next, options){
         // TODO: multiple support
         opts.start = ranges[0].start;
         opts.end = ranges[0].end;
-				requestedLength = opts.end - opts.start + 1;
+        requestedLength = opts.end - opts.start + 1;
         if ((requestedLength < stat.size) || (opts.start !== 0)) {
-					chunkSize = requestedLength;
-        	res.statusCode = 206;
-        	res.setHeader('Content-Range', 'bytes '
-          	+ opts.start
-          	+ '-'
-          	+ opts.end
-          	+ '/'
-          	+ stat.size);
-				} 
+          chunkSize = requestedLength;
+          res.statusCode = 206;
+          res.setHeader('Content-Range', 'bytes '
+            + opts.start
+            + '-'
+            + opts.end
+            + '/'
+            + stat.size);
+        } 
       // invalid
       } else {
         return fn
