@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "express" : ">= 2.5.2",
-    "mongodb" : ">= 0.9.7"
+    "mongodb" : ">= 0.9.7",
+    "eventingfunctions" : ">= 0.1.0"
   },
   "devDependencies": {
     "browserify" : ">= 1.8.1"

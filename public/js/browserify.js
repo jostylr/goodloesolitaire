@@ -557,7 +557,7 @@ module.exports = function (evem, debug, logf) {
   evem.install = install;
   evem.a = {};
   evem.debug = debug;
-  evem.data = {};
+  evem.data = new queryengine.Collection();
   evem.store = {};  //for non-JSON able stuff, record it by using $$store : "..."
   evem.retrieve = function (name) {
     return evem.store[name];
