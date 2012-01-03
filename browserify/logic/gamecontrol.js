@@ -4,14 +4,14 @@ var file = 'logic/gamecontrol: ';
 
 var servercalls = require('../utilities/server');
 
-var ret, gcd;
+var gcd;
 
 var a;
 
 var process;
 
-module.exports = function (gcd) {
-  ret = gcd.ret;
+module.exports = function (gcde) {
+  gcd = gcde;
   gcd.install(file, a);  
 };
 
@@ -42,12 +42,12 @@ a = {
       servercalls.get('shuffle/'+uid+'/'+type, function (server) {
         var build;
         if (server.error) {
-          ret({$$emit: [["new game denied", server]]}, me.desc);
+          gcd.ret({$$emit: [["new game denied", server]]}, me.desc);
           return false;
         }
         build = process(type, server);
         build.$$emit = "server started new game";
-        ret(build, me.desc);
+        gcd.ret(build, me.desc);
       });
     }
   ],
@@ -57,12 +57,12 @@ a = {
       servercalls.get('drawcards/'+uid+'/'+gid+'/'+draws, function (server){
         var build;
         if (server.error) {
-          ret({$$emit: [["failed to draw cards", server]]}, me.desc);
+          gcd.ret({$$emit: [["failed to draw cards", server]]}, me.desc);
           return false;
         }
         build = process(type, server);
         build.$$emit = "server drew cards";      
-        ret(build, me.desc);
+        gcd.ret(build, me.desc);
       });  
   }],
   
@@ -72,10 +72,10 @@ a = {
       servercalls.get('endgame/'+uid+"/"+gid+"/"+name, function (server){
         var build;
         if (server.error) {
-          ret({$$emit: [["end game denied", server]]}, me.desc);
+          gcd.ret({$$emit: [["end game denied", server]]}, me.desc);
           return false;
         }
-        ret({$set : { highscores: server.highscores.sort(function (a,b) {return b.score - a.score;})  },
+        gcd.ret({$set : { highscores: server.highscores.sort(function (a,b) {return b.score - a.score;})  },
             $$emit : "server ended game"
         }, me.desc);
       });
@@ -86,10 +86,10 @@ a = {
   "send view scores" : function me () {
     servercalls.get('viewscores', function (server) {
       if (server.error) {
-        ret({$$emit: [["view scores denied", server]]}, me.desc);
+        gcd.ret({$$emit: [["view scores denied", server]]}, me.desc);
         return false;
       }
-    ret({$set : {highscores: server.highscores},
+    gcd.ret({$set : {highscores: server.highscores},
           $$emit : "server sent high scores"
         }, me.desc);
     });

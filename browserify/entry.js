@@ -2,11 +2,14 @@
 
 var events = require('events');
 
-gcd = new events.EventEmitter(); 
-
 
 //require('./utilities/debugging')(gcd);
-require('eventingfunctions')(gcd, true);
+var Dispatcher = require('eventingfunctions').Dispatcher; 
+
+gcd = new Dispatcher(true);
+
+gcd.emit("debugging requested"); 
+
 
 /*
 gcd.emit = (function (gcd) {

@@ -2,7 +2,7 @@
 
 var file = 'logic/history: ';
 
-var gcd;
+
 
 var a;
 

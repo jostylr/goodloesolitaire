@@ -2,12 +2,12 @@
 
 var file = 'ui/scores: ';
 
-var ret;
+var gcd;
 
 var a;
 
-module.exports = function (gcd) {
-  ret = gcd.ret; 
+module.exports = function (gcde) {
+  gcd = gcde;
   gcd.install(file, a);   
 };
 
@@ -32,7 +32,7 @@ a = {
         $("#name a").html(name);
       }
       $('#scoreentry').unbind('hide', self); //self cleanup
-      ret({ $set : {name : name},
+      gcd.ret({ $set : {name : name},
         $$emit : 'name submitted' }, me.desc);
     });
   },
@@ -147,7 +147,7 @@ a = {
   };*/
 
   "retrieve high scores for viewing" : function () {
-    ret({$$once : { "high scores checked" : "display high scores" }, 
+    gcd.ret({$$once : { "high scores checked" : "display high scores" }, 
       $$emit : "high scores requested" });
   },
   
@@ -157,7 +157,7 @@ a = {
       keyboard: true,
       show: true
     });
-    ret({$$emit : "name entry shown"});
+    gcd.ret({$$emit : "name entry shown"});
   },
   
   "hide name entry" : function () {
@@ -165,7 +165,7 @@ a = {
   },
   
   "emit name entry hidden" : function () {
-    ret({ $$emit : "name entry hidden" });
+    gcd.ret({ $$emit : "name entry hidden" });
   },
   
   "keys for name entry" : function  (evnt) {

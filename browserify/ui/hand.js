@@ -5,14 +5,12 @@ var file = 'ui/hand: ';
 var cardutil = require('../utilities/cards');
 var deck = cardutil.deck;
 
-var a, b, ret, store, retrieve;
+var a, b, gcd;
 
 var querycards, handcall, hail, computecardposition;
 
-module.exports = function (gcd) {
-  ret = gcd.ret;
-  store = gcd.store;
-  retrieve = gcd.retrieve; 
+module.exports = function (gcde) {
+  gcd = gcde; 
   
   gcd.install(file, a);
     
@@ -21,8 +19,8 @@ module.exports = function (gcd) {
 
 b = {
   "translate card click" : function (event) {
-    store.clickedcard = $(this);
-    ret({ $$emitnow: 'card clicked', $$store : "clickedcard" }, file+"translate card click" );
+    gcd.store.clickedcard = $(this);
+    gcd.ret({ $$emitnow: 'card clicked', $$store : "clickedcard" }, file+"translate card click" );
   }
   
 };
@@ -115,7 +113,7 @@ a = {
   //initial hand display
   "hide hand" : function () {
     $("#hand").css("visibility", "hidden");
-    ret({$$on : {"hand loaded" : "show hand" } }, file+"hide hand");
+    gcd.ret({$$on : {"hand loaded" : "show hand" } }, file+"hide hand");
   },
   
   "show hand" : function () {
@@ -124,7 +122,7 @@ a = {
 
   "toggle draw cards" : [ [ "cardsleft", {$$retrieve : "clickedcard"}],
     function (cardsleft, card$) {
-      card$ = retrieve(card$.slice(9)); // uses gcd.retrieve to get object, but wanted above for doc
+      card$ = gcd.retrieve(card$.slice(9)); // uses gcd.retrieve to get object, but wanted above for doc
       var drawcount;
       if (card$.hasClass('draw')) {
         card$.removeClass('draw');
@@ -180,7 +178,7 @@ computecardposition = function (card) {
       return [(i % 8)*86, Math.floor(i/8)*120];
     }
   }
-  ret( { $$emit : "card not found" } );
+  gcd.ret( { $$emit : "card not found" } );
   return [0, 0];
 };
 

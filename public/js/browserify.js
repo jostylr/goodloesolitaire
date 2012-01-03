@@ -522,61 +522,72 @@ require.define("/node_modules/eventingfunctions/package.json", function (require
 require.define("/node_modules/eventingfunctions/inventory.js", function (require, module, exports, __dirname, __filename) {
     /*globals $, module, console, require, process*/
 
+var events = require('events');
 var logs = require('./lib/logging.js');
 var queryengine = require('query-engine/lib/query-engine');  
-
-//Collection
-var documents = new queryengine.Collection({
-    0: {
-        title: 'abc',
-        tags: ['a', 'b']
-    },
-    1: {
-        title: 'blah',
-        tags: ['a', 'b', 'c']
-    }
-});
-
-// Query
-console.log(documents.find({
-    tags: {
-        $in: ['a']
-    }
-})); // {0: documents.0, 1: documents.1}
-console.log(documents.find({
-    title: 'blah'
-})); // {1: documents.1}
 
 
 var file = 'utilities/inventory';
 
-var install, prepargs, makechanges, wrapper, wrapper_debug, delayedemit;
+var prepargs, makechanges, wrapper, wrapper_debug, delayedemit;
 
-module.exports = function (evem, debug, logf) {
-  logf = logf || logs.con;
-  evem.install = install;
+
+var Dispatcher = function () {
+  var evem = this;
+   
+  //action object
   evem.a = {};
-  evem.debug = debug;
+  
+  //transforms object
+  evem.t = {};
+  
+  //log/debug 
+  evem.logtypes = {};
+  evem.logtypes['default active'] = logs.con;
+  evem.logtypes['nolog'] = logs.noop;
+  
+  //initially no debug
+  evem.log = evem.logtypes['nolog'];
+  
+  
+  evem.install("inventory", { //action functions
+    "turn on debugging" :  function (type) {
+      type = type || 'default active';
+      evem.log = evem.logtypes[type];
+      return {$$emit : "debugging turned on"};
+    },
+    "turn off debugging" : function () {
+      evem.log = evem.logtypes['nolog'];
+      return {$$emit : "debugging turned off"};
+    }
+  } );
+  
+  evem.ret( { $$on : {
+    "debugging requested" : [
+      "turn on debugging" 
+    ],
+    "debugging turned on" : [
+    ],
+    "debugging off, please" : [
+      "turn off debugging"
+    ],
+    "debugging turned off" : [
+    ]
+  } } );
+
+  
+  //data storage
   evem.data = new queryengine.Collection();
   evem.store = {};  //for non-JSON able stuff, record it by using $$store : "..."
-  evem.retrieve = function (name) {
-    return evem.store[name];
-  };
-  console.log(logf);
-  evem.log = logf; 
-  if (evem.debug) {
-    evem.ret = function (changes, desc) {
-      evem.log.makechanges(desc || "no description", changes);
-      makechanges(evem, changes);
-    }; 
-  } else {
-    evem.ret = function (changes) {
-      makechanges(evem, changes);
-    };    
-  }
+
 };
 
-install = function (file, a) {
+Dispatcher.prototype = new events.EventEmitter(); 
+
+module.exports.Dispatcher = Dispatcher;
+
+
+Dispatcher.prototype.install = function (file, a) {
   var evem = this;
   var eva = this.a;
   var f, g;
@@ -596,11 +607,7 @@ install = function (file, a) {
       args = false;
       f = entry;
     }
-    if (evem.debug) {
-      g = wrapper_debug(f, args, evem);    
-    } else {
-      g = wrapper(f, args, evem);      
-    }
+    g = evem.wrapper(f, args);      
     eva[fname] = g;
     g.desc = file+fname;
     f.desc = file+fname;       
@@ -609,39 +616,38 @@ install = function (file, a) {
   
 };
 
-wrapper = function (f, args, evem) {
-  return function () {
-    var changes,doneargs;
-    if (!args) {
-      changes = f.call(evem);
-    } else {
-      doneargs = prepargs(evem, args);
-      changes = f.apply(evem, doneargs);
-    }
-    makechanges(evem, changes);
-  };
+Dispatcher.prototype.retrieve = function (name) {
+  return this.store[name];
 };
 
-wrapper_debug = function (f, args, evem) {
+//return function
+Dispatcher.prototype.ret = function (changes, desc) {
+    this.log.makechanges(desc || "no description", changes);
+    this.makechanges(changes);
+  };
+
+Dispatcher.prototype.wrapper =  function (f, args) {
+  var evem = this;
   return function me () {
     var changes, doneargs;
     evem.log.action(f, args);
     if (!args) {
       changes = f.call(evem);
     } else {
-      doneargs = prepargs(evem, args);
+      doneargs = evem.prepargs(args);
       evem.log.prepargs(me.desc, doneargs);
       changes = f.apply(evem, doneargs);
     }
     if (changes) {
       evem.log.makechanges(me.desc, changes);
-      makechanges(evem, changes);
+      evem.makechanges(changes);
     }
   };
 };
 
 
-prepargs = function (evem, args) {
+Dispatcher.prototype.prepargs = function (args) {
+  var evem = this;
   var i, n, current, value, key;
   var values = [];
   var data = evem.data;
@@ -689,19 +695,22 @@ prepargs = function (evem, args) {
   return values; 
 };
 
-delayedemit = function (evem, evnt) {
-  if (typeof evnt === "string") {
+Dispatcher.prototype.delayedemit = function (evnt) {
+  var evem = this;
+  if (typeof evnt === "string") { //even with no data
     process.nextTick(function () {evem.emit(evnt);});
-  } else {
+  } else { //event with arguments
     process.nextTick(function () {evem.emit.apply(evem, evnt);});    
   }
 };
 
-makechanges = function (evem, changes) {
+Dispatcher.prototype.makechanges = function (changes) {
+  var evem = this;
   var data = evem.data;
   var a = evem.a;
   var key, i, n, evnt, type, current, pe;
   //command structure
+  try {
   if (changes.hasOwnProperty("$set")) {
     for (key in changes.$set) {
       data[key] = changes.$set[key];
@@ -719,12 +728,12 @@ makechanges = function (evem, changes) {
   }
   if (changes.hasOwnProperty("$$emit")) {
     if (typeof changes.$$emit === "string" ) {
-      delayedemit(evem, changes.$$emit); 
+      evem.delayedemit(changes.$$emit); 
       evem.log.emit(changes.$$emit);
     } else { //presumably array
       n = changes.$$emit.length;
       for (i = 0; i < n; i += 1) {
-        delayedemit(evem, changes.$$emit[i]);
+        evem.delayedemit(changes.$$emit[i]);
         evem.log.emit(changes.$$emit[i]);
       }      
     }
@@ -772,6 +781,9 @@ makechanges = function (evem, changes) {
     }    
   }  
   
+} catch (e) {
+  console.log(e);
+}
   
   
   return false; 
@@ -808,6 +820,25 @@ module.exports.con = {
   "makechanges" : function (desc, changes) {
     console.log("RETURN " + //desc+": " + 
         JSON.stringify(changes));
+  }
+};
+
+module.exports.noop = {
+  "emit" : function () {
+  },
+  "emitnow" : function () {
+  },
+  "on" : function () {
+  },
+  "once" : function () {
+  },
+  "removeListener" :function () {
+  },
+  "action" : function () {
+  },
+  "prepargs" : function () {
+  },
+  "makechanges" : function () {
   }
 };
 });
@@ -1238,14 +1269,14 @@ var file = 'logic/gamecontrol: ';
 
 var servercalls = require('../utilities/server');
 
-var ret, gcd;
+var gcd;
 
 var a;
 
 var process;
 
-module.exports = function (gcd) {
-  ret = gcd.ret;
+module.exports = function (gcde) {
+  gcd = gcde;
   gcd.install(file, a);  
 };
 
@@ -1276,12 +1307,12 @@ a = {
       servercalls.get('shuffle/'+uid+'/'+type, function (server) {
         var build;
         if (server.error) {
-          ret({$$emit: [["new game denied", server]]}, me.desc);
+          gcd.ret({$$emit: [["new game denied", server]]}, me.desc);
           return false;
         }
         build = process(type, server);
         build.$$emit = "server started new game";
-        ret(build, me.desc);
+        gcd.ret(build, me.desc);
       });
     }
   ],
@@ -1291,12 +1322,12 @@ a = {
       servercalls.get('drawcards/'+uid+'/'+gid+'/'+draws, function (server){
         var build;
         if (server.error) {
-          ret({$$emit: [["failed to draw cards", server]]}, me.desc);
+          gcd.ret({$$emit: [["failed to draw cards", server]]}, me.desc);
           return false;
         }
         build = process(type, server);
         build.$$emit = "server drew cards";      
-        ret(build, me.desc);
+        gcd.ret(build, me.desc);
       });  
   }],
   
@@ -1306,10 +1337,10 @@ a = {
       servercalls.get('endgame/'+uid+"/"+gid+"/"+name, function (server){
         var build;
         if (server.error) {
-          ret({$$emit: [["end game denied", server]]}, me.desc);
+          gcd.ret({$$emit: [["end game denied", server]]}, me.desc);
           return false;
         }
-        ret({$set : { highscores: server.highscores.sort(function (a,b) {return b.score - a.score;})  },
+        gcd.ret({$set : { highscores: server.highscores.sort(function (a,b) {return b.score - a.score;})  },
             $$emit : "server ended game"
         }, me.desc);
       });
@@ -1320,10 +1351,10 @@ a = {
   "send view scores" : function me () {
     servercalls.get('viewscores', function (server) {
       if (server.error) {
-        ret({$$emit: [["view scores denied", server]]}, me.desc);
+        gcd.ret({$$emit: [["view scores denied", server]]}, me.desc);
         return false;
       }
-    ret({$set : {highscores: server.highscores},
+    gcd.ret({$set : {highscores: server.highscores},
           $$emit : "server sent high scores"
         }, me.desc);
     });
@@ -1414,7 +1445,7 @@ require.define("/logic/history.js", function (require, module, exports, __dirnam
 
 var file = 'logic/history: ';
 
-var gcd;
+
 
 var a;
 
@@ -1685,11 +1716,11 @@ var a, b;
 
 var fadelevel = 0.4;
 
-var ret; 
+var gcd; 
 
-module.exports = function (gcd) {
-  
-  ret = gcd.ret;
+module.exports = function (gcde) {
+  gcd = gcde;
+
   gcd.install(file, a);
   
 
@@ -1708,19 +1739,19 @@ b = { "hand key bindings": function (evnt) {
   },
   
   "emit new game requested" : function me () {
-    ret({ $$emit : "new game requested" }, file+"emit new game requested");
+    gcd.ret({ $$emit : "new game requested" }, file+"emit new game requested");
   },
    
   "emit draw cards requested" : function me () {
-    ret({ $$emit : "draw cards requested" }, file+"emit draw cards requested");
+    gcd.ret({ $$emit : "draw cards requested" }, file+"emit draw cards requested");
   },
   
   "emit end game requested" : function me  () {
-    ret({ $$emit : "end game requested" }, file+"emit end game requested");     
+    gcd.ret({ $$emit : "end game requested" }, file+"emit end game requested");     
   },
   
   "emit retrieve game requested" : function me (event) {
-    ret({ $set : {"requested gid" : $(event.target).parents("tr").attr("id") },
+    gcd.ret({ $set : {"requested gid" : $(event.target).parents("tr").attr("id") },
       $$emit : 'old game requested'
     }, file+"emit retrieve game requested");
   },
@@ -1750,7 +1781,7 @@ a = {
   },
   "fade main" : function  me () {
     $(".main").fadeTo(600, fadelevel, function () {
-      ret( { $emit : "main is faded" }, me.desc );
+      gcd.ret( { $emit : "main is faded" }, me.desc );
     });
   },
   
@@ -1763,13 +1794,13 @@ a = {
     $('html').unbind('keyup', b["hand key bindings"]);
   },
   "listen for name entry" : function me () {
-    ret({ $$on: {
+    gcd.ret({ $$on: {
       "name entry shown" : "unbind hand keys",
       "name submitted" : "bind hand keys"
     }}, me.desc);
   },
   "remove listen for name entry" : function me () {
-    ret({ $$removeListener: {
+    gcd.ret({ $$removeListener: {
       "name entry shown" : "unbind hand keys",
       "name submitted" : "bind hand keys"
     }}, me.desc);
@@ -1879,14 +1910,12 @@ var file = 'ui/hand: ';
 var cardutil = require('../utilities/cards');
 var deck = cardutil.deck;
 
-var a, b, ret, store, retrieve;
+var a, b, gcd;
 
 var querycards, handcall, hail, computecardposition;
 
-module.exports = function (gcd) {
-  ret = gcd.ret;
-  store = gcd.store;
-  retrieve = gcd.retrieve; 
+module.exports = function (gcde) {
+  gcd = gcde; 
   
   gcd.install(file, a);
     
@@ -1895,8 +1924,8 @@ module.exports = function (gcd) {
 
 b = {
   "translate card click" : function (event) {
-    store.clickedcard = $(this);
-    ret({ $$emitnow: 'card clicked', $$store : "clickedcard" }, file+"translate card click" );
+    gcd.store.clickedcard = $(this);
+    gcd.ret({ $$emitnow: 'card clicked', $$store : "clickedcard" }, file+"translate card click" );
   }
   
 };
@@ -1989,7 +2018,7 @@ a = {
   //initial hand display
   "hide hand" : function () {
     $("#hand").css("visibility", "hidden");
-    ret({$$on : {"hand loaded" : "show hand" } }, file+"hide hand");
+    gcd.ret({$$on : {"hand loaded" : "show hand" } }, file+"hide hand");
   },
   
   "show hand" : function () {
@@ -1998,7 +2027,7 @@ a = {
 
   "toggle draw cards" : [ [ "cardsleft", {$$retrieve : "clickedcard"}],
     function (cardsleft, card$) {
-      card$ = retrieve(card$.slice(9)); // uses gcd.retrieve to get object, but wanted above for doc
+      card$ = gcd.retrieve(card$.slice(9)); // uses gcd.retrieve to get object, but wanted above for doc
       var drawcount;
       if (card$.hasClass('draw')) {
         card$.removeClass('draw');
@@ -2054,7 +2083,7 @@ computecardposition = function (card) {
       return [(i % 8)*86, Math.floor(i/8)*120];
     }
   }
-  ret( { $$emit : "card not found" } );
+  gcd.ret( { $$emit : "card not found" } );
   return [0, 0];
 };
 
@@ -2073,12 +2102,12 @@ require.define("/ui/scores.js", function (require, module, exports, __dirname, _
 
 var file = 'ui/scores: ';
 
-var ret;
+var gcd;
 
 var a;
 
-module.exports = function (gcd) {
-  ret = gcd.ret; 
+module.exports = function (gcde) {
+  gcd = gcde;
   gcd.install(file, a);   
 };
 
@@ -2103,7 +2132,7 @@ a = {
         $("#name a").html(name);
       }
       $('#scoreentry').unbind('hide', self); //self cleanup
-      ret({ $set : {name : name},
+      gcd.ret({ $set : {name : name},
         $$emit : 'name submitted' }, me.desc);
     });
   },
@@ -2218,7 +2247,7 @@ a = {
   };*/
 
   "retrieve high scores for viewing" : function () {
-    ret({$$once : { "high scores checked" : "display high scores" }, 
+    gcd.ret({$$once : { "high scores checked" : "display high scores" }, 
       $$emit : "high scores requested" });
   },
   
@@ -2228,7 +2257,7 @@ a = {
       keyboard: true,
       show: true
     });
-    ret({$$emit : "name entry shown"});
+    gcd.ret({$$emit : "name entry shown"});
   },
   
   "hide name entry" : function () {
@@ -2236,7 +2265,7 @@ a = {
   },
   
   "emit name entry hidden" : function () {
-    ret({ $$emit : "name entry hidden" });
+    gcd.ret({ $$emit : "name entry hidden" });
   },
   
   "keys for name entry" : function  (evnt) {
@@ -2403,11 +2432,14 @@ require.define("/entry.js", function (require, module, exports, __dirname, __fil
 
 var events = require('events');
 
-gcd = new events.EventEmitter(); 
-
 
 //require('./utilities/debugging')(gcd);
-require('eventingfunctions')(gcd, true);
+var Dispatcher = require('eventingfunctions').Dispatcher; 
+
+gcd = new Dispatcher(true);
+
+gcd.emit("debugging requested"); 
+
 
 /*
 gcd.emit = (function (gcd) {

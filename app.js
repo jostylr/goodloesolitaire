@@ -19,7 +19,7 @@ var setHeaders = function (req,res,next) {
 	//res.header("Access-Control-Allow-Origin",req.header('origin'));	
 	//res.header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept");	 
 	//res.header("X-Powered-By","nodeejs");	
-	res.header("Cache-Control", "no-store");
+	res.header("Cache-Control", "max-age=0");
 //}	
 
 next();

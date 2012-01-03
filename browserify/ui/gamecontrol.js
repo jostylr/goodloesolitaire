@@ -6,11 +6,11 @@ var a, b;
 
 var fadelevel = 0.4;
 
-var ret; 
+var gcd; 
 
-module.exports = function (gcd) {
-  
-  ret = gcd.ret;
+module.exports = function (gcde) {
+  gcd = gcde;
+
   gcd.install(file, a);
   
 
@@ -29,19 +29,19 @@ b = { "hand key bindings": function (evnt) {
   },
   
   "emit new game requested" : function me () {
-    ret({ $$emit : "new game requested" }, file+"emit new game requested");
+    gcd.ret({ $$emit : "new game requested" }, file+"emit new game requested");
   },
    
   "emit draw cards requested" : function me () {
-    ret({ $$emit : "draw cards requested" }, file+"emit draw cards requested");
+    gcd.ret({ $$emit : "draw cards requested" }, file+"emit draw cards requested");
   },
   
   "emit end game requested" : function me  () {
-    ret({ $$emit : "end game requested" }, file+"emit end game requested");     
+    gcd.ret({ $$emit : "end game requested" }, file+"emit end game requested");     
   },
   
   "emit retrieve game requested" : function me (event) {
-    ret({ $set : {"requested gid" : $(event.target).parents("tr").attr("id") },
+    gcd.ret({ $set : {"requested gid" : $(event.target).parents("tr").attr("id") },
       $$emit : 'old game requested'
     }, file+"emit retrieve game requested");
   },
@@ -71,7 +71,7 @@ a = {
   },
   "fade main" : function  me () {
     $(".main").fadeTo(600, fadelevel, function () {
-      ret( { $emit : "main is faded" }, me.desc );
+      gcd.ret( { $emit : "main is faded" }, me.desc );
     });
   },
   
@@ -84,13 +84,13 @@ a = {
     $('html').unbind('keyup', b["hand key bindings"]);
   },
   "listen for name entry" : function me () {
-    ret({ $$on: {
+    gcd.ret({ $$on: {
       "name entry shown" : "unbind hand keys",
       "name submitted" : "bind hand keys"
     }}, me.desc);
   },
   "remove listen for name entry" : function me () {
-    ret({ $$removeListener: {
+    gcd.ret({ $$removeListener: {
       "name entry shown" : "unbind hand keys",
       "name submitted" : "bind hand keys"
     }}, me.desc);
