@@ -168,30 +168,9 @@ var Object_keys = Object.keys || function (obj) {
 
 if (typeof process === 'undefined') process = {};
 
-if (!process.nextTick) process.nextTick = (function () {
-    var queue = [];
-    var canPost = window.postMessage && window.addEventListener
-    
-    if (canPost) {
-        window.addEventListener('message', function (ev) {
-            if (ev.source === window && ev.data === 'browserify-tick') {
-                ev.stopPropagation();
-                if (queue.length > 0) {
-                    var fn = queue.shift();
-                    fn();
-                }
-            }
-        }, true);
-    }
-    
-    return function (fn) {
-        if (canPost) {
-            queue.push(fn);
-            window.postMessage('browserify-tick', '*');
-        }
-        else setTimeout(fn, 0);
-    };
-})();
+if (!process.nextTick) process.nextTick = function (fn) {
+    setTimeout(fn, 0);
+};
 
 if (!process.title) process.title = 'browser';
 
@@ -524,7 +503,7 @@ require.define("/node_modules/eventingfunctions/inventory.js", function (require
 
 var events = require('events');
 var logs = require('./lib/logging.js');
-var queryengine = require('query-engine/lib/query-engine');  
+var queryengine = require('query-engine');  
 
 
 var file = 'utilities/inventory';
@@ -622,6 +601,7 @@ Dispatcher.prototype.retrieve = function (name) {
 
 //return function
 Dispatcher.prototype.ret = function (changes, desc) {
+    console.log(this, changes, desc);
     this.log.makechanges(desc || "no description", changes);
     this.makechanges(changes);
   };
@@ -843,15 +823,15 @@ module.exports.noop = {
 };
 });
 
-require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/query-engine.js", function (require, module, exports, __dirname, __filename) {
+require.define("/node_modules/query-engine/package.json", function (require, module, exports, __dirname, __filename) {
+    module.exports = {"main":"./lib/query-engine.coffee"}
+});
+
+require.define("/node_modules/query-engine/lib/query-engine.coffee", function (require, module, exports, __dirname, __filename) {
     (function() {
   var Collection, Hash, extendNatives, get, key, set, toArray, value, _ref;
-  var __indexOf = Array.prototype.indexOf || function(item) {
-    for (var i = 0, l = this.length; i < l; i++) {
-      if (this[i] === item) return i;
-    }
-    return -1;
-  }, __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty;
+  var __hasProp = Object.prototype.hasOwnProperty, __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (__hasProp.call(this, i) && this[i] === item) return i; } return -1; }, __slice = Array.prototype.slice;
+
   get = function(obj, key) {
     if (obj.get != null) {
       return obj.get(key);
@@ -859,6 +839,7 @@ require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/qu
       return obj[key];
     }
   };
+
   set = function(obj, key, value) {
     if (obj.set != null) {
       return obj.set(key, value);
@@ -866,6 +847,7 @@ require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/qu
       return obj[key] = value;
     }
   };
+
   toArray = function(value) {
     if (!value) {
       return [];
@@ -875,28 +857,34 @@ require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/qu
       return value;
     }
   };
+
   Hash = (function() {
+
     _Class.prototype.arr = [];
+
     function _Class(arr) {
       this.arr = toArray(arr);
     }
+
     _Class.prototype.hasIn = function(options) {
       var value, _i, _len, _ref;
       options = toArray(options);
       _ref = this.arr;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         value = _ref[_i];
-        if (__indexOf.call(options, value) >= 0) {
-          return true;
-        }
+        if (__indexOf.call(options, value) >= 0) return true;
       }
       return false;
     };
+
     _Class.prototype.hasAll = function(options) {
       return this.arr.sort().join() === options.sort().join();
     };
+
     return _Class;
+
   })();
+
   _ref = Array.prototype;
   for (key in _ref) {
     value = _ref[key];
@@ -906,23 +894,22 @@ require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/qu
       return value.apply(this.arr, args);
     };
   }
+
   Collection = (function() {
+
     function _Class(data) {
       var key, value;
-      if (data == null) {
-        data = {};
-      }
+      if (data == null) data = {};
       for (key in data) {
         if (!__hasProp.call(data, key)) continue;
         value = data[key];
         this[key] = value;
       }
     }
+
     _Class.prototype.find = function(query, next) {
       var $and, $nor, $or, append, empty, exists, expression, field, id, key, length, match, matchAll, matchAny, matchType, matches, newMatches, record, selector, selectorType, value, _i, _j, _k, _len, _len2, _len3, _ref2, _ref3;
-      if (query == null) {
-        query = {};
-      }
+      if (query == null) query = {};
       matches = new Collection;
       length = 0;
       $nor = false;
@@ -960,31 +947,33 @@ require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/qu
           value = get(record, field);
           id = get(record, 'id') || id;
           exists = typeof value !== 'undefined';
-          if (!exists) {
-            value = false;
-          }
+          if (!exists) value = false;
           if ((selectorType === 'string' || selectorType === 'number') || selectorType instanceof String) {
-            if (exists && value === selector) {
-              match = true;
-            }
+            if (exists && value === selector) match = true;
           } else if (selector instanceof Array) {
-            if (exists && (new Hash(value)).hasAll(selector)) {
-              match = true;
-            }
+            if (exists && (new Hash(value)).hasAll(selector)) match = true;
           } else if (selector instanceof Date) {
-            if (exists && value.toString() === selector.toString()) {
-              match = true;
-            }
+            if (exists && value.toString() === selector.toString()) match = true;
           } else if (selector instanceof RegExp) {
-            if (exists && selector.test(value)) {
-              match = true;
-            }
+            if (exists && selector.test(value)) match = true;
           } else if (selector instanceof Object) {
-            if (selector.$all) {
+            if (selector.$beginsWith) {
               if (exists) {
-                if ((new Hash(value)).hasAll(selector.$all)) {
+                if (typeof value === 'string' && value.substr(0, selector.$beginsWith.length) === selector.$beginsWith) {
                   match = true;
                 }
+              }
+            }
+            if (selector.$endsWith) {
+              if (exists) {
+                if (typeof value === 'string' && value.substr(selector.$endsWith.length * -1) === selector.$endsWith) {
+                  match = true;
+                }
+              }
+            }
+            if (selector.$all) {
+              if (exists) {
+                if ((new Hash(value)).hasAll(selector.$all)) match = true;
               }
             }
             if (selector.$in) {
@@ -998,7 +987,7 @@ require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/qu
             }
             if (selector.$nin) {
               if (exists) {
-                if ((new Hash(value)).hasIn(selector.$in) === false && (new Hash(selector.$in)).hasIn(value) === false) {
+                if ((new Hash(value)).hasIn(selector.$nin) === false && (new Hash(selector.$nin)).hasIn(value) === false) {
                   match = true;
                 }
               }
@@ -1008,50 +997,20 @@ require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/qu
                 match = true;
               }
             }
-            if (selector.$type) {
-              if (typeof value === selector.$type) {
-                match = true;
-              }
-            }
+            if (selector.$type) if (typeof value === selector.$type) match = true;
             if (selector.$exists) {
               if (selector.$exists) {
-                if (exists === true) {
-                  match = true;
-                }
+                if (exists === true) match = true;
               } else {
-                if (exists === false) {
-                  match = true;
-                }
+                if (exists === false) match = true;
               }
             }
-            if (selector.$mod) {
-              match = false;
-            }
-            if (selector.$ne) {
-              if (exists && value !== selector.$ne) {
-                match = true;
-              }
-            }
-            if (selector.$lt) {
-              if (exists && value < selector.$lt) {
-                match = true;
-              }
-            }
-            if (selector.$gt) {
-              if (exists && value > selector.$gt) {
-                match = true;
-              }
-            }
-            if (selector.$lte) {
-              if (exists && value <= selector.$lte) {
-                match = true;
-              }
-            }
-            if (selector.$gte) {
-              if (exists && value >= selector.$gte) {
-                match = true;
-              }
-            }
+            if (selector.$mod) match = false;
+            if (selector.$ne) if (exists && value !== selector.$ne) match = true;
+            if (selector.$lt) if (exists && value < selector.$lt) match = true;
+            if (selector.$gt) if (exists && value > selector.$gt) match = true;
+            if (selector.$lte) if (exists && value <= selector.$lte) match = true;
+            if (selector.$gte) if (exists && value >= selector.$gte) match = true;
           }
           if (match) {
             matchAny = true;
@@ -1059,9 +1018,7 @@ require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/qu
             matchAll = false;
           }
         }
-        if (matchAll && !matchAny) {
-          matchAll = false;
-        }
+        if (matchAll && !matchAny) matchAll = false;
         append = false;
         if (empty) {
           append = true;
@@ -1069,25 +1026,17 @@ require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/qu
           switch (matchType) {
             case 'none':
             case 'nor':
-              if (!matchAny) {
-                append = true;
-              }
+              if (!matchAny) append = true;
               break;
             case 'any':
             case 'or':
-              if (matchAny) {
-                append = true;
-              }
+              if (matchAny) append = true;
               break;
             default:
-              if (matchAll) {
-                append = true;
-              }
+              if (matchAll) append = true;
           }
         }
-        if (append) {
-          matches[id] = record;
-        }
+        if (append) matches[id] = record;
       }
       if ($nor) {
         newMatches = {};
@@ -1103,9 +1052,7 @@ require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/qu
         for (key in newMatches) {
           if (!__hasProp.call(newMatches, key)) continue;
           value = newMatches[key];
-          if (matches[key] != null) {
-            delete matches[key];
-          }
+          if (matches[key] != null) delete matches[key];
         }
       }
       if ($or) {
@@ -1138,11 +1085,10 @@ require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/qu
         return matches;
       }
     };
+
     _Class.prototype.findOne = function(query, next) {
       var match, matches;
-      if (query == null) {
-        query = {};
-      }
+      if (query == null) query = {};
       matches = this.find(query).toArray();
       match = matches.length >= 1 ? matches[0] : void 0;
       if (next != null) {
@@ -1151,6 +1097,7 @@ require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/qu
         return match;
       }
     };
+
     _Class.prototype.forEach = function(callback) {
       var id, record, _results;
       _results = [];
@@ -1161,6 +1108,7 @@ require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/qu
       }
       return _results;
     };
+
     _Class.prototype.toArray = function(next) {
       var arr, key, value;
       arr = [];
@@ -1175,6 +1123,7 @@ require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/qu
         return arr;
       }
     };
+
     _Class.prototype.sort = function(comparison, next) {
       var arr, key, value;
       arr = this.toArray();
@@ -1201,11 +1150,10 @@ require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/qu
         return arr;
       }
     };
+
     _Class.prototype.remove = function(query, next) {
       var id, matches, record;
-      if (query == null) {
-        query = {};
-      }
+      if (query == null) query = {};
       matches = this.find(query);
       for (id in this) {
         if (!__hasProp.call(this, id)) continue;
@@ -1218,19 +1166,18 @@ require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/qu
         return this;
       }
     };
+
     return _Class;
+
   })();
+
   extendNatives = function() {
     var key, value, _base, _base2, _ref2, _ref3, _ref4, _ref5, _results;
     _ref2 = Hash.prototype;
     for (key in _ref2) {
       if (!__hasProp.call(_ref2, key)) continue;
       value = _ref2[key];
-            if ((_ref3 = (_base = Array.prototype)[key]) != null) {
-        _ref3;
-      } else {
-        _base[key] = value;
-      };
+      if ((_ref3 = (_base = Array.prototype)[key]) == null) _base[key] = value;
     }
     _ref4 = Collection.prototype;
     _results = [];
@@ -1241,6 +1188,7 @@ require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/qu
     }
     return _results;
   };
+
   if ((typeof module !== "undefined" && module !== null) && (module.exports != null)) {
     module.exports = {
       set: set,
@@ -1258,6 +1206,7 @@ require.define("/node_modules/eventingfunctions/node_modules/query-engine/lib/qu
       extendNatives: extendNatives
     };
   }
+
 }).call(this);
 
 });

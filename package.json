@@ -1,20 +1,18 @@
 {
   "author": "James Taylor (http://mythiclogos.com)",
   "name": "goodloesolitaire",
-  "description": "A web server and client for playing Goodloe Solitaire",
-  "version": "0.1.0",
+  "description": "A web client for playing Goodloe Solitaire",
+  "version": "0.2.0",
   "homepage": "http://goodloesolitaire.com",
   "repository": {
     "type": "git",
     "url": "git://github.com/jostylr/goodloesolitaire.git"
   },
-  "main": "app.js",
+  "main": "",
   "engines": {
     "node": "~0.6.5"
   },
   "dependencies": {
-    "express" : ">= 2.5.2",
-    "mongodb" : ">= 0.9.7",
     "eventingfunctions" : ">= 0.1.0"
   },
   "devDependencies": {
