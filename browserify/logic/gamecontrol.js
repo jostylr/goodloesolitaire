@@ -39,15 +39,8 @@ a = {
   
   "start new game": [[ "type" ],
     function me (type) {
-      console.log("hello");
       var deck = new Deck();
       deck.newhand();
-      console.log([deck]);
-      /*
-        build = process(type, server);
-        build.$$emit = "server started new game";
-        gcd.ret(build, me.desc);
-        */
       gcd.ret({$set:{deck:deck, hand:deck.hand.slice(0)}, $$emit: "game started"}, me.desc); 
     }
   ],
@@ -59,19 +52,16 @@ a = {
   }],
   
   
-  "end game" : [ ["uid", "gid", {$$get : "name", $$default :"___"} ],
-    function me (uid, gid, name) {
-
-      servercalls.get('endgame/'+uid+"/"+gid+"/"+name, function (server){
-        var build;
-        if (server.error) {
-          gcd.ret({$$emit: [["end game denied", server]]}, me.desc);
-          return false;
-        }
-        gcd.ret({$set : { highscores: server.highscores.sort(function (a,b) {return b.score - a.score;})  },
-            $$emit : "server ended game"
+  "make tweet" : [ ["deck", "score", "type", "wilds"],
+    function me (deck, score, type, wilds) {
+        var url = "http://goodloesolitaire.com/?"+
+          "seed="+deck.seed+
+          "&moves="+deck.moves.join("")+ //deck.movesList()
+          "&type="+type+
+          "&wilds="+wilds;
+        gcd.ret({$set : { tweeturl: url}  ,
+            $$emit : "tweet ready"
         }, me.desc);
-      });
     }
   ],
   

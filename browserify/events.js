@@ -102,8 +102,13 @@ module.exports = function (gcd) {
       'add row to history' // ui/history: ""
     ],
     "end game requested" : [
-      "add listener to show high scores",// ui/scores: ONCE "high scores checked"
-      "check score/name"  // logic/scores: "name requested for high score" OR "no highscore at end of game"
+      //"add listener to show high scores",// ui/scores: ONCE "high scores checked"
+      "make tweet",
+      "install startgame", // ui/gamecontrol: 
+      "unbind hand keys", // ui/gamecontrol: 
+      "remove listen for name entry", // ui/gamecontrol: REMOVE "name entry shown", REMOVE "name submitted"
+      "fade main" // ui/gamecontrol: "main is faded"      
+      //"check score/name"  // logic/scores: "name requested for high score" OR "no highscore at end of game"
         // above removed by 'remove score/name'
         //ON "end game requested", a["send end game"] // logic/gamecontrol: added by "attach end to request"
     ],

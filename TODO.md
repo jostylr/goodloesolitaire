@@ -1,5 +1,13 @@
 # To do
 
+1. on end, make tweet url, tweet text and a tweet button in modal. 
+2. make sure reset then works, but also allow replay 
+3. parse such a url and setup the game/offer replay/see history
+4. other game types
+5. 
+
+
+
 BUG: White artifacts under handtext in webkit. Does not appear in index_local.html
 
 ## 2.0
