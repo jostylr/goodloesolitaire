@@ -1278,15 +1278,8 @@ a = {
   
   "start new game": [[ "type" ],
     function me (type) {
-      console.log("hello");
       var deck = new Deck();
       deck.newhand();
-      console.log([deck]);
-      /*
-        build = process(type, server);
-        build.$$emit = "server started new game";
-        gcd.ret(build, me.desc);
-        */
       gcd.ret({$set:{deck:deck, hand:deck.hand.slice(0)}, $$emit: "game started"}, me.desc); 
     }
   ],
@@ -1298,19 +1291,16 @@ a = {
   }],
   
   
-  "end game" : [ ["uid", "gid", {$$get : "name", $$default :"___"} ],
-    function me (uid, gid, name) {
-
-      servercalls.get('endgame/'+uid+"/"+gid+"/"+name, function (server){
-        var build;
-        if (server.error) {
-          gcd.ret({$$emit: [["end game denied", server]]}, me.desc);
-          return false;
-        }
-        gcd.ret({$set : { highscores: server.highscores.sort(function (a,b) {return b.score - a.score;})  },
-            $$emit : "server ended game"
+  "make tweet" : [ ["deck", "score", "type", "wilds"],
+    function me (deck, score, type, wilds) {
+        var url = "http://goodloesolitaire.com/?"+
+          "seed="+deck.seed+
+          "&moves="+deck.moves.join("")+ //deck.movesList()
+          "&type="+type+
+          "&wilds="+wilds;
+        gcd.ret({$set : { tweeturl: url}  ,
+            $$emit : "tweet ready"
         }, me.desc);
-      });
     }
   ],
   
@@ -1603,7 +1593,7 @@ a = {
     return {$set : { historycount : 1 } };
   },
   "negate oldhand" : function  () {
-    return {$set : { oldhand : false } }; // used in cards.js
+    return {$set : { oldhand : false, oldcall: false } }; // used in cards.js
   },
   "increment history count" : function () {
     return {$inc : { historycount : 1} };
@@ -2813,8 +2803,13 @@ module.exports = function (gcd) {
       'add row to history' // ui/history: ""
     ],
     "end game requested" : [
-      "add listener to show high scores",// ui/scores: ONCE "high scores checked"
-      "check score/name"  // logic/scores: "name requested for high score" OR "no highscore at end of game"
+      //"add listener to show high scores",// ui/scores: ONCE "high scores checked"
+      "make tweet",
+      "install startgame", // ui/gamecontrol: 
+      "unbind hand keys", // ui/gamecontrol: 
+      "remove listen for name entry", // ui/gamecontrol: REMOVE "name entry shown", REMOVE "name submitted"
+      "fade main" // ui/gamecontrol: "main is faded"      
+      //"check score/name"  // logic/scores: "name requested for high score" OR "no highscore at end of game"
         // above removed by 'remove score/name'
         //ON "end game requested", a["send end game"] // logic/gamecontrol: added by "attach end to request"
     ],
