@@ -26,7 +26,8 @@ require.resolve = (function () {
         
         if (require._core[x]) return x;
         var path = require.modules.path();
-        var y = cwd || '.';
+        cwd = path.resolve('/', cwd);
+        var y = cwd || '/';
         
         if (x.match(/^(?:\.\.?\/|\/)/)) {
             var m = loadAsFileSync(path.resolve(y, x))
@@ -115,7 +116,11 @@ require.alias = function (from, to) {
     }
     var basedir = path.dirname(res);
     
-    var keys = Object_keys(require.modules);
+    var keys = (Object.keys || function (obj) {
+        var res = [];
+        for (var key in obj) res.push(key)
+        return res;
+    })(require.modules);
     
     for (var i = 0; i < keys.length; i++) {
         var key = keys[i];
@@ -160,17 +165,34 @@ require.define = function (filename, fn) {
     };
 };
 
-var Object_keys = Object.keys || function (obj) {
-    var res = [];
-    for (var key in obj) res.push(key)
-    return res;
-};
-
 if (typeof process === 'undefined') process = {};
 
-if (!process.nextTick) process.nextTick = function (fn) {
-    setTimeout(fn, 0);
-};
+if (!process.nextTick) process.nextTick = (function () {
+    var queue = [];
+    var canPost = typeof window !== 'undefined'
+        && window.postMessage && window.addEventListener
+    ;
+    
+    if (canPost) {
+        window.addEventListener('message', function (ev) {
+            if (ev.source === window && ev.data === 'browserify-tick') {
+                ev.stopPropagation();
+                if (queue.length > 0) {
+                    var fn = queue.shift();
+                    fn();
+                }
+            }
+        }, true);
+    }
+    
+    return function (fn) {
+        if (canPost) {
+            queue.push(fn);
+            window.postMessage('browserify-tick', '*');
+        }
+        else setTimeout(fn, 0);
+    };
+})();
 
 if (!process.title) process.title = 'browser';
 
@@ -181,8 +203,11 @@ if (!process.binding) process.binding = function (name) {
 
 if (!process.cwd) process.cwd = function () { return '.' };
 
+if (!process.env) process.env = {};
+if (!process.argv) process.argv = [];
+
 require.define("path", function (require, module, exports, __dirname, __filename) {
-    function filter (xs, fn) {
+function filter (xs, fn) {
     var res = [];
     for (var i = 0; i < xs.length; i++) {
         if (fn(xs[i], i, xs)) res.push(xs[i]);
@@ -320,13 +345,13 @@ exports.extname = function(path) {
 });
 
 require.define("events", function (require, module, exports, __dirname, __filename) {
-    if (!process.EventEmitter) process.EventEmitter = function () {};
+if (!process.EventEmitter) process.EventEmitter = function () {};
 
 var EventEmitter = exports.EventEmitter = process.EventEmitter;
 var isArray = typeof Array.isArray === 'function'
     ? Array.isArray
     : function (xs) {
-        return Object.toString.call(xs) === '[object Array]'
+        return Object.prototype.toString.call(xs) === '[object Array]'
     }
 ;
 
@@ -495,11 +520,11 @@ EventEmitter.prototype.listeners = function(type) {
 });
 
 require.define("/node_modules/eventingfunctions/package.json", function (require, module, exports, __dirname, __filename) {
-    module.exports = {"main":"inventory.js"}
+module.exports = {"main":"inventory.js"}
 });
 
 require.define("/node_modules/eventingfunctions/inventory.js", function (require, module, exports, __dirname, __filename) {
-    /*globals $, module, console, require, process*/
+/*globals $, module, console, require, process*/
 
 var events = require('events');
 var logs = require('./lib/logging.js');
@@ -771,7 +796,7 @@ Dispatcher.prototype.makechanges = function (changes) {
 });
 
 require.define("/node_modules/eventingfunctions/lib/logging.js", function (require, module, exports, __dirname, __filename) {
-    /*globals $, module, exports, console, require, process*/
+/*globals $, module, exports, console, require, process*/
 
 module.exports.con = {
   "emit" : function (evnt) {
@@ -824,11 +849,11 @@ module.exports.noop = {
 });
 
 require.define("/node_modules/query-engine/package.json", function (require, module, exports, __dirname, __filename) {
-    module.exports = {"main":"./lib/query-engine.coffee"}
+module.exports = {"main":"./lib/query-engine.coffee"}
 });
 
 require.define("/node_modules/query-engine/lib/query-engine.coffee", function (require, module, exports, __dirname, __filename) {
-    (function() {
+(function() {
   var Collection, Hash, extendNatives, get, key, set, toArray, value, _ref;
   var __hasProp = Object.prototype.hasOwnProperty, __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (__hasProp.call(this, i) && this[i] === item) return i; } return -1; }, __slice = Array.prototype.slice;
 
@@ -1212,17 +1237,17 @@ require.define("/node_modules/query-engine/lib/query-engine.coffee", function (r
 });
 
 require.define("/logic/gamecontrol.js", function (require, module, exports, __dirname, __filename) {
-    /*globals $, module, console, require*/
+/*globals $, module, console, require*/
 
 var file = 'logic/gamecontrol: ';
 
-var servercalls = require('../utilities/server');
+var Deck = require('../logic/deckbehavior');
 
 var gcd;
 
 var a;
 
-var process;
+var process, newdeck, types;
 
 module.exports = function (gcde) {
   gcd = gcde;
@@ -1251,38 +1276,31 @@ a = {
   
   //server calls
   
-  "send new game": [[ "uid", "type" ],
-    function me (uid, type) {
-      servercalls.get('shuffle/'+uid+'/'+type, function (server) {
-        var build;
-        if (server.error) {
-          gcd.ret({$$emit: [["new game denied", server]]}, me.desc);
-          return false;
-        }
+  "start new game": [[ "type" ],
+    function me (type) {
+      console.log("hello");
+      var deck = new Deck();
+      deck.newhand();
+      console.log([deck]);
+      /*
         build = process(type, server);
         build.$$emit = "server started new game";
         gcd.ret(build, me.desc);
-      });
+        */
+      gcd.ret({$set:{deck:deck, hand:deck.hand.slice(0)}, $$emit: "game started"}, me.desc); 
     }
   ],
   
-  "send draw cards" : [["uid", "gid", "draws", "type", "cardsleft"],
-    function me (uid, gid, draws, type) {
-      servercalls.get('drawcards/'+uid+'/'+gid+'/'+draws, function (server){
-        var build;
-        if (server.error) {
-          gcd.ret({$$emit: [["failed to draw cards", server]]}, me.desc);
-          return false;
-        }
-        build = process(type, server);
-        build.$$emit = "server drew cards";      
-        gcd.ret(build, me.desc);
-      });  
+  "draw cards" : [["deck", "draws"],
+    function me (deck, draws, type) {
+      deck.draw(draws.split('')); 
+      gcd.ret({$$emit : "cards drawn", $set : {hand:deck.hand.slice(0)} }, me.desc); 
   }],
   
   
-  "send end game" : [ ["uid", "gid", {$$get : "name", $$default :"___"} ],
+  "end game" : [ ["uid", "gid", {$$get : "name", $$default :"___"} ],
     function me (uid, gid, name) {
+
       servercalls.get('endgame/'+uid+"/"+gid+"/"+name, function (server){
         var build;
         if (server.error) {
@@ -1296,6 +1314,7 @@ a = {
     }
   ],
   
+
   
   "send view scores" : function me () {
     servercalls.get('viewscores', function (server) {
@@ -1308,6 +1327,9 @@ a = {
         }, me.desc);
     });
   }
+
+
+
 
 /*
   'send game review' : function (gid) {
@@ -1355,42 +1377,213 @@ process = function (type, server) {
 
     
 
+
 });
 
-require.define("/utilities/server.js", function (require, module, exports, __dirname, __filename) {
-    /*globals $, exports, console*/
+require.define("/logic/deckbehavior.js", function (require, module, exports, __dirname, __filename) {
+/*globals $, module, console, require*/
 
-//server interaction. A thin wrapper around jquery server methods
-	
-var server = '';//'http://127.0.0.1:3000/';	
-	
-console.log("server")
-	
-exports.put = function (command, data, callback) {
-	$.ajax(server + command, {
-		type: 'POST',
-		data: JSON.stringify(data),
-		contentType: 'application/json',
-		dataType: "json",
-		success: callback || function (data, status) {console.log(command, data, status);},
-		error  : function() { console.log("error response"); }
-	});
+
+
+
+var Deck = function (seed) {
+  var deck = ["2c",  "2d",  "2h",  "2s",  "3c",  "3d",  "3h",  "3s",  "4c",  "4d",  "4h",  "4s",  "5c",  "5d",  "5h",  "5s",  
+          "6c",  "6d",  "6h",  "6s",  "7c",  "7d",  "7h",  "7s",  "8c",  "8d",  "8h",  "8s",  "9c",  "9d",  "9h",  "9s", 
+          "Tc",  "Td",  "Th",  "Ts",  "Jc",  "Jd",  "Jh",  "Js",  "Qc",  "Qd",  "Qh",  "Qs",  "Kc",  "Kd",  "Kh",  "Ks", 
+          "Ac",  "Ad",  "Ah",  "As"
+        ];
+  var i,j, temp; 
+  for (i = 0 ; i<52; i += 1) {
+    j = Math.floor(Math.random() * (52 - i)) + i;
+    temp = deck[j];
+    deck[j] = deck[i];
+    deck[i] = temp; 
+  }
+  var place = 0;
+  seed = seed || (Math.random().toString()).slice(2);
+  console.log(seed);
+  Math.seedrandom(seed);
+  this.drawcard = function () {
+    var ret;
+    if (place < 52) {
+      ret = deck[place]; 
+      place += 1;
+    } else {
+      ret = null;
+    }
+    console.log(place, ret);
+    return ret;
+  };
+  this.hand = [];
+  this.moves = [];
+  this.seed = seed; 
+
+  return this;
 };
 
-exports.get = function (command, callback) {
-	$.ajax(server + command, {
-		type: 'GET',
-		contentType: 'application/json',
-		dataType: "json",
-		success: callback || function (data, status) {console.log(command, data, status);},
-		error  : function() { console.log("error response"); }
-	});
+
+Deck.prototype.newhand = function () {
+  return this.draw([1, 1, 1, 1, 1]);
 };
+
+Deck.prototype.draw = function (places) {
+  var num = 0;
+  var hand = this.hand;
+  console.log("draw", places, hand);
+  for (var i = 0; i < 5; i += 1) {
+    if (places[i] == 1) {
+      hand[i] = this.drawcard() || hand[i];
+      num += Math.pow(2, i); 
+    }
+  }
+  this.moves.push(num);
+};
+
+
+
+module.exports = Deck;
+
+/*
+
+//games {gid: {userid: userid, deck:[52 cards], hand: [5 cards], draws: [[2,3], [1], ...], current: #, score: #, typeGame: 'str', status: time|'end' ]}
+var cardutil = require('./cardutil');
+var memory = require('./memory');
+
+//for initializing high scores
+exports.initializehs = function (scores) {
+  memory.initializehs(scores.initializehs);
+};
+
+var i;
+var games = {};
+var letters = [];
+for (i = 0; i<10; i += 1) {
+  letters.push(String(i));
+}
+for (i = 0; i<26; i += 1) {
+  letters.push(String.fromCharCode(i+65), String.fromCharCode(i+97));
+}
+
+var gametypes =  {
+  'basic' : function (game) {
+    game.type = 'basic';
+    game.data = {streak:0, score:0};
+    game.wilds = 'yes';
+  }
+};
+
+
+
+    //implement a cleanup routine 
+
+//new game and shuffles deck
+exports.shuffle = function (res, id, type, scores) {
+  var deck, i, j, temp, gid, hand, calldelta, game;
+  //work out type
+  type = type || 'basic';
+  if (!(gametypes.hasOwnProperty(type))) { 
+    type = "basic";
+  }
+  //create and shuffle deck
+ 
+  //hand
+  hand = deck.slice(0,5); 
+  //create game id
+  gid = '';
+  for (i = 0; i<8; i+=1) {
+    gid += letters[Math.floor(Math.random()*(62))];
+  }
+  //initial game creation
+  game = {deck:deck, userid:id, hand: hand, draws: ["11111"], current:5, status: Date.now()};
+  games[gid] = game; 
+  //put in stuff for game type
+  gametypes[type](game);
+  //make initial call using lowest possible hand for oldhand
+  calldelta = cardutil.call(hand, ["3c", "4d", "5h", "6s", "8c"], scores.scoring[type], game);
+  memory.newgame(gid, game);
+  res.json({gid:gid, hand: hand, call: calldelta[0], cardsleft: 47, gamedata: game.data, delta : calldelta[1]});
+};
+
+
+var drawcb = function (res, draws, id, gid, scores) {
+  return function (err, game) {
+    var hand, oldhand, i, score, cur, deck, calldelta; 
+    if (game.status === 'end') {
+      res.json({'error': "Game already ended"});
+      return false; 
+    }
+    deck = game.deck;
+    oldhand = game.hand.slice(); 
+    var nocards = true;
+
+    //check id matches gid's userid
+
+    //main logic
+    hand = game.hand;
+    cur = game.current;
+    for (i = 0; i < 5; i += 1) {
+      try {
+        if (draws[i] === "1") {
+          if (cur >= 52) {break;}
+          nocards = false;
+          hand[i] = deck[cur];
+          cur += 1;
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    }
+    if (nocards) {res.json({error:"no cards drawn."}); return false;}
+    calldelta = cardutil.call(hand, oldhand, scores.scoring[game.type], game);  
+    memory.update(gid, game, {hand:hand, draws:draws, data:game.data, current: cur, score:game.data.score, status:Date.now()});
+    res.json({hand:hand, call:calldelta[0], gamedata:game.data, delta:calldelta[1], cardsleft: 52-cur});
+  };
+};
+
+exports.drawcards = function (res, draws, id, gid, scores) {
+  var callback = drawcb(res, draws, id, gid, scores);
+  if (games.hasOwnProperty(gid) ) {
+    callback(null, games[gid]); 
+  } else {
+    memory.loadgame(gid, callback);
+  }
+};
+
+exports.endgame = function (res, id, gid, scores, name) {
+  var game, hs;
+  game = games[gid];
+  if (game.status === 'end') {
+    res.json({'error': "Game already ended"});
+    return false; 
+  }
+  memory.endgame(gid);
+  game.status = 'end';
+  //console.log(scores);
+  hs = scores.highscores;
+  //ordering is a bit hazy
+  if ( (hs.length < 10) || (game.data.score >= hs[0].score) || (game.data.score >= hs[hs.length-1].score) ) {
+    //new highscore logic
+    scores.update(game.data.score, gid, name.replace(/[^ a-zA-Z0-9_]/g, ''), memory.savehighscore);
+    res.json({type: "highscore", game: game, highscores: scores.highscores});
+  } else {
+    //no new highscore logic
+    res.json({type:"not a new highscore", game: game, highscores: scores.highscores});
+  }
+};
+
+
+//retrieves game with gid for replay
+exports.retrievegame = function (res, gid) {
+  memory.retrievegame(res, gid, games);
+};
+
+*/
+
 
 });
 
 require.define("/logic/history.js", function (require, module, exports, __dirname, __filename) {
-    /*globals $, module, console, require*/
+/*globals $, module, console, require*/
 
 var file = 'logic/history: ';
 
@@ -1432,7 +1625,7 @@ a = {
 });
 
 require.define("/utilities/cards.js", function (require, module, exports, __dirname, __filename) {
-    /*globals exports */
+/*globals exports */
   
 var ranks = {
     "A": ["Aces", "Ace"], 
@@ -1515,7 +1708,7 @@ exports["generate short version of call"] = function (call){
 });
 
 require.define("/logic/hand.js", function (require, module, exports, __dirname, __filename) {
-    /*globals $, module, console*/
+/*globals $, module, console*/
 
 var file = 'logic/hand: ';
 
@@ -1575,7 +1768,7 @@ a = {
 });
 
 require.define("/logic/scores.js", function (require, module, exports, __dirname, __filename) {
-    /*globals $, module, console, require*/
+/*globals $, module, console, require*/
 
 var file = 'logic/scores: ';
 
@@ -1656,8 +1849,97 @@ a = {
 };
 });
 
+require.define("/logic/compute_score.js", function (require, module, exports, __dirname, __filename) {
+/*globals $, module, console, require*/
+
+var file = 'logic/compute_score: ';
+
+var gcd;
+
+var a;
+
+var scoring, types;
+
+module.exports = function (gcde) {
+  gcd = gcde;
+  gcd.install(file, a);  
+};
+
+a = {
+  "compute score" : [["call", "type", "diff", "typedata"], 
+    function me (call, type, diff, data) {
+      gcd.ret({$set : scoring[type](call, diff, data), $$emit: "score computed"}, me.desc);
+    }
+  ],
+
+  "load type" : [["type", "wilds"],
+    function me (type, wilds) {
+      type = type || "basic";
+      wilds = wilds || "yes";
+      var typedata = types[type];
+      gcd.ret({$set : {type : type, wilds : wilds, typedata : typedata}, $$emit : "type loaded"}, me.desc);
+    }
+  ]
+  
+};
+
+
+
+types = {
+  "basic" : {streak: 0, score: 0, level : 0, delta:0}
+
+};
+
+//scoring functions take in a diff and a game. mainly diff
+//diff is of the form [type of diff, level change]
+scoring = {
+  "basic" : function (call, diff, data) {
+    var streak = data.streak;
+    var delta = 0;
+    var lvl = 0;
+    //no change, streak grows, not score
+    if (diff[0] === 0) {
+      if (streak > 0 ) {
+        streak += 1; 
+        delta = 0;
+      } else {
+        streak -= 1;
+        delta = 0;
+      }
+    } else if (diff[0] > 0) { 
+      if (streak >0) {
+        //streak continues
+        streak += 1;
+      } else {
+        streak = 1;
+      }
+      delta = 100*streak*streak;
+      if (diff[0] === 1) { //major change
+        delta *= diff[1];
+        lvl = diff[1];
+      }
+    } else {
+      if (streak < 0) {
+        //losing streak continues
+        streak -= 1;
+      } else {
+        streak = -1;
+      }
+      delta = -100*streak*streak;
+      if (diff[0] === 1) { //major change
+        delta *= diff[1];
+        lvl = diff[1];
+      }
+    }
+    return {streak: streak, score: (data.score + delta), level : lvl, delta:delta, 
+      typedata : {streak: streak, score: (data.score + delta), level : lvl, delta:delta}
+    };
+  }
+};
+});
+
 require.define("/ui/gamecontrol.js", function (require, module, exports, __dirname, __filename) {
-    /*globals $, module, console, require*/
+/*globals $, module, console, require*/
 
 var file = 'ui/gamecontrol: ';
 
@@ -1786,7 +2068,7 @@ a = {
 });
 
 require.define("/ui/history.js", function (require, module, exports, __dirname, __filename) {
-    /*globals $, module, console, require*/
+/*globals $, module, console, require*/
 
 var file = 'ui/history: ';
 
@@ -1852,7 +2134,7 @@ a = {
 });
 
 require.define("/ui/hand.js", function (require, module, exports, __dirname, __filename) {
-    /*globals $, module, console, require*/
+/*globals $, module, console, require*/
 
 var file = 'ui/hand: ';
 
@@ -2047,7 +2329,7 @@ computecardposition = function (card) {
 });
 
 require.define("/ui/scores.js", function (require, module, exports, __dirname, __filename) {
-    /*globals $, module, console, require, humaneDate*/
+/*globals $, module, console, require, humaneDate*/
 
 var file = 'ui/scores: ';
 
@@ -2229,11 +2511,207 @@ a = {
 
 });
 
+require.define("/utilities/cardutil.js", function (require, module, exports, __dirname, __filename) {
+/*globals $, module, console, require*/
+
+var file = 'util/cardutil: ';
+
+var gcd;
+
+var a, install;
+
+module.exports = function (gcde) {
+  gcd = gcde;
+  gcd.install(file, a);  
+};
+
+
+var wildfuns, analyzehand, comparehands;
+
+a = {
+  "enable wilds" : function me () {
+    gcd.ret({$set:{wilds: "yes"}, $$emit : "wilds enabled"});
+  },
+  "disable wilds" : function me () {
+    gcd.ret({$set:{wilds: "no"}, $$emit : "wilds enabled"});
+  },
+
+  "analyze hand" : [["hand", "wilds", "call" ], 
+    function me (hand, wildson, call) {
+      wildson  = wildson || "yes";
+      gcd.ret({$set:{oldcall: call, call:analyzehand(hand, wildfuns[wildson])}, $$emit : "hand analyzed"}, me.desc);
+    }
+  ],
+
+  "compare hands" : [ ["call", "oldcall"], 
+    function me (call, oldcall) {
+      gcd.ret({$set:{diff : comparehands(call, oldcall)}, $$emit: "hands compared"}, me.desc); 
+    }
+  ]
+
+};
+
+
+var major = {"5" :9, "sf":8, "4":7, "fh":6, "f":5, "s":4, "3":3, "2p":2, "2":1, "1":0};
+var rankings = {'2' :0, '3':1,'4':2, '5':3, '6':4,'7':5, '8': 6, '9':7, 'T':8, 'J':9, 'Q':10, 'K':11, 'A':12};
+var reverserankings = ['2' , '3','4', '5', '6','7', '8', '9', 'T', 'J', 'Q', 'K', 'A'];
+
+
+wildfuns = {
+  'yes' : function (card) {
+    if (card[0] === '2') {
+      return true;
+    } else {
+      return false;
+    }
+  },
+  'no' : function (card) {
+    return false; 
+  }
+};
+  
+
+//higher ranks come first in sort list
+var sortbyranks = function (a,b) {return rankings[b[0]] - rankings[a[0]];};
+
+analyzehand = function (hand, wilds) {
+  var wildcount = 0;
+  var flush, straight, grouping, calls;
+  var r, s, rankcount, suitcount, subrc, low, rankdiff, potentialRanking; 
+  var suits = {'s' :0,'c' :0, 'd' :0,'h' :0};
+  var ranks = {'2' :0, '3':0,'4':0, '5':0, '6':0,'7':0, '8': 0, '9':0, 'T':0, 'J':0, 'Q':0, 'K':0, 'A':0};
+  //bin suits, ranks or wilds
+  hand.forEach(function (val, ind, hand) {
+    if (wilds(val)) {
+      wildcount += 1; 
+    } else {
+      suits[val[1]] += 1; 
+      ranks[val[0]] += 1; 
+    }
+  });
+  //extract ranks and suit counts of relevant portions [["s", 2], ..] 
+  rankcount = [];
+  for (r in ranks) {
+    if (ranks[r]) {
+      rankcount.push([r, ranks[r]]);
+    }
+  }
+  suitcount = [];
+  for (s in suits) {
+    if (suits[s]) {
+      suitcount.push([s, suits[s]]);
+    }
+  }
+  rankcount.sort(sortbyranks); //want highest ranks first so that wilds get added appropriately (sort is stable)
+  rankcount.sort(function(a,b) {return b[1]-a[1];});
+  //figure out grouping
+  switch (rankcount.length) {
+    case 1: //5k  (5)
+      grouping = ["5", rankcount[0][0]];
+    break;
+    case 2:  //4k (4,1) or fh (3,2)
+      if ( (rankcount[0][1] + wildcount) === 4 ) { //4k
+        grouping = ["4", rankcount[0][0], rankcount[1][0]];
+      } else { //fh
+        grouping = ["fh", rankcount[0][0], rankcount[1][0]];        
+      }
+    break;
+    case 3: // 3k (3, 1, 1) or 2p (2, 2, 1)
+      if ( (rankcount[0][1] + wildcount) === 3) { //3k
+        subrc = rankcount.slice(1).sort(sortbyranks);
+        grouping = ["3", rankcount[0][0], subrc[0][0], subrc[1][0]];            
+      } else { //2p
+        subrc = rankcount.slice(0,2).sort(sortbyranks);
+        grouping = ["2p", subrc[0][0], subrc[1][0], rankcount[2][0]];   
+        
+      }
+    break;
+    case 4: //pair (2, 1, 1, 1)
+      subrc = rankcount.slice(1).sort(sortbyranks);
+      grouping = ["2", rankcount[0][0], subrc[0][0], subrc[1][0], subrc[2][0]];   
+    break;
+    default: //all 5 different ranks (1,1,1,1,1)
+      rankcount.sort(sortbyranks);
+      grouping = ["1", rankcount[0][0], rankcount[1][0], rankcount[2][0], rankcount[3][0], rankcount[4][0]];
+  }
+  calls = [grouping];
+  //check for straight 
+  if ( (rankcount.length + wildcount === 5) ) {
+    rankcount.sort(sortbyranks);
+    rankdiff = rankings[rankcount[0][0]] - rankings[rankcount[rankcount.length-1][0]];
+    if (rankdiff < 5 ) {
+      //adding in cards at the end. 
+      potentialRanking = rankings[rankcount[0][0]]+(4-rankdiff);
+      if (potentialRanking > 12) {
+        potentialRanking = 12;
+      }
+      straight = ["s", reverserankings[potentialRanking]];
+      calls.push(straight);
+    }  else {
+      //Aces can be low!
+      rankings.A  = -1;
+      rankcount.sort(sortbyranks);
+      rankdiff = rankings[rankcount[0][0]] - rankings[rankcount[rankcount.length-1][0]];
+      if ( rankdiff < 5 ) {
+        straight = ["s", reverserankings[rankings[rankcount[0][0]]+(4-rankdiff)]];
+        calls.push(straight);
+      } else {
+        straight = false; 
+      }
+      rankings.A  = 12;      
+    }
+  } else {
+    straight = false;
+  }
+  //flush!
+  if (suitcount.length === 1) {
+    rankcount.sort(sortbyranks);
+    //flushes are ranked by low card. 
+    low =  rankcount[rankcount.length-1][0];
+    //due to wilds, low card may be bigger than 10 but highest low is 10
+    if (rankings[low] > 8) {low = 'T';}
+    flush = ["f", low];
+    calls.push(flush);
+  } else {
+    flush = false; 
+  }
+  if (straight && flush) {
+    calls.push(["sf", straight[1]]);
+  }
+  calls.sort(function(a,b) {return major[b[0]] - major[a[0]];});
+  return calls[0];
+  //return JSON.stringify( [calls[0], hand]); 
+};
+
+comparehands = function (newh, oldh) {
+  var diff, i, n;
+  if (!oldh) {
+    oldh = ['1', '3', '4', '5', '6', '8'] ; //lowest hand possible
+  }
+  //compare major first
+  diff = major[newh[0]] - major[oldh[0]];
+  if (diff !== 0 ) {
+    return [(diff>0 ? 1 : -1), diff]; 
+  } else {
+    //same level, look for minor differences
+    n = newh.length;
+    for (i = 1; i<n; i += 1) {
+      diff = rankings[newh[i]] - rankings[oldh[i]];
+      if (diff !== 0) {
+        return [ ((diff >0) ? i+1 : -(i+1)), diff];
+      }
+    }
+    //no differences found
+    return [0];
+  }
+};
+
+});
+
 require.define("/events.js", function (require, module, exports, __dirname, __filename) {
-    /*globals $, module, console, require*/
+/*globals $, module, console, require*/
 
 module.exports = function (gcd) {
-  var a = gcd.a;
   gcd.ret( { $$on : {
     "ready" : [
       "initialize values",  // logic/gamecontrol:
@@ -2246,20 +2724,32 @@ module.exports = function (gcd) {
       "zero history count", // logic/history:
       "negate oldhand",   // logic/history:
       'empty history body', // ui/history:
-      "send new game",  // logic/gamecontrol: "server started new game" OR "new game denied"
+      "start new game",  // logic/gamecontrol: "game started"
       "reset hand state", // logic/hand: 
       "remove main fade", // ui/gamecontrol: 
-      "clear streak" // ui/scores: 
+      "clear streak", // ui/scores: 
+      "load type" // logic/gamecontrol !!!!!  basic, ...  and wilds see cardutil "enable, disable"
     ],
-    "server started new game" : [
+    "game started" : [
       "note new hand", // logic/hand: 
+      "analyze hand", //util/cardutil: hand analyzed
       "install endgame", // ui/gamecontrol: 
       "bind hand keys", // ui/gamecontrol: 
       "listen for name entry", // ui/gamecontrol: ON "name entry shown", ON "name submitted"
       "remove main fade", // ui/gamecontrol: 
       "load hand", // ui/hand: "hand loaded" 
-      "update number of cards left", // ui/hand: 
-      "pulse positive score"// ui/scores: 
+      "update number of cards left" // ui/hand: 
+      //"pulse positive score"// ui/scores: 
+    ],
+    "hand analyzed" : [
+      "compare hands"  // util/cardutil: "hand compared"
+    ],
+    "hands compared" : [
+      "compute score"  //logic/compute_score
+    ],
+    "score computed" : [
+      "check delta",  //  logic/scores: "(negative OR positive OR no) change in score"
+      "check for streak" // logic/scores: "streak" OR ""
     ],
     "card clicked" : [
       "toggle draw cards" // ui/hand: "not enough cards left"
@@ -2269,13 +2759,11 @@ module.exports = function (gcd) {
       "assemble drawn cards", // ui/hand: "no discarded cards"  OR "cards discarded"
       "clear streak" // ui/scores:       
     ],
-    "server drew cards" : [
+    "cards drawn" : [
       "check for cards left" , // logic/hand:  // IF cards <=0, "no cards left to draw"
       "load hand", // ui/hand: 
-      "update number of cards left", // ui/hand:     
-      "check delta",  //  logic/scores: "(negative OR positive OR no) change in score"
-      "check for streak" // logic/scores: "streak" OR ""
-      
+      "update number of cards left", // ui/hand:
+      "analyze hand"    //util/cardutil     
     ],
     "miagan" : [ 
       "display miagan" // ui/hand: 
@@ -2293,7 +2781,7 @@ module.exports = function (gcd) {
       "note old hand" // logic/hand:
     ],
     "cards discarded" : [
-      "send draw cards",  // logic/gamecontrol: "server drew cards" OR "failed to draw cards"
+      "draw cards",  // logic/gamecontrol: "server drew cards" OR "failed to draw cards"
       "check for a hail call", // logic/hand: "hail call checked" AND MAYBE "miagan", "mulligan", "hail mia", "hail mary"
       "use backing for discarded cards" // ui/hand:     
     ],
@@ -2362,10 +2850,10 @@ module.exports = function (gcd) {
         // gcd.removeListener("name submitted"  , a["bind hand keys",  // ui/gamecontrol: removed by "remove listen for name entry"
         // gcd.on("name submitted"               , a["get name value",// ui/scores: 
     'no highscore at end of game' : [
-      "send end game" // logic/gamecontrol: "server ended game" OR "end game denied"
+      "end game" // logic/gamecontrol: "server ended game" OR "end game denied"
     ],    //above removed by "attach end to request" 
     'high scores requested' : [
-      "send view scores" // logic/gamecontrol: "server sent high scores" OR "view scores denied"
+      //"send view scores" // logic/gamecontrol: "server sent high scores" OR "view scores denied"
     ],
     "server sent high scores" : [
     "look for new high scores" // logic/scores: "high scores checked"
@@ -2386,6 +2874,7 @@ var events = require('events');
 var Dispatcher = require('eventingfunctions').Dispatcher; 
 
 gcd = new Dispatcher(true);
+
 
 gcd.emit("debugging requested"); 
 
@@ -2413,11 +2902,14 @@ require('./logic/gamecontrol'  )(gcd);
 require('./logic/history'      )(gcd);
 require('./logic/hand'         )(gcd);
 require('./logic/scores'       )(gcd);
+require('./logic/compute_score')(gcd);
 
 require('./ui/gamecontrol'    )(gcd);
 require('./ui/history'        )(gcd);
 require('./ui/hand'           )(gcd);
 require('./ui/scores'         )(gcd);
+
+require('./utilities/cardutil')(gcd);
 
 require('./events.js')(gcd);
 

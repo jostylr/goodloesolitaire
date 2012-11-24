@@ -1,7 +1,6 @@
 /*globals $, module, console, require*/
 
 module.exports = function (gcd) {
-  var a = gcd.a;
   gcd.ret( { $$on : {
     "ready" : [
       "initialize values",  // logic/gamecontrol:
@@ -14,20 +13,32 @@ module.exports = function (gcd) {
       "zero history count", // logic/history:
       "negate oldhand",   // logic/history:
       'empty history body', // ui/history:
-      "send new game",  // logic/gamecontrol: "server started new game" OR "new game denied"
+      "start new game",  // logic/gamecontrol: "game started"
       "reset hand state", // logic/hand: 
       "remove main fade", // ui/gamecontrol: 
-      "clear streak" // ui/scores: 
+      "clear streak", // ui/scores: 
+      "load type" // logic/gamecontrol !!!!!  basic, ...  and wilds see cardutil "enable, disable"
     ],
-    "server started new game" : [
+    "game started" : [
       "note new hand", // logic/hand: 
+      "analyze hand", //util/cardutil: hand analyzed
       "install endgame", // ui/gamecontrol: 
       "bind hand keys", // ui/gamecontrol: 
       "listen for name entry", // ui/gamecontrol: ON "name entry shown", ON "name submitted"
       "remove main fade", // ui/gamecontrol: 
       "load hand", // ui/hand: "hand loaded" 
-      "update number of cards left", // ui/hand: 
-      "pulse positive score"// ui/scores: 
+      "update number of cards left" // ui/hand: 
+      //"pulse positive score"// ui/scores: 
+    ],
+    "hand analyzed" : [
+      "compare hands"  // util/cardutil: "hand compared"
+    ],
+    "hands compared" : [
+      "compute score"  //logic/compute_score
+    ],
+    "score computed" : [
+      "check delta",  //  logic/scores: "(negative OR positive OR no) change in score"
+      "check for streak" // logic/scores: "streak" OR ""
     ],
     "card clicked" : [
       "toggle draw cards" // ui/hand: "not enough cards left"
@@ -37,13 +48,11 @@ module.exports = function (gcd) {
       "assemble drawn cards", // ui/hand: "no discarded cards"  OR "cards discarded"
       "clear streak" // ui/scores:       
     ],
-    "server drew cards" : [
+    "cards drawn" : [
       "check for cards left" , // logic/hand:  // IF cards <=0, "no cards left to draw"
       "load hand", // ui/hand: 
-      "update number of cards left", // ui/hand:     
-      "check delta",  //  logic/scores: "(negative OR positive OR no) change in score"
-      "check for streak" // logic/scores: "streak" OR ""
-      
+      "update number of cards left", // ui/hand:
+      "analyze hand"    //util/cardutil     
     ],
     "miagan" : [ 
       "display miagan" // ui/hand: 
@@ -61,7 +70,7 @@ module.exports = function (gcd) {
       "note old hand" // logic/hand:
     ],
     "cards discarded" : [
-      "send draw cards",  // logic/gamecontrol: "server drew cards" OR "failed to draw cards"
+      "draw cards",  // logic/gamecontrol: "server drew cards" OR "failed to draw cards"
       "check for a hail call", // logic/hand: "hail call checked" AND MAYBE "miagan", "mulligan", "hail mia", "hail mary"
       "use backing for discarded cards" // ui/hand:     
     ],
@@ -130,10 +139,10 @@ module.exports = function (gcd) {
         // gcd.removeListener("name submitted"  , a["bind hand keys",  // ui/gamecontrol: removed by "remove listen for name entry"
         // gcd.on("name submitted"               , a["get name value",// ui/scores: 
     'no highscore at end of game' : [
-      "send end game" // logic/gamecontrol: "server ended game" OR "end game denied"
+      "end game" // logic/gamecontrol: "server ended game" OR "end game denied"
     ],    //above removed by "attach end to request" 
     'high scores requested' : [
-      "send view scores" // logic/gamecontrol: "server sent high scores" OR "view scores denied"
+      //"send view scores" // logic/gamecontrol: "server sent high scores" OR "view scores denied"
     ],
     "server sent high scores" : [
     "look for new high scores" // logic/scores: "high scores checked"

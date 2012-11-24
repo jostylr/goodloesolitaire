@@ -8,6 +8,7 @@ var Dispatcher = require('eventingfunctions').Dispatcher;
 
 gcd = new Dispatcher(true);
 
+
 gcd.emit("debugging requested"); 
 
 
@@ -34,11 +35,14 @@ require('./logic/gamecontrol'  )(gcd);
 require('./logic/history'      )(gcd);
 require('./logic/hand'         )(gcd);
 require('./logic/scores'       )(gcd);
+require('./logic/compute_score')(gcd);
 
 require('./ui/gamecontrol'    )(gcd);
 require('./ui/history'        )(gcd);
 require('./ui/hand'           )(gcd);
 require('./ui/scores'         )(gcd);
+
+require('./utilities/cardutil')(gcd);
 
 require('./events.js')(gcd);
 

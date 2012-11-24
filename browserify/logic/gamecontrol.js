@@ -2,13 +2,13 @@
 
 var file = 'logic/gamecontrol: ';
 
-var servercalls = require('../utilities/server');
+var Deck = require('../logic/deckbehavior');
 
 var gcd;
 
 var a;
 
-var process;
+var process, newdeck, types;
 
 module.exports = function (gcde) {
   gcd = gcde;
@@ -37,38 +37,31 @@ a = {
   
   //server calls
   
-  "send new game": [[ "uid", "type" ],
-    function me (uid, type) {
-      servercalls.get('shuffle/'+uid+'/'+type, function (server) {
-        var build;
-        if (server.error) {
-          gcd.ret({$$emit: [["new game denied", server]]}, me.desc);
-          return false;
-        }
+  "start new game": [[ "type" ],
+    function me (type) {
+      console.log("hello");
+      var deck = new Deck();
+      deck.newhand();
+      console.log([deck]);
+      /*
         build = process(type, server);
         build.$$emit = "server started new game";
         gcd.ret(build, me.desc);
-      });
+        */
+      gcd.ret({$set:{deck:deck, hand:deck.hand.slice(0)}, $$emit: "game started"}, me.desc); 
     }
   ],
   
-  "send draw cards" : [["uid", "gid", "draws", "type", "cardsleft"],
-    function me (uid, gid, draws, type) {
-      servercalls.get('drawcards/'+uid+'/'+gid+'/'+draws, function (server){
-        var build;
-        if (server.error) {
-          gcd.ret({$$emit: [["failed to draw cards", server]]}, me.desc);
-          return false;
-        }
-        build = process(type, server);
-        build.$$emit = "server drew cards";      
-        gcd.ret(build, me.desc);
-      });  
+  "draw cards" : [["deck", "draws"],
+    function me (deck, draws, type) {
+      deck.draw(draws.split('')); 
+      gcd.ret({$$emit : "cards drawn", $set : {hand:deck.hand.slice(0)} }, me.desc); 
   }],
   
   
-  "send end game" : [ ["uid", "gid", {$$get : "name", $$default :"___"} ],
+  "end game" : [ ["uid", "gid", {$$get : "name", $$default :"___"} ],
     function me (uid, gid, name) {
+
       servercalls.get('endgame/'+uid+"/"+gid+"/"+name, function (server){
         var build;
         if (server.error) {
@@ -82,6 +75,7 @@ a = {
     }
   ],
   
+
   
   "send view scores" : function me () {
     servercalls.get('viewscores', function (server) {
@@ -94,6 +88,9 @@ a = {
         }, me.desc);
     });
   }
+
+
+
 
 /*
   'send game review' : function (gid) {
@@ -140,3 +137,4 @@ process = function (type, server) {
 };
 
     
+
