@@ -1593,7 +1593,7 @@ a = {
     return {$set : { historycount : 1 } };
   },
   "negate oldhand" : function  () {
-    return {$set : { oldhand : false, oldcall: false } }; // used in cards.js
+    return {$set : { oldhand : false, call: false } }; // used in cards.js
   },
   "increment history count" : function () {
     return {$inc : { historycount : 1} };
