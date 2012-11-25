@@ -7,7 +7,7 @@ module.exports = function (gcd) {
       "initialize score data", // logic/scores:
       "initialize game clicks, hide stuff", // ui/gamecontrol: 
       "initialize draw card click, hide hail, hand", // ui/hand:   
-      'initialize name/score clicks, modals, high scores' // ui/scores:
+      'initialize name/score clicks, modals, high scores'// ui/scores: "high scores requested"
     ],
     "new game requested" : [                                          
       "zero history count", // logic/history:
@@ -24,6 +24,7 @@ module.exports = function (gcd) {
       "analyze hand", //util/cardutil: hand analyzed
       "install endgame", // ui/gamecontrol: 
       "bind hand keys", // ui/gamecontrol: 
+      "listen for name entry", // ui/gamecontrol: ON "name entry shown", ON "name submitted"
       "remove main fade", // ui/gamecontrol: 
       "load hand", // ui/hand: "hand loaded" 
       "update number of cards left" // ui/hand: 
@@ -102,6 +103,7 @@ module.exports = function (gcd) {
     ],
     "end game requested" : [
       //"add listener to show high scores",// ui/scores: ONCE "high scores checked"
+      "make tweet",
       "install startgame", // ui/gamecontrol: 
       "unbind hand keys", // ui/gamecontrol: 
       "remove listen for name entry", // ui/gamecontrol: REMOVE "name entry shown", REMOVE "name submitted"
@@ -110,8 +112,45 @@ module.exports = function (gcd) {
         // above removed by 'remove score/name'
         //ON "end game requested", a["send end game"] // logic/gamecontrol: added by "attach end to request"
     ],
-    "tweet requested" : [
-      "send tweet" //ui/scores
+    "server ended game" : [
+      "look for new high scores", // logic/scores:  "high scores checked"
+      "install startgame", // ui/gamecontrol: 
+      "unbind hand keys", // ui/gamecontrol: 
+      "remove listen for name entry", // ui/gamecontrol: REMOVE "name entry shown", REMOVE "name submitted"
+      "fade main" // ui/gamecontrol: "main is faded"
+    ],
+    
+        //  ??? gcd.on("high scores checked"          , a["display high scores", // ui/scores: 
+    "name requested for high score" : [
+      "watch name to send end game", // logic/scores: once
+      "name entry requested"// ui/scores: "name entry shown"
+    ],
+    "name entry shown" : [
+      "bind name entry keys",// ui/scores:
+      "focus into name modal",// ui/scores:  
+      "get name" // ui/scores:  'name submitted'
+    ],
+        // gcd.on("name entry shown"      , a["unbind hand keys", // ui/gamecontrol: added by "listen for name entry"
+        // gcd.removeListener("name entry shown", a["unbind hand keys", // ui/gamecontrol: removed by "remove listen for name entry"
+ 
+        //gcd.on("name entry hidden"            , a["emit submit name" ,// ui/scores: 
+    "name submitted" : [
+      "attach end to request", // logic/gamecontrol: removeListerner, on
+      "remove score/name", // logic/scores: removeListener
+      "unbind name entry keys"// ui/scores: 
+    ],
+        // ONCE "name submitted", a["send end game"]  // logic/gamecontrol: added by "watch name to send end game"
+        // gcd.on("name submitted"       , a["bind hand keys", // ui/gamecontrol: added by "listen for name entry"
+        // gcd.removeListener("name submitted"  , a["bind hand keys",  // ui/gamecontrol: removed by "remove listen for name entry"
+        // gcd.on("name submitted"               , a["get name value",// ui/scores: 
+    'no highscore at end of game' : [
+      "end game" // logic/gamecontrol: "server ended game" OR "end game denied"
+    ],    //above removed by "attach end to request" 
+    'high scores requested' : [
+      //"send view scores" // logic/gamecontrol: "server sent high scores" OR "view scores denied"
+    ],
+    "server sent high scores" : [
+    "look for new high scores" // logic/scores: "high scores checked"
     ]
   } 
 });

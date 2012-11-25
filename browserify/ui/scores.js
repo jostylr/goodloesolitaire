@@ -1,4 +1,4 @@
-/*globals $, module, console, require, humaneDate*/
+/*globals $, module, console, require, humaneDate, window*/
 
 var file = 'ui/scores: ';
 
@@ -22,23 +22,6 @@ a = {
       $('#inarow').html(streak + " in a row" + (level ? " with a bonus of "+ level + "!" : "!"));
     }
   ],
-  'get name' : function me () {
-    $('#scoreentry').bind('hide', function self () {
-      var name;
-      name = encodeURI($('#namemodal').val().replace(/[^ a-zA-Z0-9_]/g, ''));
-      if (!name) {
-        name = "___";
-      } else {
-        $("#name a").html(name);
-      }
-      $('#scoreentry').unbind('hide', self); //self cleanup
-      gcd.ret({ $set : {name : name},
-        $$emit : 'name submitted' }, me.desc);
-    });
-  },
-  "add listener to show high scores" : function () {
-    return {$$once : {"high scores checked" : "display high scores" } };
-  },
   'display high scores' : [ [ "highscores" ],
     function (highscores) {
       var row, rowclass, n, i, date;
@@ -128,7 +111,8 @@ a = {
   },
   
   'initialize name/score clicks, modals, high scores' : function () {
-    $('#highscores')    .bind("click", a["retrieve high scores for viewing"]);
+    $('#showtweets')    .bind("click", a["show tweets"]);
+    $('#sendtweet')     .bind("click", a["request tweet"]);
     $("#name")          .bind("click", a["name entry requested"]);
     $("#submitname")    .bind("click", a["hide name entry"]);
     $("#scoreentry")    .bind("hide" , a["emit name entry hidden"]);
@@ -145,6 +129,38 @@ a = {
   a["emit submit name"] = function () {
       gcd.emit("name submitted", data);
   };*/
+
+  "show tweets" : function () {
+    $('#modal-tweet').modal({
+      backdrop: true,
+      keyboard: true,
+      show: true
+    });
+    gcd.ret({$$emit : "tweets shown"});
+  },
+
+
+
+  "request tweet" : function() {
+    gcd.ret({$$emit : "tweet requested"});
+  },
+
+   "send tweet" : [["deck", "score", "type", "wilds"], 
+    function me (deck, score, type, wilds) {
+      console.log("tweet clicked");
+      var gameurl = encodeURI("http://goodloesolitaire.com/")+encodeURIComponent("?"+
+          "seed="+deck.seed+
+          "&moves="+deck.moves.join("")+ //deck.movesList()
+          "&type="+type+
+          "&wilds="+wilds);
+      var text = encodeURIComponent("Scored "+score+" playing "+type); 
+      var twitterurl = "https://twitter.com/intent/tweet?screen_name=gsolitaire&text="+text+"&url="+gameurl;
+      var newwindow=window.open(twitterurl,'name','height=200,width=150');
+      if (window.focus) {newwindow.focus();}
+      return false;
+
+    }
+  ],
 
   "retrieve high scores for viewing" : function () {
     gcd.ret({$$once : { "high scores checked" : "display high scores" }, 
