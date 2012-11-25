@@ -1257,24 +1257,11 @@ module.exports = function (gcde) {
 a = {
   "initialize values" : function () {
     return {$set : {
-      uid : 0, //set by server
-      gid : 0, //set by server
-      type : 'basic' //toggle options
+      type : 'basic', //toggle options
+      wilds : 'yes'
     }};
   },
   
-  
-  "watch name to send end game" : function () {
-    return { $$once: { "name submitted" : "send end game" } };
-  },
-  
-  "attach end to request" : function () {
-    return { $$removeListener : { "no highscore at end of game" : "send end game" }, 
-             $$on : { "end game requested" : "send end game" }
-    };
-  },
-  
-  //server calls
   
   "start new game": [[ "type" ],
     function me (type) {
@@ -1288,85 +1275,11 @@ a = {
     function me (deck, draws, type) {
       deck.draw(draws.split('')); 
       gcd.ret({$$emit : "cards drawn", $set : {hand:deck.hand.slice(0)} }, me.desc); 
-  }],
+  }]
   
-  
-  "make tweet" : [ ["deck", "score", "type", "wilds"],
-    function me (deck, score, type, wilds) {
-        var url = "http://goodloesolitaire.com/?"+
-          "seed="+deck.seed+
-          "&moves="+deck.moves.join("")+ //deck.movesList()
-          "&type="+type+
-          "&wilds="+wilds;
-        gcd.ret({$set : { tweeturl: url}  ,
-            $$emit : "tweet ready"
-        }, me.desc);
-    }
-  ],
-  
-
-  
-  "send view scores" : function me () {
-    servercalls.get('viewscores', function (server) {
-      if (server.error) {
-        gcd.ret({$$emit: [["view scores denied", server]]}, me.desc);
-        return false;
-      }
-    gcd.ret({$set : {highscores: server.highscores},
-          $$emit : "server sent high scores"
-        }, me.desc);
-    });
-  }
-
-
-
-
-/*
-  'send game review' : function (gid) {
-      servercalls.get('retrievegame/'+gid,  function (data){        
-        console.log(JSON.stringify(data));
-      });      
-    },
-
-  'send game history' : function (gid) {
-      servercalls.get('retrievegame/'+gid,  function (data){        
-        console.log(JSON.stringify(data));
-      });      
-    },
-    
-  'send game replay' : function (gid) {
-      servercalls.get('retrievegame/'+gid,  function (data){        
-        console.log(JSON.stringify(data));
-      });      
-    }
-  */
   
 };
-
-process = function (type, server) {
-  var build = {$set : {}};
-  var data = build.$set;
-  if (server.hasOwnProperty("gid")) {
-     data.gid = server.gid;
-  }
-  data.hand = server.hand;
-  data.call = server.call;
-  data.cardsleft  = server.cardsleft;
-  switch (type) {
-    case "basic" :
-      data.streak = server.gamedata.streak;
-      data.score = server.gamedata.score;
-      data.delta = server.delta;
-      data.level = server.gamedata.level;
-    break;
-    default : 
-    break;
-  }
-  return build;
-};
-
-    
-
+  
 
 });
 
@@ -1427,147 +1340,12 @@ Deck.prototype.draw = function (places) {
     }
   }
   this.moves.push(num);
-};
+};  
 
 
 
 module.exports = Deck;
 
-/*
-
-//games {gid: {userid: userid, deck:[52 cards], hand: [5 cards], draws: [[2,3], [1], ...], current: #, score: #, typeGame: 'str', status: time|'end' ]}
-var cardutil = require('./cardutil');
-var memory = require('./memory');
-
-//for initializing high scores
-exports.initializehs = function (scores) {
-  memory.initializehs(scores.initializehs);
-};
-
-var i;
-var games = {};
-var letters = [];
-for (i = 0; i<10; i += 1) {
-  letters.push(String(i));
-}
-for (i = 0; i<26; i += 1) {
-  letters.push(String.fromCharCode(i+65), String.fromCharCode(i+97));
-}
-
-var gametypes =  {
-  'basic' : function (game) {
-    game.type = 'basic';
-    game.data = {streak:0, score:0};
-    game.wilds = 'yes';
-  }
-};
-
-
-
-    //implement a cleanup routine 
-
-//new game and shuffles deck
-exports.shuffle = function (res, id, type, scores) {
-  var deck, i, j, temp, gid, hand, calldelta, game;
-  //work out type
-  type = type || 'basic';
-  if (!(gametypes.hasOwnProperty(type))) { 
-    type = "basic";
-  }
-  //create and shuffle deck
- 
-  //hand
-  hand = deck.slice(0,5); 
-  //create game id
-  gid = '';
-  for (i = 0; i<8; i+=1) {
-    gid += letters[Math.floor(Math.random()*(62))];
-  }
-  //initial game creation
-  game = {deck:deck, userid:id, hand: hand, draws: ["11111"], current:5, status: Date.now()};
-  games[gid] = game; 
-  //put in stuff for game type
-  gametypes[type](game);
-  //make initial call using lowest possible hand for oldhand
-  calldelta = cardutil.call(hand, ["3c", "4d", "5h", "6s", "8c"], scores.scoring[type], game);
-  memory.newgame(gid, game);
-  res.json({gid:gid, hand: hand, call: calldelta[0], cardsleft: 47, gamedata: game.data, delta : calldelta[1]});
-};
-
-
-var drawcb = function (res, draws, id, gid, scores) {
-  return function (err, game) {
-    var hand, oldhand, i, score, cur, deck, calldelta; 
-    if (game.status === 'end') {
-      res.json({'error': "Game already ended"});
-      return false; 
-    }
-    deck = game.deck;
-    oldhand = game.hand.slice(); 
-    var nocards = true;
-
-    //check id matches gid's userid
-
-    //main logic
-    hand = game.hand;
-    cur = game.current;
-    for (i = 0; i < 5; i += 1) {
-      try {
-        if (draws[i] === "1") {
-          if (cur >= 52) {break;}
-          nocards = false;
-          hand[i] = deck[cur];
-          cur += 1;
-        }
-      } catch (e) {
-        console.log(e);
-      }
-    }
-    if (nocards) {res.json({error:"no cards drawn."}); return false;}
-    calldelta = cardutil.call(hand, oldhand, scores.scoring[game.type], game);  
-    memory.update(gid, game, {hand:hand, draws:draws, data:game.data, current: cur, score:game.data.score, status:Date.now()});
-    res.json({hand:hand, call:calldelta[0], gamedata:game.data, delta:calldelta[1], cardsleft: 52-cur});
-  };
-};
-
-exports.drawcards = function (res, draws, id, gid, scores) {
-  var callback = drawcb(res, draws, id, gid, scores);
-  if (games.hasOwnProperty(gid) ) {
-    callback(null, games[gid]); 
-  } else {
-    memory.loadgame(gid, callback);
-  }
-};
-
-exports.endgame = function (res, id, gid, scores, name) {
-  var game, hs;
-  game = games[gid];
-  if (game.status === 'end') {
-    res.json({'error': "Game already ended"});
-    return false; 
-  }
-  memory.endgame(gid);
-  game.status = 'end';
-  //console.log(scores);
-  hs = scores.highscores;
-  //ordering is a bit hazy
-  if ( (hs.length < 10) || (game.data.score >= hs[0].score) || (game.data.score >= hs[hs.length-1].score) ) {
-    //new highscore logic
-    scores.update(game.data.score, gid, name.replace(/[^ a-zA-Z0-9_]/g, ''), memory.savehighscore);
-    res.json({type: "highscore", game: game, highscores: scores.highscores});
-  } else {
-    //no new highscore logic
-    res.json({type:"not a new highscore", game: game, highscores: scores.highscores});
-  }
-};
-
-
-//retrieves game with gid for replay
-exports.retrievegame = function (res, gid) {
-  memory.retrievegame(res, gid, games);
-};
-
-*/
 
 
 });
@@ -2319,7 +2097,7 @@ computecardposition = function (card) {
 });
 
 require.define("/ui/scores.js", function (require, module, exports, __dirname, __filename) {
-/*globals $, module, console, require, humaneDate*/
+/*globals $, module, console, require, humaneDate, window*/
 
 var file = 'ui/scores: ';
 
@@ -2343,23 +2121,6 @@ a = {
       $('#inarow').html(streak + " in a row" + (level ? " with a bonus of "+ level + "!" : "!"));
     }
   ],
-  'get name' : function me () {
-    $('#scoreentry').bind('hide', function self () {
-      var name;
-      name = encodeURI($('#namemodal').val().replace(/[^ a-zA-Z0-9_]/g, ''));
-      if (!name) {
-        name = "___";
-      } else {
-        $("#name a").html(name);
-      }
-      $('#scoreentry').unbind('hide', self); //self cleanup
-      gcd.ret({ $set : {name : name},
-        $$emit : 'name submitted' }, me.desc);
-    });
-  },
-  "add listener to show high scores" : function () {
-    return {$$once : {"high scores checked" : "display high scores" } };
-  },
   'display high scores' : [ [ "highscores" ],
     function (highscores) {
       var row, rowclass, n, i, date;
@@ -2449,7 +2210,8 @@ a = {
   },
   
   'initialize name/score clicks, modals, high scores' : function () {
-    $('#highscores')    .bind("click", a["retrieve high scores for viewing"]);
+    $('#showtweets')    .bind("click", a["show tweets"]);
+    $('#sendtweet')     .bind("click", a["request tweet"]);
     $("#name")          .bind("click", a["name entry requested"]);
     $("#submitname")    .bind("click", a["hide name entry"]);
     $("#scoreentry")    .bind("hide" , a["emit name entry hidden"]);
@@ -2466,6 +2228,38 @@ a = {
   a["emit submit name"] = function () {
       gcd.emit("name submitted", data);
   };*/
+
+  "show tweets" : function () {
+    $('#modal-tweet').modal({
+      backdrop: true,
+      keyboard: true,
+      show: true
+    });
+    gcd.ret({$$emit : "tweets shown"});
+  },
+
+
+
+  "request tweet" : function() {
+    gcd.ret({$$emit : "tweet requested"});
+  },
+
+   "send tweet" : [["deck", "score", "type", "wilds"], 
+    function me (deck, score, type, wilds) {
+      console.log("tweet clicked");
+      var gameurl = encodeURI("http://goodloesolitaire.com/")+encodeURIComponent("?"+
+          "seed="+deck.seed+
+          "&moves="+deck.moves.join("")+ //deck.movesList()
+          "&type="+type+
+          "&wilds="+wilds);
+      var text = encodeURIComponent("Scored "+score+" playing "+type); 
+      var twitterurl = "https://twitter.com/intent/tweet?screen_name=gsolitaire&text="+text+"&url="+gameurl;
+      var newwindow=window.open(twitterurl,'name','height=200,width=150');
+      if (window.focus) {newwindow.focus();}
+      return false;
+
+    }
+  ],
 
   "retrieve high scores for viewing" : function () {
     gcd.ret({$$once : { "high scores checked" : "display high scores" }, 
@@ -2708,7 +2502,7 @@ module.exports = function (gcd) {
       "initialize score data", // logic/scores:
       "initialize game clicks, hide stuff", // ui/gamecontrol: 
       "initialize draw card click, hide hail, hand", // ui/hand:   
-      'initialize name/score clicks, modals, high scores'// ui/scores: "high scores requested"
+      'initialize name/score clicks, modals, high scores' // ui/scores:
     ],
     "new game requested" : [                                          
       "zero history count", // logic/history:
@@ -2725,7 +2519,6 @@ module.exports = function (gcd) {
       "analyze hand", //util/cardutil: hand analyzed
       "install endgame", // ui/gamecontrol: 
       "bind hand keys", // ui/gamecontrol: 
-      "listen for name entry", // ui/gamecontrol: ON "name entry shown", ON "name submitted"
       "remove main fade", // ui/gamecontrol: 
       "load hand", // ui/hand: "hand loaded" 
       "update number of cards left" // ui/hand: 
@@ -2804,7 +2597,6 @@ module.exports = function (gcd) {
     ],
     "end game requested" : [
       //"add listener to show high scores",// ui/scores: ONCE "high scores checked"
-      "make tweet",
       "install startgame", // ui/gamecontrol: 
       "unbind hand keys", // ui/gamecontrol: 
       "remove listen for name entry", // ui/gamecontrol: REMOVE "name entry shown", REMOVE "name submitted"
@@ -2813,45 +2605,8 @@ module.exports = function (gcd) {
         // above removed by 'remove score/name'
         //ON "end game requested", a["send end game"] // logic/gamecontrol: added by "attach end to request"
     ],
-    "server ended game" : [
-      "look for new high scores", // logic/scores:  "high scores checked"
-      "install startgame", // ui/gamecontrol: 
-      "unbind hand keys", // ui/gamecontrol: 
-      "remove listen for name entry", // ui/gamecontrol: REMOVE "name entry shown", REMOVE "name submitted"
-      "fade main" // ui/gamecontrol: "main is faded"
-    ],
-    
-        //  ??? gcd.on("high scores checked"          , a["display high scores", // ui/scores: 
-    "name requested for high score" : [
-      "watch name to send end game", // logic/scores: once
-      "name entry requested"// ui/scores: "name entry shown"
-    ],
-    "name entry shown" : [
-      "bind name entry keys",// ui/scores:
-      "focus into name modal",// ui/scores:  
-      "get name" // ui/scores:  'name submitted'
-    ],
-        // gcd.on("name entry shown"      , a["unbind hand keys", // ui/gamecontrol: added by "listen for name entry"
-        // gcd.removeListener("name entry shown", a["unbind hand keys", // ui/gamecontrol: removed by "remove listen for name entry"
- 
-        //gcd.on("name entry hidden"            , a["emit submit name" ,// ui/scores: 
-    "name submitted" : [
-      "attach end to request", // logic/gamecontrol: removeListerner, on
-      "remove score/name", // logic/scores: removeListener
-      "unbind name entry keys"// ui/scores: 
-    ],
-        // ONCE "name submitted", a["send end game"]  // logic/gamecontrol: added by "watch name to send end game"
-        // gcd.on("name submitted"       , a["bind hand keys", // ui/gamecontrol: added by "listen for name entry"
-        // gcd.removeListener("name submitted"  , a["bind hand keys",  // ui/gamecontrol: removed by "remove listen for name entry"
-        // gcd.on("name submitted"               , a["get name value",// ui/scores: 
-    'no highscore at end of game' : [
-      "end game" // logic/gamecontrol: "server ended game" OR "end game denied"
-    ],    //above removed by "attach end to request" 
-    'high scores requested' : [
-      //"send view scores" // logic/gamecontrol: "server sent high scores" OR "view scores denied"
-    ],
-    "server sent high scores" : [
-    "look for new high scores" // logic/scores: "high scores checked"
+    "tweet requested" : [
+      "send tweet" //ui/scores
     ]
   } 
 });

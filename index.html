@@ -12,15 +12,36 @@
     <link rel="shortcut icon" href="images/favicon.ico" />
     <link rel="stylesheet" type='text/css' href="css/bootstrap.min.css" />
     <link rel="stylesheet" type='text/css' href="css/style.css" />
+    <link rel="stylesheet" type='text/css' href="css/jquery.tweet.css" />
     <link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Amaranth' />
     <link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Candal' />
 
     <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/jquery.tweet.js"></script>
     <script type="text/javascript" src="js/bootstrap-twipsy.js"></script>
     <script type="text/javascript" src="js/bootstrap-modal.js"></script>
 		<script src="js/humanedate.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/mathrandom.min.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" src="js/browserify.js" charset="utf-8"></script>
+
+    <script type='text/javascript'>
+      //display tweets
+      jQuery(function($){
+        $("#loadtweet").tweet({
+          avatar_size: 32,
+          count: 15,
+          query: "gsolitaire",
+          template: "{user}: {text} » {retweet_action}"
+        });
+      }).bind("loaded", function(){
+        $(this).find("a.tweet_action").click(function(ev) {
+          window.open(this.href, "Retweet",
+                      'menubar=0,resizable=0,width=550,height=420,top=200,left=400');
+          ev.preventDefault();
+        });
+      });
+
+    </script>
   </head>
   <body>
     <div id="fb-root"></div>
@@ -30,12 +51,11 @@
            <h3 class="brand">Goodloe Solitaire</h3>
            <ul class="nav">
              <li id="togglegame"><a id="newgame">Start Game</a><a id="endgame">End Game</a></li>
-             <li id="highscores"><a>High Scores</a></li>
+             <li id="showtweets"><a>Tweets</a></li>
              <li id="about"><a>About</a></li>
            </ul>
            <ul class="nav secondary-nav">
-             <!--<li><div class="fb-login-button" data-show-faces="false" data-width="200"></div></li>-->
-            <li id="name"><a>Log In</a></li>
+            <li id="sendtweet"><a >Tweet Game</a></li>
            </ul>
          </div>
 
@@ -44,9 +64,6 @@
       <div class="container">
           <div class="content">
             <div class="page-header">
-              <div id="social">
-              <div class="fb-like" data-href="http://goodloesolitaire.com" data-send="true" data-width="340" data-show-faces="true" data-colorscheme="dark"></div>
-            </div>
             </div>
             <div class="row">
               <div class="span10 main">
@@ -77,6 +94,7 @@
                 <img class="hide" src="images/deck.png">
                 <div id="handtextdiv"><span id="handtext"></span></div>
               </div>
+ 
               <div id="history" class="span6 history-table">
                 <table>
                   <tbody>
@@ -104,28 +122,26 @@
           <h4>Credits</h4>
             <p>James Taylor and Thomas Park</p>
             <p>With thanks to jQuery, Bootstrap, GitHub, node.js, and MongoDB</p>
+            <p>Comments? Send them to @GSolitaire on Twitter or goodloesolitaire on gmail. 
           </div>
       </div>
 
-      <div id="modal-highscores" class="modal hide fade">
+      <div id="modal-tweet" class="modal hide fade">
           <div class="modal-header">
             <a href="#" class="close">&times;</a>
-            <h3>High Scores</h3>
+            <h3>Latest Tweets</h3>
           </div>
-          <div class="modal-body">
-            <table id="table-highscores" class="zebra-striped">
-            <tbody id="hs">
-            </tbody>
-           </table>
+          <div id="loadtweet" class="modal-body">
           </div>
       </div>
 
-        <div id="scoreentry" class="modal hide fade">
+        <div id="tweetentry" class="modal hide fade">
         <div class="modal-header">
             <a href="#" class="close">&times;</a>
-            <h3>Enter Your Name</h3>
+            <h3>Tweet your game</h3>
           </div>
           <div class="modal-body">
+            <p id="tweettext"></p>
             <p id="newhighscoretext">Enter your name for high scores.</p>
                  <input type="text" maxlength="20" name="namemodal" id="namemodal" autofocus="autofocus" placeholder="Guest" /> 
                  <input type="submit" name="submitname" value="Done" id="submitname" />
