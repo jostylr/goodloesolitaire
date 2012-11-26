@@ -2266,7 +2266,7 @@ a = {
                    ',top='    + top    +
                    ',left='   + left;
       var twitterwindow = window.open(twitterurl, 'twitter', opts);
-      if ((twitterwindow === null) || (twitterwindow.closed) ) {
+      if ((!twitterwindow) || (twitterwindow.closed) ) {
         //popup not open
         $("#tweetgamelink").attr("href", twitterurl).click();
       }
