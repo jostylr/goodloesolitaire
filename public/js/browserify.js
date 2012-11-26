@@ -2254,8 +2254,23 @@ a = {
           "&wilds="+wilds);
       var text = encodeURIComponent("Scored "+score+" playing "+type); 
       var twitterurl = "https://twitter.com/intent/tweet?screen_name=gsolitaire&text="+text+"&url="+gameurl;
-      var newwindow=window.open(twitterurl,'name','height=200,width=150');
-      if (window.focus) {newwindow.focus();}
+    //     var newwindow= window.open(twitterurl,'name','height=200,width=150');
+   //   if (window.focus) {newwindow.focus();}
+      var width  = 575,
+          height = 400,
+          left   = ($(window).width()  - width)  / 2,
+          top    = ($(window).height() - height) / 2,
+          opts   = 'status=1' +
+                   ',width='  + width  +
+                   ',height=' + height +
+                   ',top='    + top    +
+                   ',left='   + left;
+      var twitterwindow = window.open(twitterurl, 'twitter', opts);
+      if ((twitterwindow === null) || (twitterwindow.closed) ) {
+        //popup not open
+        $("#tweetgamelink").attr("href", twitterurl).click();
+      }
+ 
       return false;
 
     }
