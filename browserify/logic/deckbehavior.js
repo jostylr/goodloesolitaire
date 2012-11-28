@@ -9,6 +9,9 @@ var Deck = function (seed) {
           "Tc",  "Td",  "Th",  "Ts",  "Jc",  "Jd",  "Jh",  "Js",  "Qc",  "Qd",  "Qh",  "Qs",  "Kc",  "Kd",  "Kh",  "Ks", 
           "Ac",  "Ad",  "Ah",  "As"
         ];
+  seed = seed || (Math.random().toString()).slice(2);
+  console.log(seed);
+  Math.seedrandom(seed);
   var i,j, temp; 
   for (i = 0 ; i<52; i += 1) {
     j = Math.floor(Math.random() * (52 - i)) + i;
@@ -16,19 +19,16 @@ var Deck = function (seed) {
     deck[j] = deck[i];
     deck[i] = temp; 
   }
-  var place = 0;
-  seed = seed || (Math.random().toString()).slice(2);
-  console.log(seed);
-  Math.seedrandom(seed);
+  this.place = 0;
   this.drawcard = function () {
     var ret;
-    if (place < 52) {
-      ret = deck[place]; 
-      place += 1;
+    if (this.place < 52) {
+      ret = deck[this.place]; 
+      this.place += 1;
     } else {
       ret = null;
     }
-    console.log(place, ret);
+    console.log(this.place, ret);
     return ret;
   };
   this.hand = [];
@@ -50,14 +50,61 @@ Deck.prototype.draw = function (places) {
   for (var i = 0; i < 5; i += 1) {
     if (places[i] == 1) {
       hand[i] = this.drawcard() || hand[i];
-      num += Math.pow(2, i); 
+      num += Math.pow(2, i);
     }
   }
   this.moves.push(num);
 };  
 
 
+// A-Z  65-90,  a-z 97-122
+Deck.prototype.encodedMoves = function () {
+  var moves = this.moves;
+  Math.seedrandom(this.seed);
+  var i, n = moves.length, str = '', charcode;
+  for (i = 0; i < n; i += 1) {
+    charcode = 65 + Math.floor(Math.random() * 27)+moves[i];
+    if (charcode > 90) {
+      charcode += 7;  //shift it to the a-z range
+    }
+    if (charcode > 122) {
+      charcode -= 58;
+    } 
+    str += String.fromCharCode(charcode);
+  }
+  return str;
+};
+
+Deck.prototype.decodeMoves = function (strMoves) {
+  //moves is a string of letters--translate to numbers, then into array of moves
+  var moves = [];
+  Math.seedrandom(this.seed);
+  var i, n= strMoves.length, charcode, ii, num, move, base;
+  for (i = 0; i <n; i +=1 ) {
+    charcode = strMoves.charCodeAt(i);
+    base = Math.floor(Math.random() * 27) + 65;
+    if (charcode < base)  {
+      charcode = charcode - base +58 - 7;
+    } else if (charcode > 97) {
+      charcode = charcode -base -7;
+    } else {
+      charcode = charcode - base;
+    }
+    num = charcode; 
+    move = [];
+    moves.push(move);
+    for (ii = 4; ii >= 0; ii -= 1) {
+      if (num > Math.pow(2, ii)) {
+        move.push(1);
+        num =- Math.pow(2, ii);
+      } else {
+        move.push(0);      
+      }
+    }
+  }
+  this.urlMoves = moves;
+};
+
 
 module.exports = Deck;
-
 

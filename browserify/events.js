@@ -7,19 +7,25 @@ module.exports = function (gcd) {
       "initialize score data", // logic/scores:
       "initialize game clicks, hide stuff", // ui/gamecontrol: 
       "initialize draw card click, hide hail, hand", // ui/hand:   
-      'initialize name/score clicks, modals, high scores' // ui/scores:
+      'initialize name/score clicks, modals, high scores', // ui/scores:
+      "check if old game" // logic/gamecontrol:
     ],
-    "new game requested" : [                                          
+    "old game data successfully processed" : [
+      //"Add brand new/replay/review buttons"
+    ],
+    "new game requested" : [                                    
+      "start new game"  // logic/gamecontrol: "game started"
+      
+    ],
+    "game started" : [
       "zero history count", // logic/history:
       "negate oldhand",   // logic/history:
       'empty history body', // ui/history:
-      "start new game",  // logic/gamecontrol: "game started"
       "reset hand state", // logic/hand: 
       "remove main fade", // ui/gamecontrol: 
       "clear streak", // ui/scores: 
-      "load type" // logic/gamecontrol !!!!!  basic, ...  and wilds see cardutil "enable, disable"
-    ],
-    "game started" : [
+      "load type", // logic/gamecontrol !!!!!  basic, ...  and wilds see cardutil "enable, disable"
+
       "note new hand", // logic/hand: 
       "analyze hand", //util/cardutil: hand analyzed
       "install endgame", // ui/gamecontrol: 
@@ -37,7 +43,8 @@ module.exports = function (gcd) {
     ],
     "score computed" : [
       "check delta",  //  logic/scores: "(negative OR positive OR no) change in score"
-      "check for streak" // logic/scores: "streak" OR ""
+      "check for streak", // logic/scores: "streak" OR ""
+      "update hash" // logic/gamecontrol
     ],
     "card clicked" : [
       "toggle draw cards" // ui/hand: "not enough cards left"

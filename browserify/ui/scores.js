@@ -148,7 +148,7 @@ a = {
    "send tweet" : [["deck", "score", "type", "wilds"], 
     function me (deck, score, type, wilds) {
       console.log("tweet clicked");
-      var gameurl = encodeURI("http://goodloesolitaire.com/")+encodeURIComponent("?"+
+      var gameurl = encodeURI("http://goodloesolitaire.com/")+encodeURIComponent("#"+
           "seed="+deck.seed+
           "&moves="+deck.moves.join("")+ //deck.movesList()
           "&type="+type+
