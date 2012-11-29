@@ -65,8 +65,8 @@ a = {
     function me (deck, type, wilds) {
       var hash =
           "seed="+deck.seed+
-          "&type="+type+
-          "&wilds="+wilds+
+          ((type !== "basic") ? "&type="+type : "") +
+          ((wilds !== "yes") ? "&wilds="+wilds : "") +
           "&moves="+deck.encodedMoves(); //deck.movesList()
 
       window.location.hash = hash; 

@@ -1304,8 +1304,8 @@ a = {
     function me (deck, type, wilds) {
       var hash =
           "seed="+deck.seed+
-          "&type="+type+
-          "&wilds="+wilds+
+          ((type !== "basic") ? "&type="+type : "") +
+          ((wilds !== "yes") ? "&wilds="+wilds : "") +
           "&moves="+deck.encodedMoves(); //deck.movesList()
 
       window.location.hash = hash; 
@@ -1423,6 +1423,7 @@ Deck.prototype.encodedMoves = function () {
     if (charcode > 122) {
       charcode -= 58;
     } 
+    console.log(charcode, moves[i]);
     str += String.fromCharCode(charcode);
   }
   return str;
@@ -1447,11 +1448,12 @@ Deck.prototype.decodeMoves = function (strMoves) {
     move = [];
     moves.push(move);
     for (ii = 4; ii >= 0; ii -= 1) {
-      if (num > Math.pow(2, ii)) {
-        move.push(1);
-        num =- Math.pow(2, ii);
+      console.log(num);
+      if (num >= Math.pow(2, ii)) {
+        move[ii] = 1;
+        num = num - Math.pow(2, ii);
       } else {
-        move.push(0);      
+        move[ii]= 0;      
       }
     }
   }
@@ -2358,16 +2360,28 @@ a = {
     gcd.ret({$$emit : "tweet requested"});
   },
 
+
+
    "send tweet" : [["deck", "score", "type", "wilds"], 
     function me (deck, score, type, wilds) {
       console.log("tweet clicked");
-      var gameurl = encodeURI("http://goodloesolitaire.com/")+encodeURIComponent("#"+
-          "seed="+deck.seed+
-          "&moves="+deck.moves.join("")+ //deck.movesList()
-          "&type="+type+
-          "&wilds="+wilds);
-      var text = encodeURIComponent("Scored "+score+" playing "+type); 
-      var twitterurl = "https://twitter.com/intent/tweet?screen_name=gsolitaire&text="+text+"&url="+gameurl;
+      var gameurl = encodeURI("http://goodloesolitaire.com/")+encodeURIComponent(window.location.hash);
+      var text = encodeURIComponent(".@GSolitaire Scored "+score+" playing Goodloe Solitaire");
+      var htype = (type !== "basic" )? type : "";
+      var hwilds = (wilds !== "yes" )? wilds : "";
+      var hash;
+      if (htype && hwilds) {
+        hash = htype+","+hwilds;
+      } else if (htype) {
+        hash = htype;
+      } else if (hwilds) {
+        hash = hwilds;
+      } else {
+        hash = "";
+      }
+      var twitterurl = "https://twitter.com/intent/tweet?text="+text+"&url="+gameurl +
+        (hash ? "&hashtags="+hash : "");
+      
     //     var newwindow= window.open(twitterurl,'name','height=200,width=150');
    //   if (window.focus) {newwindow.focus();}
       var width  = 575,

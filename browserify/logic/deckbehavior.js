@@ -70,6 +70,7 @@ Deck.prototype.encodedMoves = function () {
     if (charcode > 122) {
       charcode -= 58;
     } 
+    console.log(charcode, moves[i]);
     str += String.fromCharCode(charcode);
   }
   return str;
@@ -94,11 +95,12 @@ Deck.prototype.decodeMoves = function (strMoves) {
     move = [];
     moves.push(move);
     for (ii = 4; ii >= 0; ii -= 1) {
-      if (num > Math.pow(2, ii)) {
-        move.push(1);
-        num =- Math.pow(2, ii);
+      console.log(num);
+      if (num >= Math.pow(2, ii)) {
+        move[ii] = 1;
+        num = num - Math.pow(2, ii);
       } else {
-        move.push(0);      
+        move[ii]= 0;      
       }
     }
   }

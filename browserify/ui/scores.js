@@ -145,16 +145,28 @@ a = {
     gcd.ret({$$emit : "tweet requested"});
   },
 
+
+
    "send tweet" : [["deck", "score", "type", "wilds"], 
     function me (deck, score, type, wilds) {
       console.log("tweet clicked");
-      var gameurl = encodeURI("http://goodloesolitaire.com/")+encodeURIComponent("#"+
-          "seed="+deck.seed+
-          "&moves="+deck.moves.join("")+ //deck.movesList()
-          "&type="+type+
-          "&wilds="+wilds);
-      var text = encodeURIComponent("Scored "+score+" playing "+type); 
-      var twitterurl = "https://twitter.com/intent/tweet?screen_name=gsolitaire&text="+text+"&url="+gameurl;
+      var gameurl = encodeURI("http://goodloesolitaire.com/")+encodeURIComponent(window.location.hash);
+      var text = encodeURIComponent(".@GSolitaire Scored "+score+" playing Goodloe Solitaire");
+      var htype = (type !== "basic" )? type : "";
+      var hwilds = (wilds !== "yes" )? wilds : "";
+      var hash;
+      if (htype && hwilds) {
+        hash = htype+","+hwilds;
+      } else if (htype) {
+        hash = htype;
+      } else if (hwilds) {
+        hash = hwilds;
+      } else {
+        hash = "";
+      }
+      var twitterurl = "https://twitter.com/intent/tweet?text="+text+"&url="+gameurl +
+        (hash ? "&hashtags="+hash : "");
+      
     //     var newwindow= window.open(twitterurl,'name','height=200,width=150');
    //   if (window.focus) {newwindow.focus();}
       var width  = 575,
