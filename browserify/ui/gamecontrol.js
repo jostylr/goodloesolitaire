@@ -61,10 +61,10 @@ b = { "hand key bindings": function (evnt) {
 
 a = {
   "install endgame" : function () {
-    $("#togglegame").html('<a id="endgame">End Game</a>');        
+ //   $("#togglegame").html('<a id="endgame">End Game</a>');        
   },
   "install startgame": function () {
-    $("#togglegame").html('<a id="newgame">Start Game</a>');      
+  //  $("#togglegame").html('<a id="newgame" >Start Game</a>');      
   },
   "remove main fade" : function  () {
     $(".main").fadeTo(200, 1);
