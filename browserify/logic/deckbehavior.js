@@ -104,7 +104,7 @@ Deck.prototype.decodeMoves = function (strMoves) {
       }
     }
   }
-  this.urlMoves = moves;
+  return moves;
 };
 
 

@@ -46,6 +46,9 @@ b = { "hand key bindings": function (evnt) {
     }, file+"emit retrieve game requested");
   },
   
+  "emit request for replay old game" : function me () {
+    gcd.ret({$$emit : "replay game requested"}, file+"emit request for replay old game");
+  },
   
   "show about" : function () {
     $('#modal-about').modal({
@@ -104,7 +107,7 @@ a = {
     $(".main").fadeTo(100, fadelevel);
     $("#hs").click(b["emit retrieve game requested"]);
     $("#about").click(b["show about"]);
-  
+    $("#oldreplay").click(b["emit request for replay old game"]);
     
   }
   

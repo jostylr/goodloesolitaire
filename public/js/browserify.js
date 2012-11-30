@@ -1281,7 +1281,7 @@ a = {
     gcd.ret({$set:{deck:deck, hand:deck.hand.slice(0), cardsleft : (52-deck.place)}, $$emit: "game started"}, me.desc); 
 
     if (ret.hasOwnProperty("moves")) {
-      deck.decodeMoves(ret.moves);
+      deck.urlMoves = ret.moves;
     } 
     ret.moves = [];
     
@@ -1306,6 +1306,7 @@ a = {
           "seed="+deck.seed+
           ((type !== "basic") ? "&type="+type : "") +
           ((wilds !== "yes") ? "&wilds="+wilds : "") +
+          ((deck.urlMoves) ? "&old="+deck.urlMoves : "") +
           "&moves="+deck.encodedMoves(); //deck.movesList()
 
       window.location.hash = hash; 
@@ -1326,8 +1327,47 @@ a = {
     function me (deck, draws, type) {
       deck.draw(draws.split('')); 
       gcd.ret({$$emit : "cards drawn", $set : {hand:deck.hand.slice(0), cardsleft : (52-deck.place)} }, me.desc); 
-  }]
+    }
+  ],
   
+  "replay old game" : [["deck"],
+    function me (deck) {
+            
+      var moves = deck.decodeMoves(deck.urlMoves);
+      var urlMoves = deck.urlMoves;
+      // clear and initialize game
+      deck = new Deck(deck.seed);
+      deck.newhand();
+      deck.urlMoves = urlMoves;
+      gcd.ret({$set:{deck:deck, hand:deck.hand.slice(0), cardsleft : (52-deck.place)}, $$emit: "game started"}, me.desc);
+      // 1/2 second cycle, 1/4 sec to click cards, 1/4 sec to draw card
+      var time = 500;
+      var moveplace = 1;
+      //set time out to click cards
+      var timeout = window.setInterval(function () {
+        if (moveplace >= moves.length) {
+          window.clearInterval(timeout);
+          return;
+        }
+        var move = moves[moveplace];
+        moveplace += 1;
+        //click cards
+        var i, n = move.length;
+        for (i = 0; i < n; i += 1) {
+          if (move[i] == 1) {
+            console.log("card"+(i+1));
+            $("#card"+(i+1)).click();
+          }
+        }
+        window.setTimeout(function () {
+          //draw card
+          $("#drawcards").click();
+        }, time/2);
+      }, time);
+      // it waits 
+    }
+  ]
+
   
 };
 
@@ -1457,7 +1497,7 @@ Deck.prototype.decodeMoves = function (strMoves) {
       }
     }
   }
-  this.urlMoves = moves;
+  return moves;
 };
 
 
@@ -1871,6 +1911,9 @@ b = { "hand key bindings": function (evnt) {
     }, file+"emit retrieve game requested");
   },
   
+  "emit request for replay old game" : function me () {
+    gcd.ret({$$emit : "replay game requested"}, file+"emit request for replay old game");
+  },
   
   "show about" : function () {
     $('#modal-about').modal({
@@ -1929,7 +1972,7 @@ a = {
     $(".main").fadeTo(100, fadelevel);
     $("#hs").click(b["emit retrieve game requested"]);
     $("#about").click(b["show about"]);
-  
+    $("#oldreplay").click(b["emit request for replay old game"]);
     
   }
   
@@ -2757,6 +2800,9 @@ module.exports = function (gcd) {
     ],
     "tweet requested" : [
       "send tweet" //ui/scores
+    ],
+    "replay game requested" : [
+      "replay old game"
     ]
   } 
 });
@@ -2776,7 +2822,7 @@ var Dispatcher = require('eventingfunctions').Dispatcher;
 gcd = new Dispatcher(true);
 
 
-gcd.emit("debugging requested"); 
+//gcd.emit("debugging requested"); 
 
 
 /*

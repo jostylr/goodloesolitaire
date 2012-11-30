@@ -119,6 +119,9 @@ module.exports = function (gcd) {
     ],
     "tweet requested" : [
       "send tweet" //ui/scores
+    ],
+    "replay game requested" : [
+      "replay old game"
     ]
   } 
 });
