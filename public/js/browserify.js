@@ -2313,7 +2313,7 @@ a = {
       $("#score").html(score);
       $("#delta").html("&#x25BC;"+(-1*delta));
       $('#score, #delta').removeClass("scoreminus scoreplus");
-      setTimeout(function () {$('#score, #delta').addClass("scoreminus");}, 5);
+      window.setTimeout(function () {$('#score, #delta').addClass("scoreminus");}, 5);
       return {$$emit : "score loaded" };
     }
   ],
@@ -2322,7 +2322,7 @@ a = {
       $("#score").html(score);
       $("#delta").html("&#x25B2;" + delta);
       $('#score, #delta').removeClass("scoreminus scoreplus");
-      setTimeout(function () {$('#score, #delta').addClass("scoreplus");}, 5);
+      window.setTimeout(function () {$('#score, #delta').addClass("scoreplus");}, 5);
       return {$$emit : "score loaded" };
     }
   ],
@@ -2409,7 +2409,7 @@ a = {
     function me (deck, score, type, wilds) {
       console.log("tweet clicked");
       var gameurl = encodeURI("http://goodloesolitaire.com/")+encodeURIComponent(window.location.hash);
-      var text = encodeURIComponent(".@GSolitaire Scored "+score+" playing Goodloe Solitaire");
+      var text = encodeURIComponent(score+" playing Goodloe Solitaire @GSolitaire");
       var htype = (type !== "basic" )? type : "";
       var hwilds = (wilds !== "yes" )? wilds : "";
       var hash;

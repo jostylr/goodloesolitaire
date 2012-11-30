@@ -30,7 +30,7 @@
         $("#loadtweet").tweet({
           avatar_size: 32,
           count: 15,
-          query: "gsolitaire",
+          query: "goodloesolitaire.com",
           template: "{user}: {text} » {retweet_action}"
         });
       }).bind("loaded", function(){
@@ -51,11 +51,11 @@
            <h3 class="brand">Goodloe Solitaire</h3>
            <ul class="nav">
              <li id="togglegame"><a id="newgame" href="http://goodloesolitaire.com">New Game</a></li>
-             <li id="showtweets"><a>Tweets</a></li>
              <li id="about"><a>About</a></li>
              <li id="oldreplay"><a>Review Old Game</a></li>
            </ul>
            <ul class="nav secondary-nav">
+              <li id="showtweets"><a>Latest Games</a></li>
             <li id="sendtweet"><a id="tweetgamelink" target="_blank" >Tweet Game</a></li>
            </ul>
          </div>
@@ -130,7 +130,7 @@
       <div id="modal-tweet" class="modal hide fade">
           <div class="modal-header">
             <a href="#" class="close">&times;</a>
-            <h3>Latest Tweets</h3>
+            <h3>Latest Scores</h3>
           </div>
           <div id="loadtweet" class="modal-body">
           </div>

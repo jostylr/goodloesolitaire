@@ -12,7 +12,7 @@
 		margin: 0;
 		padding: 0;
 		overflow-y: hidden;
-		background-color: #8ADEE2;
+		background-color: rgba(15, 15, 15, 0.2);
 	}
 	
 		.tweet_list li {
