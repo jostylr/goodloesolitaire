@@ -1,3 +1,5 @@
+replaytime = 1000;
+
 var require = function (file, cwd) {
     var resolved = require.resolve(file, cwd || '/');
     var mod = require.modules[resolved];
@@ -1346,7 +1348,7 @@ a = {
       deck.urlMoves = urlMoves;
       gcd.ret({$set:{deck:deck, hand:deck.hand.slice(0), cardsleft : (52-deck.place)}, $$emit: "game started"}, me.desc);
       // 1/2 second cycle, 1/4 sec to click cards, 1/4 sec to draw card
-      var time = 1000;
+      var time = replaytime;
       var moveplace = 1;
       //set time out to click cards
       var timeout = window.setInterval(function () {
