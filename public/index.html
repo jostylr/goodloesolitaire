@@ -18,8 +18,7 @@
 
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/jquery.tweet.js"></script>
-    <script type="text/javascript" src="js/bootstrap-twipsy.js"></script>
-    <script type="text/javascript" src="js/bootstrap-modal.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
 		<script src="js/humanedate.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/mathrandom.min.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" src="js/browserify.js" charset="utf-8"></script>
@@ -53,7 +52,19 @@
              <li id="togglegame"><a id="newgame" href="http://goodloesolitaire.com">New Game</a></li>
              <li id="about"><a>About</a></li>
              <li id="oldreplay"><a>Review Old Game</a></li>
-           </ul>
+            <li class="dropdown">  
+              <a class="dropdown-toggle" data-toggle="dropdown">Other Types <b class="caret"></b>  </a>  
+              <ul id="gametypes" class="dropdown-menu">  
+               <li><a id="basic">Default</a></li>  
+            <li><a id="mount">Climb the Mountain</a></li>  
+            <li><a id="target">Target Practice</a></li>  
+            <li><a id="measured">Measured Pace</a></li>  
+            <li><a id="alive">Staying Alive</a></li>  
+            <li><a id="powerlevel">Power Leveling</a></li>  
+            <li><a id="streakpower">Streak Power</a></li>  
+              </ul>  
+            </li>  
+          </ul>  
            <ul class="nav secondary-nav">
               <li id="showtweets"><a>Latest Games</a></li>
             <li id="sendtweet"><a id="tweetgamelink" target="_blank" >Tweet Game</a></li>
@@ -136,15 +147,24 @@
           </div>
       </div>
 
-        <div id="tweetentry" class="modal hide fade">
+
+      <div id="modal-gametype" class ="modal hide fade">
         <div class="modal-header">
-            <a href="#" class="close">&times;</a>
-            <h3>Tweet your game</h3>
-          </div>
-          <div class="modal-body">
-          <div id="totweetiframe"></div>
-          </div>
+          <a href="#" class="close">&times;</a>
+          <h3>New game</h3>
+        </div>
+        <div id="gametype-body" class="modal-body">
+          <p>Ready for a new challenge? You have chosen <span id="gametype-type"></span>. </p>
+
+          <p><a id="gametype-wilds">Deuces Wild!</a></p>
+
+          <p><a id="gametype-wilds">Playing it straight.</a></p>
+          
+          <div id="rules">Here are the rules for this version</div>
+
+        </div>
       </div>
+
 
     </body>
 </html>

@@ -45,6 +45,15 @@ b = { "hand key bindings": function (evnt) {
       $$emit : 'old game requested'
     }, file+"emit retrieve game requested");
   },
+
+  "new gametype chosen" : function me (event) {
+    var whichtype = $(event.target).attr("id");
+    $('#modal-gametype').modal({
+      backdrop: true,
+      keyboard: true,
+      show: true
+    });
+  },
   
   "emit request for replay old game" : function me () {
     gcd.ret({$$emit : "replay game requested"}, file+"emit request for replay old game");
@@ -108,6 +117,7 @@ a = {
     $("#hs").click(b["emit retrieve game requested"]);
     $("#about").click(b["show about"]);
     $("#oldreplay").click(b["emit request for replay old game"]);
+    $("#gametypes a").click(b["new gametype chosen"]);
     
   }
   

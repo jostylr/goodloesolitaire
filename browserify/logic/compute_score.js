@@ -31,11 +31,31 @@ a = {
   
 };
 
-
+/*
+1. Streaking
+    This is what we are doing now.
+  2. Climb the Mountain
+    Goal is to reach highest hand in fewest turns.
+  3. Target Practice
+    A target hand type is given. Motion towards it is rewarded. Motion away, penalized.
+  4. Measured pace
+    Points achieved for each hand type in order. 
+  5. Staying Alive
+    Maintain or improve current hand type, but ranking in it is of no consequence. Points for different hand types are not by ordering, but on perceived difficulty. One downturn is the end game.
+  6. Paying the Rent  
+    Pot of money. Each card draw costs money. Levels cost money for rent. Level gains give a pot of money. Rent increases as level stays the same. Interest accrues on pot of money each turn with streaks increasing interest. Level loss loses money.
+  10. Maybe different scoring rules too. Such as Current Major Level as base and the streak at that level as power. 
+  */
 
 types = {
-  "basic" : {streak: 0, score: 0, level : 0, delta:0}
-
+  "basic" : {streak: 0, score: 0, level : 0, delta:0},
+  "climb the mountain" : {score:52}, // subtract 1 point for each hand; once the high hand is reached, then the score is multiplied by 1000
+  "target practice" : {target : "5", delta :0, score:0}, // target gets chosen. compare the differences to previous hand and current hand
+  "measured pace" : {level:0, score:0}, 
+  "staying alive" : { score : 0},
+  "paying rent" : { score:0, level:0},
+  "power leveling" : {streak: 0, score: 0, level : 0, delta:0},
+  "streak power" : {streak: 0, score: 0, level : 0, delta:0}
 };
 
 //scoring functions take in a diff and a game. mainly diff

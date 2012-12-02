@@ -107,7 +107,7 @@ a = {
       deck.urlMoves = urlMoves;
       gcd.ret({$set:{deck:deck, hand:deck.hand.slice(0), cardsleft : (52-deck.place)}, $$emit: "game started"}, me.desc);
       // 1/2 second cycle, 1/4 sec to click cards, 1/4 sec to draw card
-      var time = 1000;
+      var time = 1500;
       var moveplace = 1;
       //set time out to click cards
       var timeout = window.setInterval(function () {
