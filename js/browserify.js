@@ -1330,9 +1330,14 @@ a = {
     }
   ],
   
-  "replay old game" : [["deck"],
-    function me (deck) {
-            
+  "replay old game" : [["deck", "replay", "drawfun"],
+    function me (deck, replay, drawfun) {
+      if (replay) {
+        window.clearInterval(replay);
+      }
+      if (drawfun) {
+        window.clearTimeout(drawfun);
+      }
       var moves = deck.decodeMoves(deck.urlMoves);
       var urlMoves = deck.urlMoves;
       // clear and initialize game
@@ -1341,7 +1346,7 @@ a = {
       deck.urlMoves = urlMoves;
       gcd.ret({$set:{deck:deck, hand:deck.hand.slice(0), cardsleft : (52-deck.place)}, $$emit: "game started"}, me.desc);
       // 1/2 second cycle, 1/4 sec to click cards, 1/4 sec to draw card
-      var time = 500;
+      var time = 1000;
       var moveplace = 1;
       //set time out to click cards
       var timeout = window.setInterval(function () {
@@ -1359,12 +1364,14 @@ a = {
             $("#card"+(i+1)).click();
           }
         }
-        window.setTimeout(function () {
+        var win = window.setTimeout(function () {
           //draw card
           $("#drawcards").click();
         }, time/2);
+        gcd.ret({$set: {drawfun:win}});
       }, time);
       // it waits 
+      gcd.ret({$set :{replay: timeout}});
     }
   ]
 
