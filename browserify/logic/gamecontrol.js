@@ -25,6 +25,7 @@ a = {
   
   "check if old game"  : function me () {
     var parts = window.location.hash.slice(1).split("&");
+    parts = parts.concat(window.location.search.slice(1).split("&"));
     var i, n = parts.length, temp;
     var ret = {};
     for (i = 0; i < n; i += 1) {
@@ -39,18 +40,19 @@ a = {
       deck = new Deck();
     }
     deck.newhand();
-    gcd.ret({$set:{deck:deck, hand:deck.hand.slice(0), cardsleft : (52-deck.place)}, $$emit: "game started"}, me.desc); 
 
     if (ret.hasOwnProperty("moves")) {
       deck.urlMoves = ret.moves;
     } 
     ret.moves = [];
-    
+    $("#targethand").addClass("hide");
     if (ret.hasOwnProperty("type")) {
       ret.type = checktypes(ret.type);
     } else {
       ret.type = "basic";
     }
+    // update newgame link
+    $("#newgame").attr("href", window.location.href.split("#")[0]).text("New "+$("#"+ret.type).text()+"");
     if (ret.hasOwnProperty("wilds")) {
       if (!((ret.wilds === "yes") || (ret.wilds === "no") )) {
         ret.wilds = "yes";
@@ -59,18 +61,17 @@ a = {
       ret.wilds = "yes";
     }
     gcd.ret({$set : {old : ret}, $$emit : "old game data successfully processed"}, me.desc);
+    gcd.ret({$set:{deck:deck, hand:deck.hand.slice(0), type: ret.type, wilds : ret.wilds, seed: ret.seed, cardsleft : (52-deck.place)}, $$emit: "game started"}, me.desc); 
+
   },
 
   "update hash" : [["deck", "type", "wilds"], 
     function me (deck, type, wilds) {
       var hash =
-          "seed="+deck.seed+
-          ((type !== "basic") ? "&type="+type : "") +
-          ((wilds !== "yes") ? "&wilds="+wilds : "") +
-          ((deck.urlMoves) ? "&old="+deck.urlMoves : "") +
+          "seed="+deck.seed +
           "&moves="+deck.encodedMoves(); //deck.movesList()
 
-      window.location.hash = hash; 
+      window.location.hash = hash;
     }
   ],
 
@@ -140,8 +141,14 @@ a = {
 };
 
 types = {
-  "basic" : {streak: 0, score: 0, level : 0, delta:0}
-
+  "basic" : 1,
+  "mount" : 1,
+  "target" : 1,
+  "measured" : 1,
+  "alive" : 1,
+  "rent" : 1,
+  "powerlevel" : 1,
+  "streakpower" : 1
 };
 
 

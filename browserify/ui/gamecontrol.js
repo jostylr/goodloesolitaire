@@ -47,14 +47,21 @@ b = { "hand key bindings": function (evnt) {
   },
 
   "new gametype chosen" : function me (event) {
-    var whichtype = $(event.target).attr("id");
+    var ev = $(event.target);
+    var whichtype = ev.attr("id");
+    var typetitle = ev.text();
+    $("#gametype-body").html($("#r-"+whichtype).html());
+    var typehref = window.location.href.split("?")[0].split("#")[0]+"?type="+whichtype;
+    $("#gametype-wilds").attr("href", typehref+"&wilds=yes");
+    $("#gametype-nowilds").attr("href", typehref+"&wilds=no"); 
+    $("#gametype-name").text(typetitle);  
     $('#modal-gametype').modal({
       backdrop: true,
       keyboard: true,
       show: true
     });
   },
-  
+ 
   "emit request for replay old game" : function me () {
     gcd.ret({$$emit : "replay game requested"}, file+"emit request for replay old game");
   },

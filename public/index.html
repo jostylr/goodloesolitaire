@@ -55,15 +55,17 @@
             <li class="dropdown">  
               <a class="dropdown-toggle" data-toggle="dropdown">Other Types <b class="caret"></b>  </a>  
               <ul id="gametypes" class="dropdown-menu">  
-               <li><a id="basic">Default</a></li>  
+               <li><a id="basic">Basic</a></li>  
             <li><a id="mount">Climb the Mountain</a></li>  
             <li><a id="target">Target Practice</a></li>  
             <li><a id="measured">Measured Pace</a></li>  
             <li><a id="alive">Staying Alive</a></li>  
+            <li><a id="rent">Paying the Rent</a></li>              
             <li><a id="powerlevel">Power Leveling</a></li>  
             <li><a id="streakpower">Streak Power</a></li>  
               </ul>  
-            </li>  
+            </li>
+            <li id="targethand" class="hide"><a></a></li>  
           </ul>  
            <ul class="nav secondary-nav">
               <li id="showtweets"><a>Latest Games</a></li>
@@ -151,20 +153,28 @@
       <div id="modal-gametype" class ="modal hide fade">
         <div class="modal-header">
           <a href="#" class="close">&times;</a>
-          <h3>New game</h3>
+          <h3 id="new-gametype"> <span id="gametype-name">Climb the Mountain</span>
+            <a class="btn" id="gametype-wilds">Deuces Wild!</a> 
+            <span style="display:inline-block; width: 5%;"></span>
+            <a class="btn" id="gametype-nowilds">Playing it straight.</a>
+            </h3>
         </div>
         <div id="gametype-body" class="modal-body">
-          <p>Ready for a new challenge? You have chosen <span id="gametype-type"></span>. </p>
-
-          <p><a id="gametype-wilds">Deuces Wild!</a></p>
-
-          <p><a id="gametype-wilds">Playing it straight.</a></p>
-          
-          <div id="rules">Here are the rules for this version</div>
-
         </div>
       </div>
 
+      <div class="hide">
+        <ul>
+          <li id="r-basic">Keep the streak going; get high in levels.</li>
+          <li id="r-mount">Goal is to reach highest hand in fewest turns.</li>  
+          <li id="r-target">A target hand type is given. Motion towards it is rewarded. Motion away, penalized.</li>  
+          <li id="r-measured">    Points achieved for each hand type in order. </li>  
+          <li id="r-alive">    Maintain or improve current hand type, but ranking in it is of no consequence. Points for different hand types are not by ordering, but on perceived difficulty. One downturn is the end game.</li>  
+          <li id="r-rent">Pot of money. Each card draw costs money. Levels cost money for rent. Level gains give a pot of money. Rent increases as level stays the same. Interest accrues on pot of money each turn with streaks increasing interest. Level loss loses money.</li>
+          <li id="r-powerlevel">Current level is a power to the streak.</li>  
+          <li id="r-streakpower">Streaks are powres to the levels.</li>  
+        </ul>
+      </div>
 
     </body>
 </html>
