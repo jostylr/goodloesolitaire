@@ -1942,7 +1942,7 @@ scoring = {
       } else {
         streak = 1;
       }
-      delta = 100*Math.pow(streak, actuallevel);
+      delta = 1*Math.pow(streak, actuallevel);
       if (diff[0] === 1) { //major change
         delta *= diff[1];
         lvl = diff[1];
@@ -1954,13 +1954,56 @@ scoring = {
       } else {
         streak = -1;
       }
-      delta = -100*Math.pow(Math.abs(streak), actuallevel);
+      delta = -1*Math.pow(Math.abs(streak), actuallevel);
       if (diff[0] === 1) { //major change
         delta *= diff[1];
         lvl = diff[1];
       }
     }
-    console.log(delta, streak, actuallevel); 
+    return {streak: streak, score: (data.score + delta), level : lvl, delta:delta, 
+      typedata : {streak: streak, score: (data.score + delta), level : lvl, delta:delta}
+    };
+  },
+
+  "streakpower" : function (call, diff, data) {
+    var streak = data.streak;
+    var delta = 0;
+    var lvl = 0;
+    var actuallevel = major[call[0]];
+    //no change, streak grows, not score
+    if (diff[0] === 0) {
+      if (streak > 0 ) {
+        streak += 1; 
+        delta = 0;
+      } else {
+        streak -= 1;
+        delta = 0;
+      }
+    } else if (diff[0] > 0) { 
+      if (streak >0) {
+        //streak continues
+        streak += 1;
+      } else {
+        streak = 1;
+      }
+      delta = 1*Math.pow(actuallevel, streak);
+      if (diff[0] === 1) { //major change
+        delta *= diff[1];
+        lvl = diff[1];
+      }
+    } else {
+      if (streak < 0) {
+        //losing streak continues
+        streak -= 1;
+      } else {
+        streak = -1;
+      }
+      delta = -1*Math.pow(actuallevel, Math.abs(streak));
+      if (diff[0] === 1) { //major change
+        delta *= diff[1];
+        lvl = diff[1];
+      }
+    }
     return {streak: streak, score: (data.score + delta), level : lvl, delta:delta, 
       typedata : {streak: streak, score: (data.score + delta), level : lvl, delta:delta}
     };
@@ -2531,7 +2574,9 @@ a = {
    "send tweet" : [["deck", "score", "type", "wilds"], 
     function me (deck, score, type, wilds) {
       console.log("tweet clicked");
-      var gameurl = encodeURI("http://goodloesolitaire.com/")+encodeURIComponent(window.location.hash);
+      var gameurl = encodeURI("http://goodloesolitaire.com/")+
+          encodeURIComponent(window.location.search)+
+          encodeURIComponent(window.location.hash);
       var text = encodeURIComponent(score+" playing Goodloe Solitaire @GSolitaire");
       var htype = (type !== "basic" )? type : "";
       var hwilds = (wilds !== "yes" )? wilds : "";
