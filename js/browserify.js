@@ -1,5 +1,3 @@
-replaytime = 1000;
-
 var require = function (file, cwd) {
     var resolved = require.resolve(file, cwd || '/');
     var mod = require.modules[resolved];
@@ -590,6 +588,8 @@ var Dispatcher = function () {
 
 Dispatcher.prototype = new events.EventEmitter(); 
 
+Dispatcher.prototype.setMaxListeners(50);
+
 module.exports.Dispatcher = Dispatcher;
 
 
@@ -628,7 +628,7 @@ Dispatcher.prototype.retrieve = function (name) {
 
 //return function
 Dispatcher.prototype.ret = function (changes, desc) {
-    console.log(this, changes, desc);
+    //console.log(this, changes, desc);
     this.log.makechanges(desc || "no description", changes);
     this.makechanges(changes);
   };
@@ -1266,6 +1266,7 @@ a = {
   
   "check if old game"  : function me () {
     var parts = window.location.hash.slice(1).split("&");
+    parts = parts.concat(window.location.search.slice(1).split("&"));
     var i, n = parts.length, temp;
     var ret = {};
     for (i = 0; i < n; i += 1) {
@@ -1280,18 +1281,19 @@ a = {
       deck = new Deck();
     }
     deck.newhand();
-    gcd.ret({$set:{deck:deck, hand:deck.hand.slice(0), cardsleft : (52-deck.place)}, $$emit: "game started"}, me.desc); 
 
     if (ret.hasOwnProperty("moves")) {
       deck.urlMoves = ret.moves;
     } 
     ret.moves = [];
-    
+    $("#targethand").addClass("hide");
     if (ret.hasOwnProperty("type")) {
       ret.type = checktypes(ret.type);
     } else {
       ret.type = "basic";
     }
+    // update newgame link
+    $("#newgame").attr("href", window.location.href.split("#")[0]).text("New "+$("#"+ret.type).text()+"");
     if (ret.hasOwnProperty("wilds")) {
       if (!((ret.wilds === "yes") || (ret.wilds === "no") )) {
         ret.wilds = "yes";
@@ -1300,18 +1302,17 @@ a = {
       ret.wilds = "yes";
     }
     gcd.ret({$set : {old : ret}, $$emit : "old game data successfully processed"}, me.desc);
+    gcd.ret({$set:{deck:deck, hand:deck.hand.slice(0), type: ret.type, wilds : ret.wilds, seed: ret.seed, cardsleft : (52-deck.place)}, $$emit: "game started"}, me.desc); 
+
   },
 
   "update hash" : [["deck", "type", "wilds"], 
     function me (deck, type, wilds) {
       var hash =
-          "seed="+deck.seed+
-          ((type !== "basic") ? "&type="+type : "") +
-          ((wilds !== "yes") ? "&wilds="+wilds : "") +
-          ((deck.urlMoves) ? "&old="+deck.urlMoves : "") +
+          "seed="+deck.seed +
           "&moves="+deck.encodedMoves(); //deck.movesList()
 
-      window.location.hash = hash; 
+      window.location.hash = hash;
     }
   ],
 
@@ -1348,7 +1349,7 @@ a = {
       deck.urlMoves = urlMoves;
       gcd.ret({$set:{deck:deck, hand:deck.hand.slice(0), cardsleft : (52-deck.place)}, $$emit: "game started"}, me.desc);
       // 1/2 second cycle, 1/4 sec to click cards, 1/4 sec to draw card
-      var time = replaytime;
+      var time = 1500;
       var moveplace = 1;
       //set time out to click cards
       var timeout = window.setInterval(function () {
@@ -1381,8 +1382,14 @@ a = {
 };
 
 types = {
-  "basic" : {streak: 0, score: 0, level : 0, delta:0}
-
+  "basic" : 1,
+  "mount" : 1,
+  "target" : 1,
+  "measured" : 1,
+  "alive" : 1,
+  "rent" : 1,
+  "powerlevel" : 1,
+  "streakpower" : 1
 };
 
 
@@ -1799,9 +1806,14 @@ module.exports = function (gcde) {
 };
 
 a = {
-  "compute score" : [["call", "type", "diff", "typedata"], 
-    function me (call, type, diff, data) {
-      gcd.ret({$set : scoring[type](call, diff, data), $$emit: "score computed"}, me.desc);
+  "compute score" : [["call", "type", "diff", "typedata", "wilds"], 
+    function me (call, type, diff, data, wilds) {
+      var ret = scoring[type](call, diff, data);
+      if (wilds === "no") {
+        ret.delta *=2;
+        ret.score *= 2; 
+      }
+      gcd.ret({$set : ret, $$emit: "score computed"}, me.desc);
     }
   ],
 
@@ -1809,19 +1821,65 @@ a = {
     function me (type, wilds) {
       type = type || "basic";
       wilds = wilds || "yes";
-      var typedata = types[type];
-      gcd.ret({$set : {type : type, wilds : wilds, typedata : typedata}, $$emit : "type loaded"}, me.desc);
+      var typedata = types[type]();
+      gcd.ret({$set : {type : type, wilds : wilds, score : typedata.score, typedata : typedata}, $$emit : "type loaded"}, me.desc);
     }
   ]
   
 };
 
+/*
+1. Streaking
+    This is what we are doing now.
+  2. Climb the Mountain
+    Goal is to reach highest hand in fewest turns.
+  3. Target Practice
+    A target hand type is given. Motion towards it is rewarded. Motion away, penalized.
+  4. Measured pace
+    Points achieved for each hand type in order. 
+  5. Staying Alive
+    Maintain or improve current hand type, but ranking in it is of no consequence. Points for different hand types are not by ordering, but on perceived difficulty. One downturn is the end game.
+  6. Paying the Rent  
+    Pot of money. Each card draw costs money. Levels cost money for rent. Level gains give a pot of money. Rent increases as level stays the same. Interest accrues on pot of money each turn with streaks increasing interest. Level loss loses money.
+  10. Maybe different scoring rules too. Such as Current Major Level as base and the streak at that level as power. 
+  */
 
+var targettranslate = function (type) {
 
-types = {
-  "basic" : {streak: 0, score: 0, level : 0, delta:0}
+  switch (type) {
+    case "5":  return "5K";
+    case "sf": return "SF";
+    case "4":  return "4K";
+    case "fh": return "FH";
+    case "f":  return "Fl";
+    case "s":  return "St";
+    case "3":  return "3K";
+    case "2p": return "2P";
+    case "2":  return "1P";
+    case "1":  return "▬" ;
+  }
 
 };
+
+types = {
+  "basic" : function () {return {streak: 0, score: 0, level : 0, delta:0};},
+  "mount" : function () {return {score:52};}, // subtract 1 point for each hand; once the high hand is reached, then the score is multiplied by 1000
+  "target" : function () {
+    var targets = ["5", "sf", "4", "fh", "f", "s", "3"]; //, "2p", "2", "1"];
+    var target = targets[Math.floor(Math.random()*7)];
+    $("#targethand a").text(targettranslate(target)).removeClass("hide");
+    return {target : target, delta :0, score:0, oldlevel:"1", rounds:0};}, // target gets chosen. compare the differences to previous hand and current hand
+  "measured" : function () {return {level:0, score:0, delta:0};}, 
+  "alive" : function () { return {score : 0, oldlevel:"1", delta:0, done:false};},
+  "rent" : function () {return { score:100, rent:0};},
+  "powerlevel" : function () {return {streak: 0, score: 0, level : 0, delta:0};},
+  "streakpower" : function () {return {streak: 0, score: 0, level : 0, delta:0};}
+};
+
+
+var major = {"5" :9, "sf":8, "4":7, "fh":6, "f":5, "s":4, "3":3, "2p":2, "2":1, "1":0};
+
+var hardness = {"5" :9, "sf":8, "4":3, "fh":6, "f":7, "s":6, "3":2, "2p":4, "2":1, "1":0};
 
 //scoring functions take in a diff and a game. mainly diff
 //diff is of the form [type of diff, level change]
@@ -1859,6 +1917,234 @@ scoring = {
         streak = -1;
       }
       delta = -100*streak*streak;
+      if (diff[0] === 1) { //major change
+        delta *= diff[1];
+        lvl = diff[1];
+      }
+    }
+    return {streak: streak, score: (data.score + delta), level : lvl, delta:delta, 
+      typedata : {streak: streak, score: (data.score + delta), level : lvl, delta:delta}
+    };
+  },
+
+  "mount" : function (call, diff, data) {
+    var level = call[0];
+    if ((level === "5") || (level === "sf")) {
+      // win
+      gcd.ret({$$emit:"game done"});
+      var score = data.score-1;
+      if (level ==="5") {
+        return {delta : (score*score*10), score : (score*score*10+score)};
+      } else { //straight flush is harder
+        return {delta : (score*score*20), score : (score*score*20+score)};
+      }
+    } else {
+      return {typedata: {score: (data.score-1)} , delta : -1, score : (data.score-1)};      
+    }
+  },
+
+  "target" : function (call, diff, data) {
+    console.log(data);
+    var target = data.target;
+    var olddiff = Math.abs( major[data.oldlevel || "1"] - major[target]);
+    var newdiff = Math.abs(major[call[0]] - major[target]);
+    var delta = (7-newdiff)*hardness[target]*100;
+    console.log(delta, target, olddiff, newdiff);
+    if (newdiff < olddiff) {
+      //closer, great!
+    } else if (newdiff > olddiff ) {
+      console.log("closer");
+      delta = -delta;
+    } else {
+      delta = 0;
+    }
+    if (newdiff === 0) {
+      delta += (50-data.rounds)*100;
+      gcd.ret({$$emit:"game done"});
+    }
+    return {typedata: {rounds: (data.rounds+1), oldlevel : call[0], target : target, delta :delta, score:(data.score+delta)}, delta :delta, score:(data.score+delta)};
+  }, // target gets chosen. compare the differences to previous hand and current hand
+
+  "measured" : function (call, diff, data) {
+    var delta = 0;
+    var level = major[call[0]];
+    if (diff[0] === 1) { // positive change
+      if (diff[1] === 1) {
+        delta = 500;
+      } else {
+        delta = -10;
+      }
+    } else if (diff[0] ===  0) { // same level
+      delta = 10;
+    } else if (diff[0] === -1) { // negative change
+      if (diff[1] === -1) {
+        delta = 10;
+      } else {
+        delta = -500;
+      }
+    }
+    delta *= level; 
+    return {streak: 0, score: (data.score + delta), delta:delta, 
+      typedata : {streak: 0, score: (data.score + delta), delta:delta}
+    };
+  }, 
+
+  "alive" : function (call, diff, data) { 
+    if (data.done === true) {
+      return {typedata:data, score:data.score, delta : 0};
+    }
+    var oldlvl = data.oldlevel || "1";
+    if (diff[0] >= 0) {
+      var delta = 1000*hardness[oldlvl];
+      return {typedata:{score:data.score+delta, delta:delta, oldlevel:call[0], done:false}, score:data.score+delta, delta : delta}; 
+    } else {
+      data.done  = true;
+      gcd.ret({$$emit:"game done"});
+      return {typedata:data, score:data.score, delta : 0};      
+    }
+    return {score : 0};},
+
+
+  "rent" : function (call, diff, data) {
+    var streak = data.streak;
+    var draws = gcd.data.draws || "00000"; //I cheat here
+    var count = 0;
+    for (var i = 0; i < 5; i+= 1) {
+      if (draws[i] === "1") {
+        count += 1;
+      }
+    }
+    var cost = count*count*5; //each card draw costs more and more
+    cost += major[call[0]]*data.rent; //rent for level
+
+    var pot = 0;
+    var rent = data.rent;
+    //give a pot of money for level attainment
+    if (diff[0] === 1) {
+      pot = major[call[0]]*100;
+      rent = 0;
+    } else if (diff[0] === -1) { 
+      cost += diff[1]*100; // penalty for loss
+      rent = 0;
+    } else {
+      rent += 1;
+    }
+
+    var money = data.score;
+
+    //compute streak
+    if (diff[0] === 0) { // level stays the same
+      if (streak > 0 ) {
+        streak += 1; 
+      } else {
+        streak -= 1;
+      }
+    } else if (diff[0] > 0) { 
+      if (streak >0) {
+        //streak continues
+        streak += 1;
+      } else {
+        streak = 1;
+      }
+    } else {
+      if (streak < 0) {
+        //losing streak continues
+        streak -= 1;
+      } else {
+        streak = -1;
+      }
+    }
+
+    var interest = money*0.02*streak; //interest, can be negative;
+
+    var delta = Math.floor(cost + pot +interest);
+    money = money + delta; 
+    if (money <= 0) {
+     gcd.ret({$$emit:"game done"});
+      return {score:0};
+    } else {
+      return {typedata: {rent: rent, score: money, streak : streak}, streak: streak, delta:delta, score:money};
+    }
+  },
+
+  "powerlevel" : function (call, diff, data) {
+    var streak = data.streak;
+    var delta = 0;
+    var lvl = 0;
+    var actuallevel = major[call[0]];
+    //no change, streak grows, not score
+    if (diff[0] === 0) {
+      if (streak > 0 ) {
+        streak += 1; 
+        delta = 0;
+      } else {
+        streak -= 1;
+        delta = 0;
+      }
+    } else if (diff[0] > 0) { 
+      if (streak >0) {
+        //streak continues
+        streak += 1;
+      } else {
+        streak = 1;
+      }
+      delta = 1*Math.pow(streak, actuallevel);
+      if (diff[0] === 1) { //major change
+        delta *= diff[1];
+        lvl = diff[1];
+      }
+    } else {
+      if (streak < 0) {
+        //losing streak continues
+        streak -= 1;
+      } else {
+        streak = -1;
+      }
+      delta = -1*Math.pow(Math.abs(streak), actuallevel);
+      if (diff[0] === 1) { //major change
+        delta *= diff[1];
+        lvl = diff[1];
+      }
+    }
+    return {streak: streak, score: (data.score + delta), level : lvl, delta:delta, 
+      typedata : {streak: streak, score: (data.score + delta), level : lvl, delta:delta}
+    };
+  },
+
+  "streakpower" : function (call, diff, data) {
+    var streak = data.streak;
+    var delta = 0;
+    var lvl = 0;
+    var actuallevel = major[call[0]];
+    //no change, streak grows, not score
+    if (diff[0] === 0) {
+      if (streak > 0 ) {
+        streak += 1; 
+        delta = 0;
+      } else {
+        streak -= 1;
+        delta = 0;
+      }
+    } else if (diff[0] > 0) { 
+      if (streak >0) {
+        //streak continues
+        streak += 1;
+      } else {
+        streak = 1;
+      }
+      delta = 1*Math.pow(actuallevel, streak);
+      if (diff[0] === 1) { //major change
+        delta *= diff[1];
+        lvl = diff[1];
+      }
+    } else {
+      if (streak < 0) {
+        //losing streak continues
+        streak -= 1;
+      } else {
+        streak = -1;
+      }
+      delta = -1*Math.pow(actuallevel, Math.abs(streak));
       if (diff[0] === 1) { //major change
         delta *= diff[1];
         lvl = diff[1];
@@ -1919,7 +2205,23 @@ b = { "hand key bindings": function (evnt) {
       $$emit : 'old game requested'
     }, file+"emit retrieve game requested");
   },
-  
+
+  "new gametype chosen" : function me (event) {
+    var ev = $(event.target);
+    var whichtype = ev.attr("id");
+    var typetitle = ev.text();
+    $("#gametype-body").html($("#r-"+whichtype).html());
+    var typehref = window.location.href.split("?")[0].split("#")[0]+"?type="+whichtype;
+    $("#gametype-wilds").attr("href", typehref+"&wilds=yes");
+    $("#gametype-nowilds").attr("href", typehref+"&wilds=no"); 
+    $("#gametype-name").text(typetitle);  
+    $('#modal-gametype').modal({
+      backdrop: true,
+      keyboard: true,
+      show: true
+    });
+  },
+ 
   "emit request for replay old game" : function me () {
     gcd.ret({$$emit : "replay game requested"}, file+"emit request for replay old game");
   },
@@ -1982,6 +2284,7 @@ a = {
     $("#hs").click(b["emit retrieve game requested"]);
     $("#about").click(b["show about"]);
     $("#oldreplay").click(b["emit request for replay old game"]);
+    $("#gametypes a").click(b["new gametype chosen"]);
     
   }
   
@@ -2417,7 +2720,9 @@ a = {
    "send tweet" : [["deck", "score", "type", "wilds"], 
     function me (deck, score, type, wilds) {
       console.log("tweet clicked");
-      var gameurl = encodeURI("http://goodloesolitaire.com/")+encodeURIComponent(window.location.hash);
+      var gameurl = encodeURI("http://goodloesolitaire.com/")+
+          encodeURIComponent(window.location.search)+
+          encodeURIComponent(window.location.hash);
       var text = encodeURIComponent(score+" playing Goodloe Solitaire @GSolitaire");
       var htype = (type !== "basic" )? type : "";
       var hwilds = (wilds !== "yes" )? wilds : "";
@@ -2776,6 +3081,10 @@ module.exports = function (gcd) {
       //"show hand" // ui/hand: added by hide hand
     ],
     "no cards left to draw" : [
+      "end the game", // logic/hand: 
+      "remove deck" // ui/hand: 
+    ],
+    "game done" :[
       "end the game", // logic/hand: 
       "remove deck" // ui/hand: 
     ],
