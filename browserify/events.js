@@ -89,6 +89,10 @@ module.exports = function (gcd) {
       "end the game", // logic/hand: 
       "remove deck" // ui/hand: 
     ],
+    "game done" :[
+      "end the game", // logic/hand: 
+      "remove deck" // ui/hand: 
+    ],
     "negative change in score" : [ 
       "pulse negative score"// ui/scores: "score loaded"
     ],
